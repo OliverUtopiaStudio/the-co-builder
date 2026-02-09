@@ -1,0 +1,264 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
+import { stages } from "@/lib/data";
+import { allWorkflows, getTotalRequiredQuestions } from "@/lib/questions";
+
+interface VentureData {
+  id: string;
+  name: string;
+  description: string | null;
+  industry: string | null;
+}
+
+interface ResponseRow {
+  asset_number: number;
+  question_id: string;
+}
+
+interface CompletionRow {
+  asset_number: number;
+  is_complete: boolean;
+}
+
+export default function VentureOverviewPage() {
+  const { ventureId } = useParams<{ ventureId: string }>();
+  const [venture, setVenture] = useState<VentureData | null>(null);
+  const [responseCounts, setResponseCounts] = useState<Record<number, number>>({});
+  const [completions, setCompletions] = useState<Record<number, boolean>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const supabase = createClient();
+
+        // Fetch venture
+        const { data: v } = await supabase
+          .from("ventures")
+          .select("id, name, description, industry")
+          .eq("id", ventureId)
+          .single();
+
+        if (v) setVenture(v);
+
+        // Fetch all responses for this venture (just counts)
+        const { data: respData } = await supabase
+          .from("responses")
+          .select("asset_number, question_id")
+          .eq("venture_id", ventureId);
+
+        if (respData) {
+          const counts: Record<number, number> = {};
+          respData.forEach((r: ResponseRow) => {
+            counts[r.asset_number] = (counts[r.asset_number] || 0) + 1;
+          });
+          setResponseCounts(counts);
+        }
+
+        // Fetch completions
+        const { data: compData } = await supabase
+          .from("asset_completion")
+          .select("asset_number, is_complete")
+          .eq("venture_id", ventureId);
+
+        if (compData) {
+          const comps: Record<number, boolean> = {};
+          compData.forEach((c: CompletionRow) => {
+            comps[c.asset_number] = c.is_complete;
+          });
+          setCompletions(comps);
+        }
+      } catch (err) {
+        console.error("Failed to load venture:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [ventureId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-muted">Loading venture...</div>
+      </div>
+    );
+  }
+
+  if (!venture) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-lg font-semibold">Venture not found</h2>
+        <Link href="/dashboard" className="text-accent text-sm hover:underline mt-2 block">
+          Back to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
+  // Calculate overall progress
+  const totalAssets = allWorkflows.length;
+  const completedAssets = Object.values(completions).filter(Boolean).length;
+  const overallPercent = totalAssets > 0 ? Math.round((completedAssets / totalAssets) * 100) : 0;
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground transition-colors mb-4"
+        >
+          ← Dashboard
+        </Link>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">{venture.name}</h1>
+            {venture.description && (
+              <p className="text-muted mt-1">{venture.description}</p>
+            )}
+          </div>
+          {venture.industry && (
+            <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+              {venture.industry}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Overall Progress */}
+      <div className="bg-surface border border-border rounded-xl p-5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium">Overall Progress</span>
+          <span className="text-sm text-muted">
+            {completedAssets}/{totalAssets} assets complete
+          </span>
+        </div>
+        <div className="w-full bg-border/50 rounded-full h-3">
+          <div
+            className="bg-accent rounded-full h-3 transition-all duration-500"
+            style={{ width: `${overallPercent}%` }}
+          />
+        </div>
+        <div className="text-right mt-1">
+          <span className="text-xs text-muted">{overallPercent}%</span>
+        </div>
+      </div>
+
+      {/* Stages */}
+      <div className="space-y-4">
+        {stages.map((stage) => {
+          const stageAssets = stage.assets;
+          const stageCompleted = stageAssets.filter(
+            (a) => completions[a.number]
+          ).length;
+          const stageTotal = stageAssets.length;
+          const stagePercent =
+            stageTotal > 0
+              ? Math.round((stageCompleted / stageTotal) * 100)
+              : 0;
+
+          return (
+            <div
+              key={stage.id}
+              className="bg-surface border border-border rounded-xl overflow-hidden"
+            >
+              {/* Stage header */}
+              <div className="p-5 border-b border-border">
+                <div className="flex items-center gap-3 mb-2">
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
+                      stagePercent === 100
+                        ? "bg-accent text-white"
+                        : "bg-accent/10 text-accent"
+                    }`}
+                  >
+                    {stagePercent === 100 ? "✓" : stage.number}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{stage.title}</h3>
+                    <p className="text-sm text-muted">{stage.subtitle}</p>
+                  </div>
+                  <span className="text-sm text-muted">
+                    {stageCompleted}/{stageTotal}
+                  </span>
+                </div>
+                <div className="w-full bg-border/50 rounded-full h-1.5 mt-2">
+                  <div
+                    className="bg-accent rounded-full h-1.5 transition-all duration-500"
+                    style={{ width: `${stagePercent}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Assets */}
+              <div className="divide-y divide-border">
+                {stageAssets.map((asset) => {
+                  const workflow = allWorkflows.find(
+                    (w) => w.assetNumber === asset.number
+                  );
+                  const totalQ = workflow
+                    ? getTotalRequiredQuestions(workflow)
+                    : 0;
+                  const answeredQ = responseCounts[asset.number] || 0;
+                  const isComplete = completions[asset.number] || false;
+                  const hasStarted = answeredQ > 0;
+
+                  return (
+                    <Link
+                      key={asset.number}
+                      href={`/venture/${ventureId}/asset/${asset.number}`}
+                      className="flex items-center gap-4 px-5 py-4 hover:bg-background/50 transition-colors"
+                    >
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                          isComplete
+                            ? "bg-accent text-white"
+                            : hasStarted
+                            ? "bg-accent/10 text-accent"
+                            : "bg-border/50 text-muted"
+                        }`}
+                      >
+                        {isComplete ? "✓" : `#${asset.number}`}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm truncate">
+                          {asset.title}
+                        </div>
+                        <div className="text-xs text-muted truncate">
+                          {asset.purpose}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {isComplete ? (
+                          <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                            Complete
+                          </span>
+                        ) : hasStarted ? (
+                          <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold font-medium">
+                            In Progress
+                          </span>
+                        ) : (
+                          <span className="text-xs px-2 py-1 rounded-full bg-border/50 text-muted">
+                            Start
+                          </span>
+                        )}
+                        <span className="text-xs text-muted">
+                          {answeredQ}/{totalQ}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
