@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
@@ -15,12 +15,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function checkAdmin() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+      const { data: fellow } = await supabase
+        .from("fellows")
+        .select("role")
+        .eq("auth_user_id", user.id)
+        .single();
+
+      if (!fellow || fellow.role !== "admin") {
+        router.replace("/dashboard");
+        return;
+      }
+      setAuthorized(true);
+      setLoading(false);
+    }
+    checkAdmin();
+  }, [router]);
 
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
+  }
+
+  if (loading || !authorized) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted text-sm">Loading...</div>
+      </div>
+    );
   }
 
   return (

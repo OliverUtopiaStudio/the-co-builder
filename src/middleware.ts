@@ -42,31 +42,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // For admin routes, check role
-  if (user && request.nextUrl.pathname.startsWith("/admin")) {
-    const { data: fellow } = await supabase
-      .from("fellows")
-      .select("role")
-      .eq("auth_user_id", user.id)
-      .single();
-
-    if (!fellow || fellow.role !== "admin") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
-  // Redirect logged-in users away from auth pages based on role
+  // Redirect logged-in users away from auth pages
   const authPaths = ["/login", "/signup"];
   const isAuthPage = authPaths.includes(request.nextUrl.pathname);
 
   if (user && isAuthPage) {
-    const { data: fellow } = await supabase
-      .from("fellows")
-      .select("role")
-      .eq("auth_user_id", user.id)
-      .single();
-
-    const target = fellow?.role === "admin" ? "/admin" : "/dashboard";
+    const redirect = request.nextUrl.searchParams.get("redirect");
+    const target = redirect || "/dashboard";
     return NextResponse.redirect(new URL(target, request.url));
   }
 
