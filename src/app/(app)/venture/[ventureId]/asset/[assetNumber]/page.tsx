@@ -34,6 +34,55 @@ function getAdjacentAssets(assetNumber: number) {
   };
 }
 
+// Validate a single question's value
+function validateQuestion(question: Question, value: unknown): string | null {
+  // Required check
+  if (question.required) {
+    if (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      return "This field is required";
+    }
+  }
+
+  // Skip further checks if empty and not required
+  if (value === undefined || value === null || value === "") {
+    return null;
+  }
+
+  // maxLength check
+  if (question.maxLength && typeof value === "string" && value.length > question.maxLength) {
+    return `Maximum ${question.maxLength} characters`;
+  }
+
+  // Number range checks
+  if (question.type === "number" && typeof value === "number") {
+    if (question.min !== undefined && value < question.min) {
+      return `Minimum value is ${question.min}`;
+    }
+    if (question.max !== undefined && value > question.max) {
+      return `Maximum value is ${question.max}`;
+    }
+  }
+
+  // URL format check
+  if (question.type === "url" && typeof value === "string" && value.length > 0) {
+    if (!value.startsWith("http://") && !value.startsWith("https://")) {
+      return "Please enter a valid URL";
+    }
+  }
+
+  return null;
+}
+
+// Get all required questions across all workflow steps
+function getAllRequiredQuestions(workflow: { steps: WorkflowStep[] }): Question[] {
+  return workflow.steps.flatMap((step) => step.questions.filter((q) => q.required));
+}
+
 export default function AssetWorkflowPage() {
   const { ventureId, assetNumber: assetNumStr } = useParams<{
     ventureId: string;
@@ -52,6 +101,7 @@ export default function AssetWorkflowPage() {
   const [isComplete, setIsComplete] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
+  const [validationErrors, setValidationErrors] = useState<Record<string, string | null>>({});
   const saveTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Load existing responses
@@ -144,6 +194,8 @@ export default function AssetWorkflowPage() {
   const handleChange = useCallback(
     (questionId: string, value: unknown) => {
       setValues((prev) => ({ ...prev, [questionId]: value }));
+      // Clear validation error when user starts typing
+      setValidationErrors((prev) => ({ ...prev, [questionId]: null }));
 
       // Clear existing timeout
       if (saveTimeouts.current[questionId]) {
@@ -158,15 +210,20 @@ export default function AssetWorkflowPage() {
     [saveValue]
   );
 
-  // Immediate save on blur
+  // Immediate save on blur + validation
   const handleBlur = useCallback(
-    (questionId: string) => {
+    (questionId: string, question?: Question) => {
       if (saveTimeouts.current[questionId]) {
         clearTimeout(saveTimeouts.current[questionId]);
       }
       const value = values[questionId];
       if (value !== undefined && value !== "") {
         saveValue(questionId, value);
+      }
+      // Run validation if question definition provided
+      if (question) {
+        const error = validateQuestion(question, value);
+        setValidationErrors((prev) => ({ ...prev, [questionId]: error }));
       }
     },
     [saveValue, values]
@@ -294,6 +351,13 @@ export default function AssetWorkflowPage() {
 
   const completedSteps = workflow.steps.filter(isStepComplete).length;
 
+  // Find required fields that are still empty (for Mark Complete validation)
+  const missingRequiredFields = getAllRequiredQuestions(workflow).filter((q) => {
+    const val = values[q.id];
+    return val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
+  });
+  const canMarkComplete = missingRequiredFields.length === 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -390,11 +454,12 @@ export default function AssetWorkflowPage() {
               question={question}
               value={values[question.id]}
               onChange={(val) => handleChange(question.id, val)}
-              onBlur={() => handleBlur(question.id)}
+              onBlur={() => handleBlur(question.id, question)}
               onFileUpload={(file) => handleFileUpload(question.id, file)}
               isSaving={saving[question.id] || false}
               isSaved={saved[question.id] || false}
               isUploading={uploadingFiles[question.id] || false}
+              validationError={validationErrors[question.id] || null}
             />
           ))}
         </div>
@@ -422,17 +487,30 @@ export default function AssetWorkflowPage() {
             Next Step →
           </button>
         ) : (
-          <button
-            onClick={toggleComplete}
-            className={`px-6 py-2 text-sm font-medium transition-colors ${
-              isComplete
-                ? "bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20"
-                : "bg-accent text-white hover:bg-accent/90"
-            }`}
-            style={{ borderRadius: 2 }}
-          >
-            {isComplete ? "✓ Marked Complete" : "Mark as Complete"}
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={toggleComplete}
+              disabled={!isComplete && !canMarkComplete}
+              className={`px-6 py-2 text-sm font-medium transition-colors ${
+                isComplete
+                  ? "bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20"
+                  : canMarkComplete
+                  ? "bg-accent text-white hover:bg-accent/90"
+                  : "bg-accent/40 text-white/60 cursor-not-allowed"
+              }`}
+              style={{ borderRadius: 2 }}
+            >
+              {isComplete ? "✓ Marked Complete" : "Mark as Complete"}
+            </button>
+            {!isComplete && !canMarkComplete && (
+              <div className="text-right max-w-xs">
+                <p className="text-red-500 text-xs">
+                  {missingRequiredFields.length} required field{missingRequiredFields.length !== 1 ? "s" : ""} missing:{" "}
+                  {missingRequiredFields.map((q) => q.label).join(", ")}
+                </p>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -479,6 +557,7 @@ function QuestionField({
   isSaving,
   isSaved,
   isUploading,
+  validationError,
 }: {
   question: Question;
   value: unknown;
@@ -488,6 +567,7 @@ function QuestionField({
   isSaving: boolean;
   isSaved: boolean;
   isUploading: boolean;
+  validationError: string | null;
 }) {
   const strValue = typeof value === "string" ? value : "";
   const fileValue = value && typeof value === "object" && "fileName" in (value as Record<string, unknown>)
@@ -774,12 +854,22 @@ function QuestionField({
       )}
 
       {/* Character count for textareas with maxLength */}
-      {question.maxLength && (question.type === "textarea" || question.type === "text") && (
-        <div className="text-right mt-1">
-          <span className="text-xs text-muted">
-            {strValue.length}/{question.maxLength}
+      {question.maxLength && question.type === "textarea" && (
+        <div className="flex items-center justify-between mt-1">
+          <span />
+          <span
+            className={`text-xs ${
+              strValue.length > question.maxLength ? "text-red-500" : "text-muted"
+            }`}
+          >
+            {strValue.length} / {question.maxLength} characters
           </span>
         </div>
+      )}
+
+      {/* Validation error */}
+      {validationError && (
+        <p className="text-red-500 text-xs mt-1">{validationError}</p>
       )}
     </div>
   );

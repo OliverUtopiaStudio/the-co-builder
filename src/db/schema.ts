@@ -138,6 +138,33 @@ export const assetRequirements = pgTable(
   ]
 );
 
+// ─── Stipend Milestones ──────────────────────────────────────────
+// Global milestone definitions (fellow_id IS NULL) + per-fellow payment tracking.
+// The studio team defines 2 milestones globally, then marks each fellow's payment released.
+export const stipendMilestones = pgTable(
+  "stipend_milestones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    fellowId: uuid("fellow_id").references(() => fellows.id, { onDelete: "cascade" }),
+    milestoneNumber: integer("milestone_number").notNull(), // 1 or 2
+    title: text("title").notNull(), // e.g. "Stage 01 approved"
+    description: text("description"),
+    amount: integer("amount").notNull().default(2500), // cents or whole dollars
+    // For global definitions (fellow_id IS NULL):
+    // title + description define what triggers payment
+    // For per-fellow records:
+    // milestoneMet + paymentReleased track actual status
+    milestoneMet: timestamp("milestone_met", { withTimezone: true }),
+    paymentReleased: timestamp("payment_released", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_stipend_fellow").on(table.fellowId),
+    index("idx_stipend_milestone_num").on(table.milestoneNumber),
+  ]
+);
+
 // ─── Slack Channel → Venture Mapping ─────────────────────────────
 export const slackChannelVentures = pgTable(
   "slack_channel_ventures",

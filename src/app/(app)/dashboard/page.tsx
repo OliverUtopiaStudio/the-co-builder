@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { stages } from "@/lib/data";
+import { getMyStipendStatus } from "@/app/actions/stipends";
 
 interface Venture {
   id: string;
@@ -26,6 +27,22 @@ interface NextAssetInfo {
   title: string;
   purpose: string;
   ventureId: string;
+}
+
+interface StipendMilestone {
+  id: string;
+  milestoneNumber: number;
+  title: string;
+  description: string | null;
+  amount: number;
+  milestoneMet: Date | string | null;
+  paymentReleased: Date | string | null;
+}
+
+interface StipendStatus {
+  myMilestones: StipendMilestone[];
+  totalBudget: number;
+  computeBudget: number;
 }
 
 /**
@@ -61,6 +78,7 @@ export default function DashboardPage() {
   const [fellow, setFellow] = useState<FellowProfile | null>(null);
   const [nextAsset, setNextAsset] = useState<NextAssetInfo | null>(null);
   const [allComplete, setAllComplete] = useState(false);
+  const [stipendStatus, setStipendStatus] = useState<StipendStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -144,6 +162,19 @@ export default function DashboardPage() {
             }
           }
         }
+
+        // Fetch stipend status via server action
+        try {
+          const stipendData = await getMyStipendStatus();
+          setStipendStatus({
+            myMilestones: stipendData.myMilestones as StipendMilestone[],
+            totalBudget: stipendData.totalBudget,
+            computeBudget: stipendData.computeBudget,
+          });
+        } catch {
+          // Fellow may not have stipend records yet — that's fine
+          setStipendStatus(null);
+        }
       } catch (err) {
         console.error("Failed to load dashboard:", err);
       } finally {
@@ -208,6 +239,90 @@ export default function DashboardPage() {
           ) : null}
         </div>
       )}
+
+      {/* Stipend & Compute */}
+      <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
+        <div className="label-uppercase mb-3">Stipend &amp; Compute</div>
+        <div
+          className="border-t border-border mt-1 mb-4"
+          style={{ borderColor: "var(--border)" }}
+        />
+
+        {/* Cash Stipend */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium mb-1">Cash Stipend</h3>
+          <p className="text-muted text-sm mb-4">
+            $5,000 total ($2,500 &times; 2 milestones)
+          </p>
+
+          {stipendStatus && stipendStatus.myMilestones.length > 0 ? (
+            <div className="space-y-3">
+              {stipendStatus.myMilestones.map((milestone) => {
+                let statusLabel: string;
+                let statusClass: string;
+                if (milestone.paymentReleased) {
+                  statusLabel = "Released";
+                  statusClass = "bg-green-100 text-green-800";
+                } else if (milestone.milestoneMet) {
+                  statusLabel = "Met";
+                  statusClass = "bg-accent/10 text-accent";
+                } else {
+                  statusLabel = "Pending";
+                  statusClass = "bg-gray-100 text-gray-600";
+                }
+
+                return (
+                  <div
+                    key={milestone.id}
+                    className="flex items-start justify-between bg-background p-4"
+                    style={{ borderRadius: 2 }}
+                  >
+                    <div>
+                      <div className="font-medium text-sm">
+                        Milestone {milestone.milestoneNumber}: {milestone.title}
+                      </div>
+                      {milestone.milestoneMet && (
+                        <div className="text-muted text-xs mt-1">
+                          Met: {new Date(milestone.milestoneMet).toLocaleDateString()}
+                        </div>
+                      )}
+                      {milestone.paymentReleased && (
+                        <div className="text-muted text-xs mt-0.5">
+                          Released: {new Date(milestone.paymentReleased).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                    <span
+                      className={`text-xs font-medium px-2 py-0.5 ${statusClass}`}
+                      style={{ borderRadius: 2 }}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="bg-background p-4 text-sm text-muted" style={{ borderRadius: 2 }}>
+              Your stipend milestones haven&apos;t been set up yet. Your studio team will configure these.
+            </div>
+          )}
+        </div>
+
+        {/* Compute Budget */}
+        <div>
+          <h3 className="text-lg font-medium mb-1">Compute Budget</h3>
+          <p className="text-muted text-sm">
+            Your compute budget is $4,000 for tools and infrastructure.
+          </p>
+          <Link
+            href="/onboarding"
+            className="inline-block text-accent text-sm font-medium mt-2 hover:underline"
+          >
+            See your onboarding for the recommended allocation &rarr;
+          </Link>
+        </div>
+      </div>
 
       {/* Ventures */}
       <div>
