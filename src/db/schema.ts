@@ -8,9 +8,11 @@ import {
   jsonb,
   uniqueIndex,
   index,
+  check,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
-// ─── Fellows (user profiles) ───────────────────────────────────
+// ─── Fellows (user profiles + lifecycle) ──────────────────────────
 export const fellows = pgTable("fellows", {
   id: uuid("id").primaryKey().defaultRandom(),
   authUserId: text("auth_user_id").notNull().unique(),
@@ -20,6 +22,13 @@ export const fellows = pgTable("fellows", {
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
   linkedinUrl: text("linkedin_url"),
+  // Lifecycle fields (MVP)
+  lifecycleStage: text("lifecycle_stage").notNull().default("onboarding"),
+  experienceProfile: text("experience_profile"),
+  domain: text("domain"),
+  background: text("background"),
+  selectionRationale: text("selection_rationale"),
+  onboardingStatus: jsonb("onboarding_status"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -126,5 +135,57 @@ export const assetRequirements = pgTable(
   },
   (table) => [
     index("idx_asset_req_venture_id").on(table.ventureId),
+  ]
+);
+
+// ─── Slack Channel → Venture Mapping ─────────────────────────────
+export const slackChannelVentures = pgTable(
+  "slack_channel_ventures",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ventureId: uuid("venture_id")
+      .notNull()
+      .references(() => ventures.id, { onDelete: "cascade" }),
+    slackChannelId: text("slack_channel_id").notNull().unique(),
+    slackChannelName: text("slack_channel_name"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_scv_venture").on(table.ventureId),
+  ]
+);
+
+// ─── Tasks (from Slack) ──────────────────────────────────────────
+export const tasks = pgTable(
+  "tasks",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ventureId: uuid("venture_id")
+      .notNull()
+      .references(() => ventures.id, { onDelete: "cascade" }),
+    assetNumber: integer("asset_number").notNull(),
+    checklistItemId: text("checklist_item_id"),
+    title: text("title").notNull(),
+    description: text("description"),
+    priority: text("priority").default("medium").notNull(),
+    status: text("status").default("open").notNull(),
+    slackChannelId: text("slack_channel_id"),
+    slackMessageTs: text("slack_message_ts"),
+    slackUserId: text("slack_user_id"),
+    slackUserName: text("slack_user_name"),
+    aiConfidence: integer("ai_confidence"),
+    aiReasoning: text("ai_reasoning"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_tasks_venture").on(table.ventureId),
+    index("idx_tasks_venture_asset").on(table.ventureId, table.assetNumber),
+    index("idx_tasks_status").on(table.ventureId, table.status),
+    check("tasks_asset_range", sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`),
+    check("tasks_priority_check", sql`${table.priority} IN ('low','medium','high','urgent')`),
+    check("tasks_status_check", sql`${table.status} IN ('open','in_progress','completed','cancelled')`),
   ]
 );

@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { stages } from "@/lib/data";
 
 interface Venture {
   id: string;
@@ -16,11 +18,49 @@ interface Venture {
 interface FellowProfile {
   fullName: string;
   email: string;
+  lifecycleStage: string;
+}
+
+interface NextAssetInfo {
+  number: number;
+  title: string;
+  purpose: string;
+  ventureId: string;
+}
+
+/**
+ * Look up asset info from the stages data structure by asset number.
+ */
+function getAssetInfo(assetNumber: number) {
+  for (const stage of stages) {
+    for (const asset of stage.assets) {
+      if (asset.number === assetNumber) {
+        return { number: asset.number, title: asset.title, purpose: asset.purpose };
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Get all asset numbers in order from the stages data.
+ */
+function getAllAssetNumbers(): number[] {
+  const numbers: number[] = [];
+  for (const stage of stages) {
+    for (const asset of stage.assets) {
+      numbers.push(asset.number);
+    }
+  }
+  return numbers.sort((a, b) => a - b);
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [ventures, setVentures] = useState<Venture[]>([]);
   const [fellow, setFellow] = useState<FellowProfile | null>(null);
+  const [nextAsset, setNextAsset] = useState<NextAssetInfo | null>(null);
+  const [allComplete, setAllComplete] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,31 +70,79 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        // Fetch fellow profile including lifecycle_stage
         const { data: fellowData } = await supabase
           .from("fellows")
-          .select("full_name, email")
+          .select("id, full_name, email, lifecycle_stage")
           .eq("auth_user_id", user.id)
           .single();
 
-        if (fellowData) {
-          setFellow({ fullName: fellowData.full_name, email: fellowData.email });
+        if (!fellowData) return;
+
+        // Redirect to onboarding if lifecycle_stage is "onboarding"
+        if (fellowData.lifecycle_stage === "onboarding") {
+          router.push("/onboarding");
+          return;
         }
 
+        setFellow({
+          fullName: fellowData.full_name,
+          email: fellowData.email,
+          lifecycleStage: fellowData.lifecycle_stage,
+        });
+
+        const fellowId = fellowData.id;
+
+        // Fetch ventures
         const { data: ventureData } = await supabase
           .from("ventures")
           .select("*")
-          .eq("fellow_id", (await supabase.from("fellows").select("id").eq("auth_user_id", user.id).single()).data?.id)
+          .eq("fellow_id", fellowId)
           .order("created_at", { ascending: false });
 
         if (ventureData) {
-          setVentures(ventureData.map((v: Record<string, unknown>) => ({
+          const mapped = ventureData.map((v: Record<string, unknown>) => ({
             id: v.id as string,
             name: v.name as string,
             description: v.description as string | null,
             industry: v.industry as string | null,
             currentStage: v.current_stage as string | null,
             createdAt: v.created_at as string,
-          })));
+          }));
+          setVentures(mapped);
+
+          // Determine "next asset" for the first (most recent) venture
+          if (mapped.length > 0) {
+            const activeVenture = mapped[0];
+
+            const { data: completions } = await supabase
+              .from("asset_completion")
+              .select("asset_number, is_complete")
+              .eq("venture_id", activeVenture.id)
+              .eq("is_complete", true);
+
+            const completedNumbers = new Set(
+              (completions || []).map((c: { asset_number: number }) => c.asset_number)
+            );
+
+            const allNumbers = getAllAssetNumbers();
+
+            // Find the first asset number not in the completed set
+            const nextNumber = allNumbers.find((n) => !completedNumbers.has(n));
+
+            if (nextNumber) {
+              const info = getAssetInfo(nextNumber);
+              if (info) {
+                setNextAsset({
+                  ...info,
+                  ventureId: activeVenture.id,
+                });
+              }
+            } else {
+              // All assets are complete
+              setAllComplete(true);
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to load dashboard:", err);
@@ -63,7 +151,7 @@ export default function DashboardPage() {
       }
     }
     load();
-  }, []);
+  }, [router]);
 
   if (loading) {
     return (
@@ -85,6 +173,41 @@ export default function DashboardPage() {
           Build your AI venture through the 27-asset Co-Build framework
         </p>
       </div>
+
+      {/* What to work on next */}
+      {ventures.length > 0 && (
+        <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
+          <div className="label-uppercase mb-3">Next Step</div>
+          <div
+            className="border-t border-border mt-1 mb-4"
+            style={{ borderColor: "var(--border)" }}
+          />
+          {allComplete ? (
+            <div>
+              <h3 className="text-lg font-medium mb-2">
+                All 27 assets complete
+              </h3>
+              <p className="text-muted text-sm">
+                Talk to your studio team about spin-out readiness.
+              </p>
+            </div>
+          ) : nextAsset ? (
+            <div>
+              <h3 className="text-lg font-medium mb-1">
+                Asset #{nextAsset.number}: {nextAsset.title}
+              </h3>
+              <p className="text-muted text-sm mb-4">{nextAsset.purpose}</p>
+              <Link
+                href={`/venture/${nextAsset.ventureId}/asset/${nextAsset.number}`}
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
+                style={{ borderRadius: 2 }}
+              >
+                Start Asset →
+              </Link>
+            </div>
+          ) : null}
+        </div>
+      )}
 
       {/* Ventures */}
       <div>

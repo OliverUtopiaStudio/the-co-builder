@@ -5,6 +5,7 @@ import { ventures, fellows } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import type { OnboardingStatus } from "@/lib/onboarding";
 
 async function getFellow() {
   const supabase = await createClient();
@@ -53,6 +54,18 @@ export async function createVenture(formData: FormData) {
       industry: industry || null,
     })
     .returning();
+
+  // Auto-update onboarding status
+  const currentStatus = (fellow.onboardingStatus as OnboardingStatus | null);
+  if (currentStatus && !currentStatus.ventureCreated) {
+    await db
+      .update(fellows)
+      .set({
+        onboardingStatus: { ...currentStatus, ventureCreated: true },
+        updatedAt: new Date(),
+      })
+      .where(eq(fellows.id, fellow.id));
+  }
 
   redirect(`/venture/${venture.id}`);
 }

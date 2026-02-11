@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { fellows, ventures, responses, assetCompletion, assetRequirements } from "@/db/schema";
 import { eq, sql, and, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
+import type { ExperienceProfile, LifecycleStage, OnboardingStatus } from "@/lib/onboarding";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -123,7 +124,6 @@ export async function getGlobalRequirements() {
 export async function toggleAssetRequirement(assetNumber: number, isRequired: boolean) {
   await requireAdmin();
 
-  // Upsert global requirement
   const existing = await db
     .select()
     .from(assetRequirements)
@@ -170,4 +170,82 @@ export async function getCompletionCountsForFellow(fellowId: string) {
   const completed = completions.filter((c) => ventureIds.includes(c.ventureId)).length;
 
   return { total: ventureList.length * 27, completed };
+}
+
+// ─── Lifecycle Management (MVP) ─────────────────────────────────
+
+export async function updateFellowExperienceProfile(
+  fellowId: string,
+  experienceProfile: ExperienceProfile
+) {
+  await requireAdmin();
+  await db
+    .update(fellows)
+    .set({ experienceProfile, updatedAt: new Date() })
+    .where(eq(fellows.id, fellowId));
+  return { success: true };
+}
+
+export async function updateFellowLifecycleStage(
+  fellowId: string,
+  lifecycleStage: LifecycleStage
+) {
+  await requireAdmin();
+  await db
+    .update(fellows)
+    .set({ lifecycleStage, updatedAt: new Date() })
+    .where(eq(fellows.id, fellowId));
+  return { success: true };
+}
+
+export async function updateFellowOnboardingAdmin(
+  fellowId: string,
+  step: "agreementSigned" | "kycVerified",
+  value: string | null
+) {
+  await requireAdmin();
+
+  const [fellow] = await db
+    .select()
+    .from(fellows)
+    .where(eq(fellows.id, fellowId))
+    .limit(1);
+
+  if (!fellow) throw new Error("Fellow not found");
+
+  const current = (fellow.onboardingStatus as OnboardingStatus | null) || {
+    agreementSigned: null,
+    kycVerified: null,
+    toolstackComplete: false,
+    computeBudgetAcknowledged: false,
+    frameworkIntroComplete: false,
+    browserSetupComplete: false,
+    ventureCreated: false,
+  };
+
+  const updated = { ...current, [step]: value };
+
+  await db
+    .update(fellows)
+    .set({ onboardingStatus: updated, updatedAt: new Date() })
+    .where(eq(fellows.id, fellowId));
+
+  return { success: true };
+}
+
+export async function updateFellowDetails(
+  fellowId: string,
+  data: { domain?: string; background?: string; selectionRationale?: string }
+) {
+  await requireAdmin();
+  await db
+    .update(fellows)
+    .set({
+      ...(data.domain !== undefined && { domain: data.domain }),
+      ...(data.background !== undefined && { background: data.background }),
+      ...(data.selectionRationale !== undefined && { selectionRationale: data.selectionRationale }),
+      updatedAt: new Date(),
+    })
+    .where(eq(fellows.id, fellowId));
+  return { success: true };
 }
