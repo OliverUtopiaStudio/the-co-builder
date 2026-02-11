@@ -29,6 +29,7 @@ export default function NewVenturePage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [industry, setIndustry] = useState("");
+  const [googleDriveUrl, setGoogleDriveUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -64,6 +65,7 @@ export default function NewVenturePage() {
           name: name.trim(),
           description: description.trim() || null,
           industry: industry || null,
+          google_drive_url: googleDriveUrl.trim() || null,
         })
         .select()
         .single();
@@ -147,6 +149,21 @@ export default function NewVenturePage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <label htmlFor="googleDriveUrl" className="block text-sm font-medium mb-1">
+              Google Drive Folder URL
+            </label>
+            <input
+              id="googleDriveUrl"
+              type="url"
+              value={googleDriveUrl}
+              onChange={(e) => setGoogleDriveUrl(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              placeholder="https://drive.google.com/drive/folders/..."
+            />
+            <p className="text-xs text-muted mt-1">Link your shared Google Drive folder for this venture</p>
           </div>
 
           <button

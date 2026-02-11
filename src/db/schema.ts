@@ -16,6 +16,7 @@ export const fellows = pgTable("fellows", {
   authUserId: text("auth_user_id").notNull().unique(),
   email: text("email").notNull(),
   fullName: text("full_name").notNull(),
+  role: text("role").notNull().default("fellow"),
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
   linkedinUrl: text("linkedin_url"),
@@ -35,6 +36,7 @@ export const ventures = pgTable(
     description: text("description"),
     industry: text("industry"),
     currentStage: text("current_stage").default("00"),
+    googleDriveUrl: text("google_drive_url"),
     isActive: boolean("is_active").default(true).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
@@ -108,5 +110,21 @@ export const uploads = pgTable(
   },
   (table) => [
     index("idx_uploads_venture_asset").on(table.ventureId, table.assetNumber),
+  ]
+);
+
+// ─── Asset Requirements (global + per-venture) ──────────────────
+export const assetRequirements = pgTable(
+  "asset_requirements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ventureId: uuid("venture_id").references(() => ventures.id, { onDelete: "cascade" }),
+    assetNumber: integer("asset_number").notNull(),
+    isRequired: boolean("is_required").default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_asset_req_venture_id").on(table.ventureId),
   ]
 );

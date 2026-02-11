@@ -31,6 +31,22 @@ function LoginForm() {
         return;
       }
 
+      // Check role to determine redirect
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: fellow } = await supabase
+          .from("fellows")
+          .select("role")
+          .eq("auth_user_id", user.id)
+          .single();
+
+        if (fellow?.role === "admin") {
+          router.push("/admin");
+          router.refresh();
+          return;
+        }
+      }
+
       router.push(redirect);
       router.refresh();
     } catch {

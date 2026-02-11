@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   // Protect authenticated routes
-  const protectedPaths = ["/dashboard", "/venture", "/profile"];
+  const protectedPaths = ["/dashboard", "/venture", "/profile", "/admin"];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -42,12 +42,32 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Redirect logged-in users away from auth pages
+  // For admin routes, check role
+  if (user && request.nextUrl.pathname.startsWith("/admin")) {
+    const { data: fellow } = await supabase
+      .from("fellows")
+      .select("role")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    if (!fellow || fellow.role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  // Redirect logged-in users away from auth pages based on role
   const authPaths = ["/login", "/signup"];
   const isAuthPage = authPaths.includes(request.nextUrl.pathname);
 
   if (user && isAuthPage) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const { data: fellow } = await supabase
+      .from("fellows")
+      .select("role")
+      .eq("auth_user_id", user.id)
+      .single();
+
+    const target = fellow?.role === "admin" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(target, request.url));
   }
 
   return supabaseResponse;
@@ -58,6 +78,7 @@ export const config = {
     "/dashboard/:path*",
     "/venture/:path*",
     "/profile/:path*",
+    "/admin/:path*",
     "/login",
     "/signup",
   ],

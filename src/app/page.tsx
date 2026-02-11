@@ -15,6 +15,12 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              href="/login?redirect=/admin"
+              className="text-xs text-muted/50 hover:text-muted transition-colors"
+            >
+              Admin
+            </Link>
+            <Link
               href="/login"
               className="text-sm text-muted hover:text-foreground transition-colors"
             >
