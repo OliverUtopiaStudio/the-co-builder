@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-type LoginMode = "choose" | "admin" | "fellow";
+type LoginMode = "choose" | "admin" | "fellow" | "reset";
 
 function LoginForm() {
   const router = useRouter();
@@ -16,6 +16,28 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/login?mode=admin`,
+      });
+      if (resetError) {
+        setError(resetError.message);
+      } else {
+        setResetSent(true);
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,6 +92,93 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Reset password screen
+  if (mode === "reset") {
+    return (
+      <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
+        <div className="bg-accent px-10 pt-10 pb-8">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
+                THE<br />UTOPIA<br />STUDIO
+              </div>
+              <h1 className="text-[28px] font-medium text-white leading-tight">Reset Password</h1>
+              <p className="text-white/80 text-sm mt-1.5">
+                {resetSent ? "Check your email" : "Enter your email to receive a reset link"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("choose");
+                setError("");
+                setResetSent(false);
+              }}
+              className="text-white/60 hover:text-white transition-colors text-sm mt-1"
+            >
+              ← Back
+            </button>
+          </div>
+        </div>
+
+        {resetSent ? (
+          <div className="px-10 py-8">
+            <div className="bg-green-50 border border-green-200 rounded-sm p-4 text-sm text-green-700" style={{ borderRadius: 2 }}>
+              Password reset email sent to <strong>{email}</strong>. Check your inbox and follow the link to set a new password.
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("choose");
+                setEmail("");
+                setResetSent(false);
+              }}
+              className="w-full mt-5 py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors"
+              style={{ borderRadius: 2 }}
+            >
+              Back to Sign In →
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleResetPassword} className="px-10 py-8 space-y-5">
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-sm p-3 text-sm text-red-700" style={{ borderRadius: 2 }}>
+                {error}
+              </div>
+            )}
+            <div>
+              <label htmlFor="reset-email" className="label-uppercase block mb-2">
+                Email
+              </label>
+              <input
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+                style={{ borderRadius: 2 }}
+                placeholder="you@example.com"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ borderRadius: 2 }}
+            >
+              {loading ? "Sending..." : "Send Reset Link →"}
+            </button>
+          </form>
+        )}
+
+        <div className="px-10 pb-6 text-center">
+          <p className="text-xs text-muted-light">The Utopia Studio — Internal Use Only</p>
+        </div>
+      </div>
+    );
   }
 
   // Choose screen
@@ -183,9 +292,22 @@ function LoginForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className="label-uppercase block mb-2">
-            Password
-          </label>
+          <div className="flex items-baseline justify-between mb-2">
+            <label htmlFor="password" className="label-uppercase">
+              Password
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("reset");
+                setPassword("");
+                setError("");
+              }}
+              className="text-xs text-accent hover:underline"
+            >
+              Forgot password?
+            </button>
+          </div>
           <input
             id="password"
             type="password"
