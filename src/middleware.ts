@@ -25,6 +25,20 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  // Intercept auth codes (password reset, email verification) on any page
+  // Supabase sends reset links to Site URL with ?code=xxx — redirect to /callback
+  const code = request.nextUrl.searchParams.get("code");
+  if (code && request.nextUrl.pathname !== "/callback") {
+    const callbackUrl = request.nextUrl.clone();
+    callbackUrl.pathname = "/callback";
+    // Preserve the code param, add next=/reset-password for recovery flows
+    callbackUrl.searchParams.set("code", code);
+    if (!callbackUrl.searchParams.has("next")) {
+      callbackUrl.searchParams.set("next", "/reset-password");
+    }
+    return NextResponse.redirect(callbackUrl);
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -57,6 +71,7 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/",
     "/dashboard/:path*",
     "/venture/:path*",
     "/profile/:path*",
