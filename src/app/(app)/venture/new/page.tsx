@@ -90,14 +90,14 @@ export default function NewVenturePage() {
         ← Back to Dashboard
       </Link>
 
-      <div className="bg-surface border border-border rounded-xl p-6">
-        <h1 className="text-2xl font-bold mb-2">Create New Venture</h1>
+      <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
+        <h1 className="text-2xl font-medium mb-2">Create New Venture</h1>
         <p className="text-muted text-sm mb-6">
           Define the AI venture you&apos;re going to build through the Co-Build framework.
         </p>
 
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300 mb-4">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300 mb-4" style={{ borderRadius: 2 }}>
             {error}
           </div>
         )}
@@ -113,7 +113,8 @@ export default function NewVenturePage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              style={{ borderRadius: 2 }}
               placeholder="e.g., MedAI Diagnostics"
             />
           </div>
@@ -127,7 +128,8 @@ export default function NewVenturePage() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
+              style={{ borderRadius: 2 }}
               placeholder="Brief elevator pitch for your venture..."
             />
           </div>
@@ -140,7 +142,8 @@ export default function NewVenturePage() {
               id="industry"
               value={industry}
               onChange={(e) => setIndustry(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              style={{ borderRadius: 2 }}
             >
               <option value="">Select an industry...</option>
               {industries.map((ind) => (
@@ -160,7 +163,8 @@ export default function NewVenturePage() {
               type="url"
               value={googleDriveUrl}
               onChange={(e) => setGoogleDriveUrl(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              style={{ borderRadius: 2 }}
               placeholder="https://drive.google.com/drive/folders/..."
             />
             <p className="text-xs text-muted mt-1">Link your shared Google Drive folder for this venture</p>
@@ -169,7 +173,8 @@ export default function NewVenturePage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-accent text-white font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2.5 bg-accent text-white font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ borderRadius: 2 }}
           >
             {loading ? "Creating..." : "Create Venture & Start Building"}
           </button>

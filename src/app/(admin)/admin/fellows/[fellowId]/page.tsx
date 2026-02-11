@@ -113,13 +113,13 @@ export default function AdminFellowDetailPage() {
       </Link>
 
       {/* Fellow Profile */}
-      <div className="bg-surface border border-border rounded-xl p-6">
+      <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold text-xl">
+          <div className="w-14 h-14 bg-accent/10 text-accent flex items-center justify-center font-medium text-xl" style={{ borderRadius: 2 }}>
             {fellow.full_name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{fellow.full_name}</h1>
+            <h1 className="text-2xl font-medium">{fellow.full_name}</h1>
             <p className="text-muted">{fellow.email}</p>
             {fellow.bio && <p className="text-sm mt-2">{fellow.bio}</p>}
             {fellow.linkedin_url && (
@@ -146,7 +146,7 @@ export default function AdminFellowDetailPage() {
         </h2>
 
         {ventures.length === 0 ? (
-          <div className="bg-surface border border-border rounded-xl p-8 text-center">
+          <div className="bg-surface border border-border p-8 text-center" style={{ borderRadius: 2 }}>
             <p className="text-muted">This fellow hasn&apos;t created any ventures yet.</p>
           </div>
         ) : (
@@ -155,7 +155,8 @@ export default function AdminFellowDetailPage() {
               <Link
                 key={venture.id}
                 href={`/admin/ventures/${venture.id}`}
-                className="block bg-surface border border-border rounded-xl p-5 hover:border-accent/30 hover:shadow-md transition-all"
+                className="block bg-surface border border-border p-5 hover:border-accent/30 hover:shadow-md transition-all"
+                style={{ borderRadius: 2 }}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -165,7 +166,7 @@ export default function AdminFellowDetailPage() {
                     )}
                     <div className="flex items-center gap-3 mt-3">
                       {venture.industry && (
-                        <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                        <span className="text-xs px-2 py-1 bg-accent/10 text-accent font-medium" style={{ borderRadius: 2 }}>
                           {venture.industry}
                         </span>
                       )}

@@ -6,8 +6,8 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: "📊" },
-  { href: "/profile", label: "Profile", icon: "👤" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/profile", label: "Profile" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -25,20 +25,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <header className="lg:hidden sticky top-0 z-50 bg-surface border-b border-border px-4 py-3 flex items-center justify-between">
+      <header className="lg:hidden sticky top-0 z-50 bg-sidebar-bg border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-lg hover:bg-background transition-colors"
+          className="p-2 text-sidebar-text"
         >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M2 4.5h16M2 10h16M2 15.5h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M2 4.5h16M2 10h16M2 15.5h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-xs">
-            CB
-          </div>
-          <span className="font-bold text-sm">The Co-Builder</span>
+          <span className="text-sidebar-text font-bold text-xs tracking-[2px]">CO-BUILDER</span>
         </Link>
         <div className="w-9" />
       </header>
@@ -53,58 +50,58 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-surface border-r border-border transform transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-56 bg-sidebar-bg transform transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="p-4 border-b border-border">
+        <div className="px-5 pt-6 pb-4">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2"
+            className="block"
             onClick={() => setSidebarOpen(false)}
           >
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold text-sm">
-              CB
+            <div className="text-sidebar-text font-bold text-[10px] tracking-[2px] leading-relaxed">
+              THE<br />UTOPIA<br />STUDIO
             </div>
-            <div>
-              <div className="font-bold text-sm">The Co-Builder</div>
-              <div className="text-xs text-muted">Utopia Studio</div>
-            </div>
+            <div className="text-sidebar-text text-sm font-medium mt-3">The Co-Builder</div>
           </Link>
         </div>
 
-        <nav className="p-3 space-y-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                pathname === item.href
-                  ? "bg-accent/10 text-accent font-medium"
-                  : "text-muted hover:bg-background hover:text-foreground"
-              }`}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </nav>
+        <div className="px-3 mt-2">
+          <div className="label-uppercase px-2 mb-2 text-sidebar-muted" style={{ fontSize: 10 }}>Navigation</div>
+          <nav className="space-y-0.5">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center px-3 py-2 text-sm transition-colors ${
+                  pathname === item.href
+                    ? "bg-white/10 text-sidebar-text font-medium"
+                    : "text-sidebar-muted hover:bg-white/5 hover:text-sidebar-text"
+                }`}
+                style={{ borderRadius: 2 }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border">
+        <div className="absolute bottom-0 left-0 right-0 px-3 pb-5 pt-3 border-t border-white/10">
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted hover:bg-background hover:text-foreground transition-colors w-full"
+            className="flex items-center px-3 py-2 text-sm text-sidebar-muted hover:text-sidebar-text hover:bg-white/5 transition-colors w-full"
+            style={{ borderRadius: 2 }}
           >
-            <span>🚪</span>
-            <span>Sign Out</span>
+            Sign Out
           </button>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="lg:ml-64 min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 py-6 lg:py-8">
+      <main className="lg:ml-56 min-h-screen">
+        <div className="max-w-5xl mx-auto px-6 py-8">
           {children}
         </div>
       </main>

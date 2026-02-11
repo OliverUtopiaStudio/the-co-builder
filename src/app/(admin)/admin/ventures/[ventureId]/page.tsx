@@ -121,14 +121,14 @@ export default function AdminVentureDetailPage() {
       </Link>
 
       {/* Venture Header */}
-      <div className="bg-surface border border-border rounded-xl p-6">
+      <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{venture.name}</h1>
+            <h1 className="text-2xl font-medium">{venture.name}</h1>
             {venture.description && <p className="text-muted mt-1">{venture.description}</p>}
             <div className="flex items-center gap-3 mt-3">
               {venture.industry && (
-                <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                <span className="text-xs px-2 py-1 bg-accent/10 text-accent font-medium" style={{ borderRadius: 2 }}>
                   {venture.industry}
                 </span>
               )}
@@ -141,7 +141,7 @@ export default function AdminVentureDetailPage() {
             )}
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-accent">{totalCompleted}/27</div>
+            <div className="text-2xl font-medium text-accent">{totalCompleted}/27</div>
             <div className="text-sm text-muted">assets complete</div>
             {venture.google_drive_url && (
               <a
@@ -173,11 +173,11 @@ export default function AdminVentureDetailPage() {
           const stageCompleted = stage.assets.filter((a) => completionMap.get(a.number)).length;
 
           return (
-            <div key={stage.id} className="bg-surface border border-border rounded-xl">
+            <div key={stage.id} className="bg-surface border border-border" style={{ borderRadius: 2 }}>
               <div className="p-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center font-bold text-accent text-sm">
+                    <div className="w-8 h-8 bg-accent/10 flex items-center justify-center font-medium text-accent text-sm" style={{ borderRadius: 2 }}>
                       {stage.number}
                     </div>
                     <div>
@@ -200,13 +200,14 @@ export default function AdminVentureDetailPage() {
                     <div key={asset.number} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
+                          className={`w-7 h-7 flex items-center justify-center text-xs font-medium ${
                             isComplete
                               ? "bg-accent text-white"
                               : answerCount > 0
                               ? "bg-gold/10 text-gold"
                               : "bg-background text-muted"
                           }`}
+                          style={{ borderRadius: 2 }}
                         >
                           {isComplete ? "✓" : asset.number}
                         </div>
@@ -218,13 +219,14 @@ export default function AdminVentureDetailPage() {
                       <div className="flex items-center gap-3 text-xs">
                         <span className="text-muted">{answerCount} responses</span>
                         <span
-                          className={`px-2 py-0.5 rounded-full font-medium ${
+                          className={`px-2 py-0.5 font-medium ${
                             isComplete
                               ? "bg-accent/10 text-accent"
                               : answerCount > 0
                               ? "bg-gold/10 text-gold"
                               : "bg-background text-muted"
                           }`}
+                          style={{ borderRadius: 2 }}
                         >
                           {isComplete ? "Complete" : answerCount > 0 ? "In Progress" : "Not Started"}
                         </span>

@@ -30,7 +30,6 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch fellow profile
         const { data: fellowData } = await supabase
           .from("fellows")
           .select("full_name, email")
@@ -41,7 +40,6 @@ export default function DashboardPage() {
           setFellow({ fullName: fellowData.full_name, email: fellowData.email });
         }
 
-        // Fetch ventures
         const { data: ventureData } = await supabase
           .from("ventures")
           .select("*")
@@ -70,7 +68,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-muted">Loading your dashboard...</div>
+        <div className="text-muted text-sm">Loading your dashboard...</div>
       </div>
     );
   }
@@ -79,10 +77,11 @@ export default function DashboardPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">
+        <div className="label-uppercase mb-2">Dashboard</div>
+        <h1 className="text-2xl font-medium">
           Welcome{fellow ? `, ${fellow.fullName.split(" ")[0]}` : ""}
         </h1>
-        <p className="text-muted mt-1">
+        <p className="text-muted text-sm mt-1">
           Build your AI venture through the 27-asset Co-Build framework
         </p>
       </div>
@@ -90,41 +89,44 @@ export default function DashboardPage() {
       {/* Ventures */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Your Ventures</h2>
+          <div className="label-uppercase">Your Ventures</div>
           <Link
             href="/venture/new"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
+            style={{ borderRadius: 2 }}
           >
-            <span>+</span> New Venture
+            + New Venture
           </Link>
         </div>
 
         {ventures.length === 0 ? (
-          <div className="border-2 border-dashed border-border rounded-xl p-12 text-center">
-            <div className="text-4xl mb-4">🚀</div>
-            <h3 className="text-lg font-semibold mb-2">Start Your First Venture</h3>
+          <div className="bg-surface border border-border p-12 text-center" style={{ borderRadius: 2 }}>
+            <div className="label-uppercase mb-4">Get Started</div>
+            <h3 className="text-lg font-medium mb-2">Start Your First Venture</h3>
             <p className="text-muted text-sm mb-6 max-w-md mx-auto">
               Create a venture to begin working through the Co-Build framework.
               You&apos;ll complete 27 assets across 7 stages — from invention to spinout.
             </p>
             <Link
               href="/venture/new"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent text-white font-medium hover:bg-accent/90 transition-colors"
+              className="inline-flex items-center gap-1.5 px-6 py-3 bg-accent text-white font-semibold hover:bg-accent/90 transition-colors"
+              style={{ borderRadius: 2 }}
             >
-              Create Your Venture
+              Create Your Venture →
             </Link>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <div className="space-y-2">
             {ventures.map((venture) => (
               <Link
                 key={venture.id}
                 href={`/venture/${venture.id}`}
-                className="block bg-surface border border-border rounded-xl p-5 hover:border-accent/30 hover:shadow-md transition-all"
+                className="block bg-surface border border-border p-5 hover:border-accent/30 transition-all"
+                style={{ borderRadius: 2 }}
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-lg">{venture.name}</h3>
+                    <h3 className="font-medium">{venture.name}</h3>
                     {venture.description && (
                       <p className="text-muted text-sm mt-1 line-clamp-2">
                         {venture.description}
@@ -132,7 +134,7 @@ export default function DashboardPage() {
                     )}
                     <div className="flex items-center gap-3 mt-3">
                       {venture.industry && (
-                        <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                        <span className="text-xs px-2 py-0.5 bg-accent/10 text-accent font-medium" style={{ borderRadius: 2 }}>
                           {venture.industry}
                         </span>
                       )}
@@ -141,7 +143,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                   </div>
-                  <span className="text-muted text-sm">→</span>
+                  <span className="text-muted">→</span>
                 </div>
               </Link>
             ))}
@@ -150,29 +152,25 @@ export default function DashboardPage() {
       </div>
 
       {/* Framework Overview */}
-      <div className="bg-surface border border-border rounded-xl p-6">
-        <h2 className="text-lg font-semibold mb-3">The Co-Build Framework</h2>
-        <p className="text-muted text-sm mb-4">
+      <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
+        <div className="label-uppercase mb-3">Framework Overview</div>
+        <h2 className="text-lg font-medium mb-1">The Co-Build Framework</h2>
+        <p className="text-muted text-sm mb-5">
           27 sequenced assets across 13 stages, grouped into 7 phases. Each asset is an
           action-based workflow with specific questions and deliverables.
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-          <div className="bg-background rounded-lg p-3">
-            <div className="text-2xl font-bold text-accent">27</div>
-            <div className="text-xs text-muted">Assets</div>
-          </div>
-          <div className="bg-background rounded-lg p-3">
-            <div className="text-2xl font-bold text-accent">7</div>
-            <div className="text-xs text-muted">Stages</div>
-          </div>
-          <div className="bg-background rounded-lg p-3">
-            <div className="text-2xl font-bold text-gold">13</div>
-            <div className="text-xs text-muted">Gates</div>
-          </div>
-          <div className="bg-background rounded-lg p-3">
-            <div className="text-2xl font-bold text-gold">1</div>
-            <div className="text-xs text-muted">Spinout</div>
-          </div>
+          {[
+            { value: "27", label: "Assets" },
+            { value: "7", label: "Stages" },
+            { value: "13", label: "Gates" },
+            { value: "1", label: "Spinout" },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-background p-3" style={{ borderRadius: 2 }}>
+              <div className="text-2xl font-medium text-accent">{stat.value}</div>
+              <div className="label-uppercase mt-1" style={{ fontSize: 10 }}>{stat.label}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

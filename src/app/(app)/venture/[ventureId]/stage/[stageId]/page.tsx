@@ -107,11 +107,11 @@ export default function StageDetailPage() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-accent/10 flex items-center justify-center text-xl font-bold text-accent">
+          <div className="w-14 h-14 bg-accent/10 flex items-center justify-center text-xl font-medium text-accent" style={{ borderRadius: 2 }}>
             {stage.number}
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{stage.title}</h1>
+            <h1 className="text-2xl font-medium">{stage.title}</h1>
             <p className="text-muted">{stage.subtitle}</p>
           </div>
         </div>
@@ -120,7 +120,7 @@ export default function StageDetailPage() {
       <p className="text-sm text-muted">{stage.description}</p>
 
       {/* Progress */}
-      <div className="bg-surface border border-border rounded-xl p-4">
+      <div className="bg-surface border border-border p-4" style={{ borderRadius: 2 }}>
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">Stage Progress</span>
           <span className="text-sm text-muted">
@@ -158,17 +158,19 @@ export default function StageDetailPage() {
             <Link
               key={asset.number}
               href={`/venture/${ventureId}/asset/${asset.number}`}
-              className="block bg-surface border border-border rounded-xl p-5 hover:border-accent/30 hover:shadow-md transition-all"
+              className="block bg-surface border border-border p-5 hover:border-accent/30 hover:shadow-md transition-all"
+              style={{ borderRadius: 2 }}
             >
               <div className="flex items-start gap-4">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
+                  className={`w-10 h-10 flex items-center justify-center text-sm font-medium shrink-0 ${
                     isComplete
                       ? "bg-accent text-white"
                       : hasStarted
                       ? "bg-accent/10 text-accent"
                       : "bg-border/50 text-muted"
                   }`}
+                  style={{ borderRadius: 2 }}
                 >
                   {isComplete ? "✓" : `#${asset.number}`}
                 </div>
@@ -176,15 +178,15 @@ export default function StageDetailPage() {
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="font-semibold">{asset.title}</h3>
                     {isComplete ? (
-                      <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium shrink-0">
+                      <span className="text-xs px-2 py-1 bg-accent/10 text-accent font-medium shrink-0" style={{ borderRadius: 2 }}>
                         Complete
                       </span>
                     ) : hasStarted ? (
-                      <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold font-medium shrink-0">
+                      <span className="text-xs px-2 py-1 bg-gold/10 text-gold font-medium shrink-0" style={{ borderRadius: 2 }}>
                         In Progress
                       </span>
                     ) : (
-                      <span className="text-xs px-2 py-1 rounded-full bg-border/50 text-muted shrink-0">
+                      <span className="text-xs px-2 py-1 bg-border/50 text-muted shrink-0" style={{ borderRadius: 2 }}>
                         Not Started
                       </span>
                     )}
@@ -223,8 +225,8 @@ export default function StageDetailPage() {
       </div>
 
       {/* Gate Decision */}
-      <div className="bg-gold/5 border border-gold/20 rounded-xl p-5">
-        <div className="text-xs text-gold font-medium uppercase mb-1">
+      <div className="bg-gold/5 border border-gold/20 p-5" style={{ borderRadius: 2 }}>
+        <div className="text-xs text-gold font-medium uppercase tracking-wide mb-1">
           Gate Decision
         </div>
         <p className="text-sm">{stage.gateDecision}</p>

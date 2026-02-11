@@ -28,7 +28,6 @@ export default function AdminFellowsPage() {
           .order("created_at", { ascending: false });
 
         if (fellowData) {
-          // Get venture counts per fellow
           const enriched = await Promise.all(
             fellowData.map(async (f) => {
               const { count } = await supabase
@@ -52,7 +51,7 @@ export default function AdminFellowsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="text-muted">Loading fellows...</div>
+        <div className="text-muted text-sm">Loading fellows...</div>
       </div>
     );
   }
@@ -60,39 +59,43 @@ export default function AdminFellowsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">All Fellows</h1>
-        <p className="text-muted mt-1">{fellows.length} fellow{fellows.length !== 1 ? "s" : ""} registered</p>
+        <div className="label-uppercase mb-2">Admin</div>
+        <h1 className="text-2xl font-medium">All Fellows</h1>
+        <p className="text-muted text-sm mt-1">{fellows.length} fellow{fellows.length !== 1 ? "s" : ""} registered</p>
       </div>
 
       {fellows.length === 0 ? (
-        <div className="bg-surface border border-border rounded-xl p-12 text-center">
-          <p className="text-muted">No fellows have signed up yet.</p>
+        <div className="bg-surface border border-border p-12 text-center" style={{ borderRadius: 2 }}>
+          <p className="text-muted text-sm">No fellows have signed up yet.</p>
         </div>
       ) : (
-        <div className="bg-surface border border-border rounded-xl divide-y divide-border">
+        <div className="bg-surface border border-border divide-y divide-border" style={{ borderRadius: 2 }}>
           {fellows.map((fellow) => (
             <Link
               key={fellow.id}
               href={`/admin/fellows/${fellow.id}`}
               className="flex items-center justify-between p-4 hover:bg-background/50 transition-colors"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-accent/10 text-accent flex items-center justify-center font-bold text-sm">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 bg-accent/10 text-accent flex items-center justify-center font-semibold text-xs"
+                  style={{ borderRadius: 2 }}
+                >
                   {fellow.full_name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <div className="font-medium">{fellow.full_name}</div>
-                  <div className="text-sm text-muted">{fellow.email}</div>
+                  <div className="font-medium text-sm">{fellow.full_name}</div>
+                  <div className="text-xs text-muted mt-0.5">{fellow.email}</div>
                 </div>
               </div>
-              <div className="flex items-center gap-6 text-sm">
-                <div className="text-muted">
+              <div className="flex items-center gap-6 text-xs text-muted">
+                <div>
                   {fellow.ventureCount} venture{fellow.ventureCount !== 1 ? "s" : ""}
                 </div>
-                <div className="text-muted">
+                <div>
                   Joined {new Date(fellow.created_at).toLocaleDateString()}
                 </div>
-                <span className="text-muted">→</span>
+                <span>→</span>
               </div>
             </Link>
           ))}

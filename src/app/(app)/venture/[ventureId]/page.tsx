@@ -117,13 +117,13 @@ export default function VentureOverviewPage() {
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{venture.name}</h1>
+            <h1 className="text-2xl font-medium">{venture.name}</h1>
             {venture.description && (
               <p className="text-muted mt-1">{venture.description}</p>
             )}
           </div>
           {venture.industry && (
-            <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+            <span className="text-xs px-2 py-1 bg-accent/10 text-accent font-medium" style={{ borderRadius: 2 }}>
               {venture.industry}
             </span>
           )}
@@ -131,7 +131,7 @@ export default function VentureOverviewPage() {
       </div>
 
       {/* Overall Progress */}
-      <div className="bg-surface border border-border rounded-xl p-5">
+      <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-medium">Overall Progress</span>
           <span className="text-sm text-muted">
@@ -165,17 +165,19 @@ export default function VentureOverviewPage() {
           return (
             <div
               key={stage.id}
-              className="bg-surface border border-border rounded-xl overflow-hidden"
+              className="bg-surface border border-border overflow-hidden"
+              style={{ borderRadius: 2 }}
             >
               {/* Stage header */}
               <div className="p-5 border-b border-border">
                 <div className="flex items-center gap-3 mb-2">
                   <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold ${
+                    className={`w-10 h-10 flex items-center justify-center text-sm font-medium ${
                       stagePercent === 100
                         ? "bg-accent text-white"
                         : "bg-accent/10 text-accent"
                     }`}
+                    style={{ borderRadius: 2 }}
                   >
                     {stagePercent === 100 ? "✓" : stage.number}
                   </div>
@@ -215,13 +217,14 @@ export default function VentureOverviewPage() {
                       className="flex items-center gap-4 px-5 py-4 hover:bg-background/50 transition-colors"
                     >
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
+                        className={`w-8 h-8 flex items-center justify-center text-xs font-medium ${
                           isComplete
                             ? "bg-accent text-white"
                             : hasStarted
                             ? "bg-accent/10 text-accent"
                             : "bg-border/50 text-muted"
                         }`}
+                        style={{ borderRadius: 2 }}
                       >
                         {isComplete ? "✓" : `#${asset.number}`}
                       </div>
@@ -235,15 +238,15 @@ export default function VentureOverviewPage() {
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {isComplete ? (
-                          <span className="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent font-medium">
+                          <span className="text-xs px-2 py-1 bg-accent/10 text-accent font-medium" style={{ borderRadius: 2 }}>
                             Complete
                           </span>
                         ) : hasStarted ? (
-                          <span className="text-xs px-2 py-1 rounded-full bg-gold/10 text-gold font-medium">
+                          <span className="text-xs px-2 py-1 bg-gold/10 text-gold font-medium" style={{ borderRadius: 2 }}>
                             In Progress
                           </span>
                         ) : (
-                          <span className="text-xs px-2 py-1 rounded-full bg-border/50 text-muted">
+                          <span className="text-xs px-2 py-1 bg-border/50 text-muted" style={{ borderRadius: 2 }}>
                             Start
                           </span>
                         )}

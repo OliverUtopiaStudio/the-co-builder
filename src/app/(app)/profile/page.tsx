@@ -95,18 +95,18 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
+      <h1 className="text-2xl font-medium mb-6">Your Profile</h1>
 
       <form onSubmit={handleSave} className="space-y-6">
-        <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
+        <div className="bg-surface border border-border p-6 space-y-4" style={{ borderRadius: 2 }}>
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 text-sm text-red-700 dark:text-red-300" style={{ borderRadius: 2 }}>
               {error}
             </div>
           )}
 
           {saved && (
-            <div className="bg-accent/10 border border-accent/20 rounded-lg p-3 text-sm text-accent">
+            <div className="bg-accent/10 border border-accent/20 p-3 text-sm text-accent" style={{ borderRadius: 2 }}>
               ✓ Profile saved successfully
             </div>
           )}
@@ -123,7 +123,8 @@ export default function ProfilePage() {
                 setProfile({ ...profile, fullName: e.target.value })
               }
               required
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              style={{ borderRadius: 2 }}
             />
           </div>
 
@@ -136,7 +137,8 @@ export default function ProfilePage() {
               type="email"
               value={profile.email}
               disabled
-              className="w-full px-3 py-2 rounded-lg border border-border bg-border/20 text-muted cursor-not-allowed"
+              className="w-full px-3 py-2 border border-border bg-border/20 text-muted cursor-not-allowed"
+              style={{ borderRadius: 2 }}
             />
             <p className="text-xs text-muted mt-1">
               Email cannot be changed here
@@ -155,7 +157,8 @@ export default function ProfilePage() {
               }
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 resize-none"
+              style={{ borderRadius: 2 }}
               placeholder="Tell us about yourself and your background..."
             />
             <div className="text-right mt-1">
@@ -179,7 +182,8 @@ export default function ProfilePage() {
               onChange={(e) =>
                 setProfile({ ...profile, linkedinUrl: e.target.value })
               }
-              className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              style={{ borderRadius: 2 }}
               placeholder="https://linkedin.com/in/yourprofile"
             />
           </div>
@@ -187,7 +191,8 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full py-2.5 rounded-lg bg-accent text-white font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2.5 bg-accent text-white font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ borderRadius: 2 }}
           >
             {saving ? "Saving..." : "Save Profile"}
           </button>

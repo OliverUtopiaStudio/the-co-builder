@@ -1,15 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111111;
-  --accent: #1a7a5c;
-  --accent-light: #e8f5f0;
-  --gold: #d4a843;
-  --gold-light: #fdf6e3;
-  --surface: #f7f7f5;
-  --border: #e5e5e3;
-  --muted: #6b7280;
+  --background: #EEEEEE;
+  --foreground: #1F1E1D;
+  --accent: #CC5536;
+  --accent-light: #faf0ed;
+  --gold: #CC5536;
+  --gold-light: #faf0ed;
+  --surface: #FFFFFF;
+  --border: #E3E1E2;
+  --muted: #8F898B;
+  --muted-light: #BDB7B9;
+  --sidebar-bg: #30302E;
+  --sidebar-text: #FAF9F5;
+  --sidebar-muted: #8F898B;
+  --sidebar-active: #CC5536;
 }
 
 @theme inline {
@@ -22,26 +27,28 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-muted: var(--muted);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --accent: #2dd4a0;
-    --accent-light: #0d2d23;
-    --gold: #f0c45a;
-    --gold-light: #2d2510;
-    --surface: #161616;
-    --border: #2a2a2a;
-    --muted: #9ca3af;
-  }
+  --color-muted-light: var(--muted-light);
+  --color-sidebar-bg: var(--sidebar-bg);
+  --color-sidebar-text: var(--sidebar-text);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-active: var(--sidebar-active);
+  --font-sans: "TWK Lausanne", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "TWK Lausanne", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility classes for Studio OS design language */
+.label-uppercase {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
 }

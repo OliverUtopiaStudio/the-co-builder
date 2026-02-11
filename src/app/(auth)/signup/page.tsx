@@ -44,7 +44,6 @@ export default function SignUpPage() {
         return;
       }
 
-      // Create fellow profile via API
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const res = await fetch("/api/fellows", {
@@ -67,21 +66,26 @@ export default function SignUpPage() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
-        <h1 className="text-2xl font-bold text-center">Create Your Account</h1>
-        <p className="text-muted text-sm text-center">
-          Join as a Fellow and start building your venture
-        </p>
+    <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
+      {/* Terracotta header */}
+      <div className="bg-accent px-10 pt-10 pb-8">
+        <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
+          THE<br />UTOPIA<br />STUDIO
+        </div>
+        <h1 className="text-[28px] font-medium text-white leading-tight">Create Account</h1>
+        <p className="text-white/80 text-sm mt-1.5">Join as a Fellow and start building your venture</p>
+      </div>
 
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="px-10 py-8 space-y-5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+          <div className="bg-red-50 border border-red-200 rounded-sm p-3 text-sm text-red-700" style={{ borderRadius: 2 }}>
             {error}
           </div>
         )}
 
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium mb-1">
+          <label htmlFor="fullName" className="label-uppercase block mb-2">
             Full Name
           </label>
           <input
@@ -90,13 +94,14 @@ export default function SignUpPage() {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+            style={{ borderRadius: 2 }}
             placeholder="Jane Smith"
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
+          <label htmlFor="email" className="label-uppercase block mb-2">
             Email
           </label>
           <input
@@ -105,13 +110,14 @@ export default function SignUpPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+            style={{ borderRadius: 2 }}
             placeholder="you@example.com"
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
+          <label htmlFor="password" className="label-uppercase block mb-2">
             Password
           </label>
           <input
@@ -121,13 +127,14 @@ export default function SignUpPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+            style={{ borderRadius: 2 }}
             placeholder="At least 8 characters"
           />
         </div>
 
         <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+          <label htmlFor="confirmPassword" className="label-uppercase block mb-2">
             Confirm Password
           </label>
           <input
@@ -136,7 +143,8 @@ export default function SignUpPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+            style={{ borderRadius: 2 }}
             placeholder="Repeat your password"
           />
         </div>
@@ -144,18 +152,25 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2.5 rounded-lg bg-accent text-white font-medium hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ borderRadius: 2 }}
         >
-          {loading ? "Creating account..." : "Create Account"}
+          {loading ? "Creating account..." : "Create Account →"}
         </button>
+      </form>
+
+      <div className="px-10 pb-6 -mt-2">
+        <p className="text-center text-xs text-muted-light">
+          Already have an account?{" "}
+          <Link href="/login" className="text-accent hover:underline">
+            Sign in
+          </Link>
+        </p>
       </div>
 
-      <p className="text-center text-sm text-muted">
-        Already have an account?{" "}
-        <Link href="/login" className="text-accent hover:underline font-medium">
-          Sign in
-        </Link>
-      </p>
-    </form>
+      <div className="px-10 pb-6 text-center">
+        <p className="text-xs text-muted-light">The Utopia Studio — Internal Use Only</p>
+      </div>
+    </div>
   );
 }

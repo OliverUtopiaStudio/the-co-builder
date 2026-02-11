@@ -34,7 +34,6 @@ function LoginForm() {
         return;
       }
 
-      // Check role to determine redirect
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -57,7 +56,6 @@ function LoginForm() {
           }
         }
 
-        // Fellow mode — admins can also use fellow view
         if (fellow?.role === "admin") {
           router.push("/admin");
           router.refresh();
@@ -77,89 +75,51 @@ function LoginForm() {
   // Choose screen
   if (mode === "choose") {
     return (
-      <div className="space-y-4">
-        <div className="bg-surface border border-border rounded-xl p-8 space-y-6">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold">Welcome to The Co-Builder</h1>
-            <p className="text-muted text-sm mt-1">
-              Choose how you&apos;d like to sign in
-            </p>
+      <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
+        {/* Terracotta header */}
+        <div className="bg-accent px-10 pt-10 pb-8">
+          <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
+            THE<br />UTOPIA<br />STUDIO
           </div>
-
-          <div className="space-y-3">
-            {/* Fellow login */}
-            <button
-              onClick={() => setMode("fellow")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-accent/50 bg-background hover:bg-accent/5 transition-all text-left group"
-            >
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-xl shrink-0">
-                🚀
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold group-hover:text-accent transition-colors">
-                  Fellow Login
-                </div>
-                <div className="text-xs text-muted mt-0.5">
-                  Access your venture workspace and Co-Build framework
-                </div>
-              </div>
-              <svg
-                className="w-5 h-5 text-muted group-hover:text-accent transition-colors shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-
-            {/* Admin login */}
-            <button
-              onClick={() => setMode("admin")}
-              className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-border hover:border-gold/50 bg-background hover:bg-gold/5 transition-all text-left group"
-            >
-              <div className="w-12 h-12 rounded-xl bg-gold/10 flex items-center justify-center text-xl shrink-0">
-                🔑
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold group-hover:text-gold transition-colors">
-                  Admin Login
-                </div>
-                <div className="text-xs text-muted mt-0.5">
-                  Manage fellows, ventures, and asset requirements
-                </div>
-              </div>
-              <svg
-                className="w-5 h-5 text-muted group-hover:text-gold transition-colors shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
+          <h1 className="text-[28px] font-medium text-white leading-tight">The Co-Builder</h1>
+          <p className="text-white/80 text-sm mt-1.5">Choose how you&apos;d like to sign in</p>
         </div>
 
-        <p className="text-center text-sm text-muted">
-          New fellow?{" "}
-          <Link
-            href="/signup"
-            className="text-accent hover:underline font-medium"
+        {/* Login options */}
+        <div className="px-10 py-8 space-y-3">
+          <button
+            onClick={() => setMode("fellow")}
+            className="w-full flex items-center justify-between px-4 py-3.5 rounded-sm bg-background border border-border hover:border-accent/40 transition-colors text-left group"
+            style={{ borderRadius: 2 }}
           >
-            Create an account
-          </Link>
-        </p>
+            <div>
+              <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">Fellow Login</div>
+              <div className="text-xs text-muted mt-0.5">Access your venture workspace</div>
+            </div>
+            <span className="text-muted group-hover:text-accent transition-colors">→</span>
+          </button>
+
+          <button
+            onClick={() => setMode("admin")}
+            className="w-full flex items-center justify-between px-4 py-3.5 rounded-sm bg-background border border-border hover:border-accent/40 transition-colors text-left group"
+            style={{ borderRadius: 2 }}
+          >
+            <div>
+              <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">Admin Login</div>
+              <div className="text-xs text-muted mt-0.5">Manage fellows and ventures</div>
+            </div>
+            <span className="text-muted group-hover:text-accent transition-colors">→</span>
+          </button>
+        </div>
+
+        <div className="px-10 pb-6">
+          <p className="text-center text-xs text-muted-light">
+            New fellow?{" "}
+            <Link href="/signup" className="text-accent hover:underline">
+              Create an account
+            </Link>
+          </p>
+        </div>
       </div>
     );
   }
@@ -168,10 +128,21 @@ function LoginForm() {
   const isAdmin = mode === "admin";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-surface border border-border rounded-xl p-6 space-y-4">
-        {/* Back button + title */}
-        <div className="flex items-center gap-3">
+    <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
+      {/* Terracotta header */}
+      <div className="bg-accent px-10 pt-10 pb-8">
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
+              THE<br />UTOPIA<br />STUDIO
+            </div>
+            <h1 className="text-[28px] font-medium text-white leading-tight">
+              {isAdmin ? "Admin Sign In" : "Fellow Sign In"}
+            </h1>
+            <p className="text-white/80 text-sm mt-1.5">
+              {isAdmin ? "Access the admin dashboard" : "Continue your Co-Build journey"}
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => {
@@ -180,53 +151,23 @@ function LoginForm() {
               setPassword("");
               setError("");
             }}
-            className="p-1.5 rounded-lg hover:bg-background transition-colors text-muted hover:text-foreground"
+            className="text-white/60 hover:text-white transition-colors text-sm mt-1"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            ← Back
           </button>
-          <div>
-            <h1 className="text-xl font-bold">
-              {isAdmin ? "Admin Sign In" : "Fellow Sign In"}
-            </h1>
-            <p className="text-muted text-xs">
-              {isAdmin
-                ? "Access the admin dashboard"
-                : "Continue your Co-Build journey"}
-            </p>
-          </div>
-          <div className="ml-auto">
-            <span
-              className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                isAdmin
-                  ? "bg-gold/10 text-gold"
-                  : "bg-accent/10 text-accent"
-              }`}
-            >
-              {isAdmin ? "Admin" : "Fellow"}
-            </span>
-          </div>
         </div>
+      </div>
 
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="px-10 py-8 space-y-5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 text-sm text-red-700 dark:text-red-300">
+          <div className="bg-red-50 border border-red-200 rounded-sm p-3 text-sm text-red-700" style={{ borderRadius: 2 }}>
             {error}
           </div>
         )}
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium mb-1">
+          <label htmlFor="email" className="label-uppercase block mb-2">
             Email
           </label>
           <input
@@ -235,13 +176,14 @@ function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+            style={{ borderRadius: 2 }}
             placeholder={isAdmin ? "admin@company.com" : "you@example.com"}
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-1">
+          <label htmlFor="password" className="label-uppercase block mb-2">
             Password
           </label>
           <input
@@ -250,40 +192,41 @@ function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
-            placeholder="Your password"
+            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+            style={{ borderRadius: 2 }}
+            placeholder="Enter your password"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2.5 rounded-lg text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-            isAdmin
-              ? "bg-gold hover:bg-gold/90"
-              : "bg-accent hover:bg-accent/90"
-          }`}
+          className="w-full py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ borderRadius: 2 }}
         >
           {loading
             ? "Signing in..."
             : isAdmin
-            ? "Sign In as Admin"
-            : "Sign In"}
+            ? "Sign In as Admin →"
+            : "Sign In →"}
         </button>
-      </div>
+      </form>
 
       {!isAdmin && (
-        <p className="text-center text-sm text-muted">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-accent hover:underline font-medium"
-          >
-            Create one
-          </Link>
-        </p>
+        <div className="px-10 pb-6 -mt-2">
+          <p className="text-center text-xs text-muted-light">
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="text-accent hover:underline">
+              Create one
+            </Link>
+          </p>
+        </div>
       )}
-    </form>
+
+      <div className="px-10 pb-6 text-center">
+        <p className="text-xs text-muted-light">The Utopia Studio — Internal Use Only</p>
+      </div>
+    </div>
   );
 }
 
@@ -291,8 +234,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="bg-surface border border-border rounded-xl p-6 text-center">
-          <div className="text-muted">Loading...</div>
+        <div className="bg-surface p-6 text-center" style={{ borderRadius: 2 }}>
+          <div className="text-muted text-sm">Loading...</div>
         </div>
       }
     >

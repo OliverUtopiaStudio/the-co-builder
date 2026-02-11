@@ -307,16 +307,17 @@ export default function AssetWorkflowPage() {
 
         <div className="flex items-start gap-4">
           <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 ${
+            className={`w-12 h-12 flex items-center justify-center text-lg font-medium shrink-0 ${
               isComplete
                 ? "bg-accent text-white"
                 : "bg-accent/10 text-accent"
             }`}
+            style={{ borderRadius: 2 }}
           >
             {isComplete ? "✓" : `#${asset.number}`}
           </div>
           <div className="flex-1">
-            <h1 className="text-xl font-bold">{asset.title}</h1>
+            <h1 className="text-xl font-medium">{asset.title}</h1>
             <p className="text-muted text-sm mt-1">{asset.purpose}</p>
           </div>
         </div>
@@ -324,8 +325,8 @@ export default function AssetWorkflowPage() {
 
       {/* Core Question callout */}
       {asset.coreQuestion && (
-        <div className="bg-accent/5 border border-accent/20 rounded-xl p-4">
-          <div className="text-xs text-accent font-medium uppercase mb-1">
+        <div className="bg-accent/5 border border-accent/20 p-4" style={{ borderRadius: 2 }}>
+          <div className="text-xs text-accent font-medium uppercase tracking-wide mb-1">
             Core Question
           </div>
           <p className="text-sm italic">&ldquo;{asset.coreQuestion}&rdquo;</p>
@@ -333,7 +334,7 @@ export default function AssetWorkflowPage() {
       )}
 
       {/* Step Progress */}
-      <div className="bg-surface border border-border rounded-xl p-4">
+      <div className="bg-surface border border-border p-4" style={{ borderRadius: 2 }}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-medium">
             Step {currentStepIdx + 1} of {totalSteps}
@@ -376,7 +377,7 @@ export default function AssetWorkflowPage() {
       </div>
 
       {/* Current Step */}
-      <div className="bg-surface border border-border rounded-xl p-6">
+      <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
         <h2 className="text-lg font-semibold mb-1">{currentStep.title}</h2>
         {currentStep.description && (
           <p className="text-sm text-muted mb-6">{currentStep.description}</p>
@@ -404,7 +405,8 @@ export default function AssetWorkflowPage() {
         <button
           onClick={() => setCurrentStepIdx(Math.max(0, currentStepIdx - 1))}
           disabled={currentStepIdx === 0}
-          className="px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-surface transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="px-4 py-2 border border-border text-sm font-medium hover:bg-surface transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          style={{ borderRadius: 2 }}
         >
           ← Previous Step
         </button>
@@ -414,18 +416,20 @@ export default function AssetWorkflowPage() {
             onClick={() =>
               setCurrentStepIdx(Math.min(totalSteps - 1, currentStepIdx + 1))
             }
-            className="px-4 py-2 rounded-lg bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
+            className="px-4 py-2 bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
+            style={{ borderRadius: 2 }}
           >
             Next Step →
           </button>
         ) : (
           <button
             onClick={toggleComplete}
-            className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-6 py-2 text-sm font-medium transition-colors ${
               isComplete
                 ? "bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20"
                 : "bg-accent text-white hover:bg-accent/90"
             }`}
+            style={{ borderRadius: 2 }}
           >
             {isComplete ? "✓ Marked Complete" : "Mark as Complete"}
           </button>
@@ -519,7 +523,8 @@ function QuestionField({
           onBlur={onBlur}
           placeholder={question.placeholder}
           maxLength={question.maxLength}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          style={{ borderRadius: 2 }}
         />
       )}
 
@@ -532,7 +537,8 @@ function QuestionField({
           placeholder={question.placeholder}
           maxLength={question.maxLength}
           rows={4}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm resize-none"
+          className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm resize-none"
+          style={{ borderRadius: 2 }}
         />
       )}
 
@@ -545,7 +551,8 @@ function QuestionField({
             // Immediate save for selects
             setTimeout(() => onBlur(), 0);
           }}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          style={{ borderRadius: 2 }}
         >
           <option value="">Select...</option>
           {question.options?.map((opt) => (
@@ -598,7 +605,8 @@ function QuestionField({
           min={question.min}
           max={question.max}
           placeholder={question.placeholder}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          style={{ borderRadius: 2 }}
         />
       )}
 
@@ -610,7 +618,8 @@ function QuestionField({
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           placeholder={question.placeholder || "https://..."}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          style={{ borderRadius: 2 }}
         />
       )}
 
@@ -627,11 +636,12 @@ function QuestionField({
                 onChange(n);
                 setTimeout(() => onBlur(), 0);
               }}
-              className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-9 h-9 text-sm font-medium transition-colors ${
                 value === n
                   ? "bg-accent text-white"
                   : "bg-border/50 hover:bg-border text-foreground"
               }`}
+              style={{ borderRadius: 2 }}
             >
               {n}
             </button>
@@ -648,7 +658,8 @@ function QuestionField({
             onChange(e.target.value);
             setTimeout(() => onBlur(), 0);
           }}
-          className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          className="w-full px-3 py-2 border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 text-sm"
+          style={{ borderRadius: 2 }}
         />
       )}
 
@@ -656,7 +667,7 @@ function QuestionField({
       {question.type === "file" && (
         <div>
           {fileValue ? (
-            <div className="flex items-center gap-3 p-3 bg-accent/5 border border-accent/20 rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-accent/5 border border-accent/20" style={{ borderRadius: 2 }}>
               <span className="text-accent">📄</span>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">
@@ -674,7 +685,7 @@ function QuestionField({
               </button>
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center border-2 border-dashed border-border rounded-lg p-8 cursor-pointer hover:border-accent/50 hover:bg-accent/5 transition-all">
+            <label className="flex flex-col items-center justify-center border-2 border-dashed border-border p-8 cursor-pointer hover:border-accent/50 hover:bg-accent/5 transition-all" style={{ borderRadius: 2 }}>
               <input
                 type="file"
                 accept={question.accept}
@@ -720,11 +731,12 @@ function QuestionField({
             return (
               <label
                 key={opt.value}
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${
+                className={`flex items-center gap-3 p-3 border transition-colors cursor-pointer ${
                   isChecked
                     ? "border-accent/30 bg-accent/5"
                     : "border-border hover:border-border/80"
                 }`}
+                style={{ borderRadius: 2 }}
               >
                 <input
                   type="checkbox"
