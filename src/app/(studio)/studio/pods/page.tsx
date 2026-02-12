@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getPods } from "@/app/actions/studio";
+import { getPods, deletePod } from "@/app/actions/studio";
 
 type Pod = {
   id: string;
@@ -17,6 +17,41 @@ type Pod = {
 export default function PodsPage() {
   const [pods, setPods] = useState<Pod[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+
+  function reload() {
+    getPods().then((data) => {
+      setPods(data as Pod[]);
+    });
+  }
+
+  async function handleDelete(podId: string) {
+    if (showDeleteConfirm !== podId) {
+      setShowDeleteConfirm(podId);
+      return;
+    }
+    if (!confirm("Are you sure you want to delete this pod? This cannot be undone.")) {
+      setShowDeleteConfirm(null);
+      return;
+    }
+    setDeletingId(podId);
+    try {
+      const result = await deletePod(podId);
+      if ("error" in result) {
+        alert(result.error);
+        setShowDeleteConfirm(null);
+      } else {
+        reload();
+      }
+    } catch (err) {
+      console.error("Failed to delete pod:", err);
+      alert("Failed to delete pod");
+    } finally {
+      setDeletingId(null);
+      setShowDeleteConfirm(null);
+    }
+  }
 
   useEffect(() => {
     getPods().then((data) => {
@@ -42,13 +77,18 @@ export default function PodsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {pods.map((pod) => {
           const clusters = Array.isArray(pod.clusters) ? (pod.clusters as string[]) : [];
+          const isDeleting = deletingId === pod.id;
+          const showConfirm = showDeleteConfirm === pod.id;
           return (
-            <Link
+            <div
               key={pod.id}
-              href={`/studio/pods/${pod.id}`}
-              className="block bg-surface border border-border hover:border-accent/30 transition-colors group"
+              className="bg-surface border border-border hover:border-accent/30 transition-colors group relative"
               style={{ borderRadius: 2 }}
             >
+              <Link
+                href={`/studio/pods/${pod.id}`}
+                className="block"
+              >
               {/* Color bar */}
               <div className="h-1" style={{ backgroundColor: pod.color || "#CC5536" }} />
 
@@ -99,7 +139,48 @@ export default function PodsPage() {
                   {pod.fellowCount === 1 ? "fellow" : "fellows"} assigned
                 </div>
               </div>
-            </Link>
+              </Link>
+              {/* Delete button */}
+              <div className="absolute top-2 right-2">
+                {showConfirm ? (
+                  <div className="flex items-center gap-1 bg-background border border-red-300 p-1" style={{ borderRadius: 2 }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        handleDelete(pod.id);
+                      }}
+                      disabled={isDeleting}
+                      className="px-2 py-1 text-[10px] text-red-600 hover:bg-red-50 font-semibold disabled:opacity-50"
+                      style={{ borderRadius: 1 }}
+                    >
+                      {isDeleting ? "..." : "✓"}
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setShowDeleteConfirm(null);
+                      }}
+                      className="px-2 py-1 text-[10px] text-muted hover:text-foreground"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleDelete(pod.id);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 px-2 py-1 text-[10px] text-red-600 hover:text-red-700 transition-opacity"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
           );
         })}
       </div>

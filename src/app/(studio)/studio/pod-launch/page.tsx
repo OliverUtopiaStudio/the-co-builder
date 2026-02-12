@@ -7,6 +7,7 @@ import {
   getPods,
   createPodLaunch,
   advancePodLaunchPhase,
+  deletePodLaunch,
 } from "@/app/actions/studio";
 
 // ─── Types ─────────────────────────────────────────────────────────
@@ -184,6 +185,8 @@ export default function PodLaunchPage() {
   const [pods, setPodsState] = useState<PodOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
 
   // Create form state
   const [showCreate, setShowCreate] = useState(false);
@@ -251,6 +254,25 @@ export default function PodLaunchPage() {
       await advancePodLaunchPhase(launchId);
       const updated = await getPodLaunches();
       setLaunches(updated as Launch[]);
+    });
+  }
+
+  function handleDelete(launchId: string) {
+    if (showDeleteConfirm !== launchId) {
+      setShowDeleteConfirm(launchId);
+      return;
+    }
+    if (!confirm(`Are you sure you want to delete this launch? This cannot be undone.`)) {
+      setShowDeleteConfirm(null);
+      return;
+    }
+    setDeletingId(launchId);
+    startTransition(async () => {
+      await deletePodLaunch(launchId);
+      const updated = await getPodLaunches();
+      setLaunches(updated as Launch[]);
+      setShowDeleteConfirm(null);
+      setDeletingId(null);
     });
   }
 
@@ -445,7 +467,11 @@ export default function PodLaunchPage() {
                 key={l.launch.id}
                 data={l}
                 onAdvance={() => handleAdvance(l.launch.id)}
+                onDelete={() => handleDelete(l.launch.id)}
+                onCancelDelete={() => setShowDeleteConfirm(null)}
                 isPending={isPending}
+                isDeleting={deletingId === l.launch.id}
+                showDeleteConfirm={showDeleteConfirm === l.launch.id}
               />
             ))}
           </div>
@@ -464,7 +490,11 @@ export default function PodLaunchPage() {
                 key={l.launch.id}
                 data={l}
                 onAdvance={() => handleAdvance(l.launch.id)}
+                onDelete={() => handleDelete(l.launch.id)}
+                onCancelDelete={() => setShowDeleteConfirm(null)}
                 isPending={isPending}
+                isDeleting={deletingId === l.launch.id}
+                showDeleteConfirm={showDeleteConfirm === l.launch.id}
               />
             ))}
           </div>
@@ -482,7 +512,11 @@ export default function PodLaunchPage() {
               <LaunchCard
                 key={l.launch.id}
                 data={l}
+                onDelete={() => handleDelete(l.launch.id)}
+                onCancelDelete={() => setShowDeleteConfirm(null)}
                 isPending={isPending}
+                isDeleting={deletingId === l.launch.id}
+                showDeleteConfirm={showDeleteConfirm === l.launch.id}
               />
             ))}
           </div>
@@ -514,11 +548,19 @@ export default function PodLaunchPage() {
 function LaunchCard({
   data,
   onAdvance,
+  onDelete,
   isPending,
+  isDeleting,
+  showDeleteConfirm,
+  onCancelDelete,
 }: {
   data: Launch;
   onAdvance?: () => void;
+  onDelete?: () => void;
   isPending: boolean;
+  isDeleting: boolean;
+  showDeleteConfirm: boolean;
+  onCancelDelete?: () => void;
 }) {
   const { launch, podName, podColor, podDisplayOrder } = data;
   const phase = PHASE_STYLES[launch.status] || PHASE_STYLES.planning;
@@ -651,7 +693,7 @@ function LaunchCard({
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Link
             href={`/studio/pod-launch/${launch.id}`}
             className="px-3 py-1.5 bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
@@ -675,6 +717,45 @@ function LaunchCard({
           >
             View Pod
           </Link>
+          {onDelete && (
+            <>
+                {showDeleteConfirm ? (
+                <div className="flex items-center gap-2 ml-auto">
+                  <span className="text-xs text-muted">Delete?</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onDelete) onDelete();
+                    }}
+                    disabled={isDeleting}
+                    className="px-3 py-1.5 text-xs text-red-600 border border-red-300 hover:bg-red-50 font-semibold transition-colors disabled:opacity-50"
+                    style={{ borderRadius: 2 }}
+                  >
+                    {isDeleting ? "Deleting..." : "Confirm"}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onCancelDelete) onCancelDelete();
+                    }}
+                    className="px-2 py-1.5 text-xs text-muted hover:text-foreground"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onDelete) onDelete();
+                  }}
+                  className="px-3 py-1.5 text-xs text-red-600 hover:text-red-700 ml-auto"
+                >
+                  Delete
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

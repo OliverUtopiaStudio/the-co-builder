@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getPod, getCampaignsForPod, getPodLaunchForPod } from "@/app/actions/studio";
+import { getPod, getCampaignsForPod, getPodLaunchForPod, getPodJourney, updateJourneyCheckpoint, deletePod } from "@/app/actions/studio";
+import { POD_JOURNEY_STAGES, getJourneyProgress, getNextCheckpoint, type JourneyCheckpoint, type JourneyStage } from "@/data/pod-journey";
 
 type PodData = {
   pod: {
@@ -87,25 +88,63 @@ function ratingLabel(rating: number | null): string {
   return "C";
 }
 
+const TABS = ["Overview", "Journey", "Campaigns", "Launch"] as const;
+type TabKey = typeof TABS[number];
+
 export default function PodDetailPage() {
   const { podId } = useParams<{ podId: string }>();
   const [data, setData] = useState<PodData | null>(null);
   const [campaigns, setCampaigns] = useState<PodCampaign[]>([]);
   const [podLaunch, setPodLaunch] = useState<PodLaunchStatus | null>(null);
+  const [journey, setJourney] = useState<{ checkpoints: JourneyCheckpoint[]; progress: ReturnType<typeof getJourneyProgress>; nextCheckpoint: JourneyCheckpoint | null; currentStage: JourneyStage | null } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabKey>("Overview");
+  const [updatingCheckpoint, setUpdatingCheckpoint] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  function reload() {
+    if (!podId) return;
+    Promise.all([
+      getPod(podId),
+      getCampaignsForPod(podId),
+      getPodLaunchForPod(podId),
+      getPodJourney(podId),
+    ]).then(([result, campData, launchData, journeyData]) => {
+      setData(result as PodData | null);
+      setCampaigns(campData as PodCampaign[]);
+      setPodLaunch(launchData as PodLaunchStatus | null);
+      setJourney(journeyData as typeof journey);
+      setLoading(false);
+    });
+  }
 
   useEffect(() => {
-    if (podId) {
-      Promise.all([getPod(podId), getCampaignsForPod(podId), getPodLaunchForPod(podId)]).then(
-        ([result, campData, launchData]) => {
-          setData(result as PodData | null);
-          setCampaigns(campData as PodCampaign[]);
-          setPodLaunch(launchData as PodLaunchStatus | null);
-          setLoading(false);
-        }
-      );
-    }
+    reload();
   }, [podId]);
+
+  async function handleCheckpointToggle(checkpointId: string, completed: boolean) {
+    if (!podId) return;
+    setUpdatingCheckpoint(checkpointId);
+    try {
+      await updateJourneyCheckpoint(podId, checkpointId, completed);
+      reload();
+    } catch (err) {
+      console.error("Failed to update checkpoint:", err);
+    } finally {
+      setUpdatingCheckpoint(null);
+    }
+  }
+
+  async function handleDeletePod() {
+    if (!podId) return;
+    try {
+      await deletePod(podId);
+      window.location.href = "/studio/pods";
+    } catch (err: unknown) {
+      const error = err as { error?: string };
+      alert(error?.error || "Failed to delete pod");
+    }
+  }
 
   if (loading) {
     return <div className="text-muted text-sm">Loading pod...</div>;
@@ -130,20 +169,66 @@ export default function PodDetailPage() {
       </div>
 
       {/* Header */}
-      <div className="flex items-start gap-4 mb-8">
-        <div
-          className="w-12 h-12 flex items-center justify-center text-white font-bold text-lg shrink-0"
-          style={{ backgroundColor: pod.color || "#CC5536", borderRadius: 2 }}
-        >
-          {pod.displayOrder}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-start gap-4">
+          <div
+            className="w-12 h-12 flex items-center justify-center text-white font-bold text-lg shrink-0"
+            style={{ backgroundColor: pod.color || "#CC5536", borderRadius: 2 }}
+          >
+            {pod.displayOrder}
+          </div>
+          <div>
+            <h1 className="text-2xl font-medium text-foreground">{pod.name}</h1>
+            {pod.tagline && <p className="text-sm text-muted mt-0.5">{pod.tagline}</p>}
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-medium text-foreground">{pod.name}</h1>
-          {pod.tagline && <p className="text-sm text-muted mt-0.5">{pod.tagline}</p>}
-        </div>
+        {showDeleteConfirm ? (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted">Delete pod?</span>
+            <button
+              onClick={handleDeletePod}
+              className="px-3 py-1.5 text-xs text-red-600 border border-red-300 hover:bg-red-50 font-semibold transition-colors"
+              style={{ borderRadius: 2 }}
+            >
+              Confirm Delete
+            </button>
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              className="px-2 py-1.5 text-xs text-muted hover:text-foreground"
+            >
+              Cancel
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-3 py-1.5 text-xs text-red-600 hover:text-red-700"
+          >
+            Delete Pod
+          </button>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Tab Bar */}
+      <div className="flex items-center gap-1 mb-6 border-b border-border">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-xs font-semibold transition-colors border-b-2 ${
+              activeTab === tab
+                ? "border-accent text-accent"
+                : "border-transparent text-muted hover:text-foreground"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* ═══ TAB: Overview ═══ */}
+      {activeTab === "Overview" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content — 2 cols */}
         <div className="lg:col-span-2 space-y-6">
           {/* Thesis */}
@@ -430,6 +515,330 @@ export default function PodDetailPage() {
           )}
         </div>
       </div>
+      )}
+
+      {/* ═══ TAB: Journey ═══ */}
+      {activeTab === "Journey" && journey && (
+        <div className="space-y-6">
+          {/* Journey Progress Overview */}
+          <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+            <div className="label-uppercase text-muted mb-4 text-[10px]">Journey Progress</div>
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-4">
+              {POD_JOURNEY_STAGES.map((stage) => {
+                const stageProgress = journey.progress.byStage[stage.key];
+                const pct = stageProgress.total > 0 ? (stageProgress.completed / stageProgress.total) * 100 : 0;
+                const isCurrent = journey.currentStage === stage.key;
+                return (
+                  <div key={stage.key} className="text-center">
+                    <div className="text-[9px] font-bold uppercase mb-1" style={{ color: isCurrent ? pod.color || "#CC5536" : "#8F898B" }}>
+                      {stage.label}
+                    </div>
+                    <div className="text-lg font-semibold text-foreground">
+                      {stageProgress.completed}/{stageProgress.total}
+                    </div>
+                    <div className="h-1.5 bg-border overflow-hidden mt-1" style={{ borderRadius: 1 }}>
+                      <div
+                        className="h-full transition-all"
+                        style={{
+                          width: `${pct}%`,
+                          backgroundColor: isCurrent ? pod.color || "#CC5536" : pct === 100 ? "#16a34a" : "#8F898B",
+                          borderRadius: 1,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="text-center pt-4 border-t border-border">
+              <div className="text-sm font-semibold text-foreground">
+                {journey.progress.completed}/{journey.progress.total} checkpoints complete
+              </div>
+              <div className="text-xs text-muted mt-1">
+                {journey.nextCheckpoint
+                  ? `Next: ${journey.nextCheckpoint.label}`
+                  : "Journey complete — Network Effects POD operational"}
+              </div>
+            </div>
+          </section>
+
+          {/* Journey Stages */}
+          {POD_JOURNEY_STAGES.map((stage, stageIdx) => {
+            const stageCheckpoints = journey.checkpoints.filter((cp) => cp.stage === stage.key);
+            const stageProgress = journey.progress.byStage[stage.key];
+            const isCurrent = journey.currentStage === stage.key;
+            const isComplete = stageProgress.completed === stageProgress.total && stageProgress.total > 0;
+            const isUpcoming = POD_JOURNEY_STAGES.findIndex((s) => s.key === journey.currentStage) < stageIdx;
+
+            return (
+              <section
+                key={stage.key}
+                className="bg-surface border border-border p-5"
+                style={{
+                  borderRadius: 2,
+                  borderColor: isCurrent ? pod.color || "#CC5536" : isComplete ? "#16a34a" : "#E3E1E2",
+                  borderLeftWidth: isCurrent ? 3 : 1,
+                }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="text-sm font-semibold text-foreground">{stage.order}. {stage.label}</div>
+                      {isComplete && <span className="text-xs text-green-600">✓ Complete</span>}
+                      {isCurrent && <span className="text-xs font-semibold" style={{ color: pod.color || "#CC5536" }}>Current</span>}
+                    </div>
+                    <p className="text-xs text-muted">{stage.description}</p>
+                  </div>
+                  <div className="text-xs text-muted">
+                    {stageProgress.completed}/{stageProgress.total}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {stageCheckpoints.map((checkpoint) => {
+                    const canToggle = !checkpoint.dependencies || checkpoint.dependencies.every((depId) => {
+                      const dep = journey.checkpoints.find((c) => c.id === depId);
+                      return dep?.completed;
+                    });
+                    const isUpdating = updatingCheckpoint === checkpoint.id;
+
+                    return (
+                      <div
+                        key={checkpoint.id}
+                        className={`flex items-start gap-3 p-3 border transition-colors ${
+                          checkpoint.completed
+                            ? "bg-green-50/50 border-green-200"
+                            : canToggle
+                            ? "bg-background border-border cursor-pointer hover:border-accent/30"
+                            : "bg-background/50 border-border/50 opacity-60"
+                        }`}
+                        style={{ borderRadius: 2 }}
+                        onClick={() => {
+                          if (canToggle && !isUpdating) {
+                            handleCheckpointToggle(checkpoint.id, !checkpoint.completed);
+                          }
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checkpoint.completed}
+                          disabled={!canToggle || isUpdating}
+                          readOnly
+                          className="mt-0.5 accent-[#16a34a]"
+                        />
+                        <div className="flex-1">
+                          <div className={`text-sm ${checkpoint.completed ? "text-muted line-through" : "text-foreground"}`}>
+                            {checkpoint.label}
+                            {checkpoint.required && (
+                              <span className="text-[10px] text-muted ml-1">(required)</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted mt-0.5">{checkpoint.description}</div>
+                          {checkpoint.completed && checkpoint.completedAt && (
+                            <div className="text-[10px] text-muted mt-1">
+                              Completed {new Date(checkpoint.completedAt).toLocaleDateString()}
+                            </div>
+                          )}
+                          {!canToggle && checkpoint.dependencies && checkpoint.dependencies.length > 0 && (
+                            <div className="text-[10px] text-muted mt-1">
+                              Requires: {checkpoint.dependencies.map((depId) => {
+                                const dep = journey.checkpoints.find((c) => c.id === depId);
+                                return dep?.label;
+                              }).filter(Boolean).join(", ")}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ═══ TAB: Campaigns ═══ */}
+      {activeTab === "Campaigns" && (
+        <div className="space-y-6">
+          <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="label-uppercase text-muted text-[10px]">
+                Sourcing Campaigns ({campaigns.length})
+              </div>
+              <Link
+                href="/studio/campaigns"
+                className="text-xs text-accent hover:underline"
+              >
+                Manage Campaigns →
+              </Link>
+            </div>
+            {campaigns.length === 0 ? (
+              <div>
+                <p className="text-sm text-muted mb-3">
+                  No campaigns launched for this pod yet.
+                </p>
+                <Link
+                  href="/studio/campaigns"
+                  className="inline-block px-3 py-1.5 bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+                  style={{ borderRadius: 2 }}
+                >
+                  + Launch Campaign
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {campaigns.map((c) => {
+                  const st = CAMPAIGN_STATUS[c.status] || CAMPAIGN_STATUS.draft;
+                  const typeInfo = TYPE_LABELS[c.campaignType] || TYPE_LABELS.mixed;
+                  const currentWeek = c.currentWeek || 0;
+                  const showFellows = c.campaignType !== "deal";
+                  const showDeals = c.campaignType !== "fellow";
+                  return (
+                    <div
+                      key={c.id}
+                      className="border border-border p-3"
+                      style={{ borderRadius: 2 }}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground">
+                            {c.name}
+                          </span>
+                          <span
+                            className="text-[8px] font-semibold tracking-[0.5px] uppercase px-1.5 py-0.5 text-white"
+                            style={{ backgroundColor: typeInfo.color, borderRadius: 2 }}
+                          >
+                            {typeInfo.label}
+                          </span>
+                        </div>
+                        <span
+                          className={`text-[9px] font-semibold tracking-[0.5px] uppercase px-1.5 py-0.5 ${st.bg} ${st.text}`}
+                          style={{ borderRadius: 2 }}
+                        >
+                          {st.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted">
+                        {showFellows && (
+                          <span>{c.targetFellows} fellow target</span>
+                        )}
+                        {showDeals && (c.targetDeals || 0) > 0 && (
+                          <span>{c.targetDeals} deal target</span>
+                        )}
+                        <span>
+                          {c.sprintWeeks}-week sprint
+                        </span>
+                        {c.status === "active" && (
+                          <span className="font-medium text-foreground">
+                            Week {currentWeek}/{c.sprintWeeks}
+                          </span>
+                        )}
+                        {c.status === "completed" && (
+                          <span className="font-medium">
+                            {showFellows && (
+                              <span style={{ color: "#CC5536" }}>
+                                {c.fellowsRecruited || 0} recruited
+                              </span>
+                            )}
+                            {showFellows && showDeals && " · "}
+                            {showDeals && (
+                              <span style={{ color: "#1976D2" }}>
+                                {c.dealsSourced || 0} deals
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      {c.status === "active" && (
+                        <div
+                          className="h-1.5 bg-background overflow-hidden mt-2"
+                          style={{ borderRadius: 1 }}
+                        >
+                          <div
+                            className="h-full transition-all"
+                            style={{
+                              width: `${Math.min(
+                                (currentWeek / c.sprintWeeks) * 100,
+                                100
+                              )}%`,
+                              backgroundColor: typeInfo.color,
+                              borderRadius: 1,
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {/* ═══ TAB: Launch ═══ */}
+      {activeTab === "Launch" && (
+        <div className="space-y-6">
+          <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="label-uppercase text-muted text-[10px]">
+                Pod Launch
+              </div>
+              <Link
+                href="/studio/pod-launch"
+                className="text-xs text-accent hover:underline"
+              >
+                All Launches →
+              </Link>
+            </div>
+            {podLaunch ? (
+              <Link
+                href={`/studio/pod-launch/${podLaunch.id}`}
+                className="block border border-border p-3 hover:border-accent/30 transition-colors group"
+                style={{ borderRadius: 2 }}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-foreground group-hover:text-accent transition-colors">
+                    {podLaunch.name}
+                  </span>
+                  <span
+                    className={`text-[9px] font-semibold tracking-[0.5px] uppercase px-1.5 py-0.5 ${
+                      podLaunch.status === "operational"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : ["sprint_1", "sprint_2"].includes(podLaunch.status)
+                        ? "bg-green-50 text-green-700"
+                        : podLaunch.status === "pre_work"
+                        ? "bg-purple-50 text-purple-700"
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                    style={{ borderRadius: 2 }}
+                  >
+                    {LAUNCH_PHASE_LABELS[podLaunch.status] || podLaunch.status}
+                  </span>
+                </div>
+                <div className="text-xs text-muted">
+                  Phase: {LAUNCH_PHASE_LABELS[podLaunch.currentPhase] || podLaunch.currentPhase}
+                  {" · "}View playbook →
+                </div>
+              </Link>
+            ) : (
+              <div>
+                <p className="text-sm text-muted mb-3">
+                  No launch playbook for this pod yet.
+                </p>
+                <Link
+                  href="/studio/pod-launch"
+                  className="inline-block px-3 py-1.5 bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+                  style={{ borderRadius: 2 }}
+                >
+                  + Launch Pod
+                </Link>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }
