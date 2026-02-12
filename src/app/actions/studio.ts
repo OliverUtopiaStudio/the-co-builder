@@ -940,11 +940,21 @@ import {
 
 export async function getPodJourney(podId: string) {
   await requireAdmin();
-  const [pod] = await db.select().from(pods).where(eq(pods.id, podId)).limit(1);
+  // Select only columns that exist, handle missing journey columns gracefully
+  const [pod] = await db
+    .select({
+      id: pods.id,
+      journeyCheckpoints: sql<JourneyCheckpoint[] | null>`COALESCE(${pods.journeyCheckpoints}, '[]'::jsonb)`,
+      currentJourneyStage: pods.currentJourneyStage,
+    })
+    .from(pods)
+    .where(eq(pods.id, podId))
+    .limit(1);
+  
   if (!pod) return null;
 
   // Initialize journey checkpoints if not exists
-  let checkpoints = (pod.journeyCheckpoints as JourneyCheckpoint[] | null) || [];
+  let checkpoints = pod.journeyCheckpoints || [];
   
   // If empty, initialize from template
   if (checkpoints.length === 0) {
@@ -953,7 +963,7 @@ export async function getPodJourney(podId: string) {
 
   const progress = getJourneyProgress(checkpoints);
   const nextCheckpoint = getNextCheckpoint(checkpoints);
-  const currentStage = getCurrentStage(checkpoints) || pod.currentJourneyStage as JourneyStage | null;
+  const currentStage = getCurrentStage(checkpoints) || (pod.currentJourneyStage as JourneyStage | null);
 
   return {
     podId: pod.id,
@@ -970,10 +980,19 @@ export async function updateJourneyCheckpoint(
   completed: boolean
 ) {
   await requireAdmin();
-  const [pod] = await db.select().from(pods).where(eq(pods.id, podId)).limit(1);
+  // Select with graceful handling of missing columns
+  const [pod] = await db
+    .select({
+      id: pods.id,
+      journeyCheckpoints: sql<JourneyCheckpoint[] | null>`COALESCE(${pods.journeyCheckpoints}, '[]'::jsonb)`,
+    })
+    .from(pods)
+    .where(eq(pods.id, podId))
+    .limit(1);
+  
   if (!pod) throw new Error("Pod not found");
 
-  let checkpoints = (pod.journeyCheckpoints as JourneyCheckpoint[] | null) || [];
+  let checkpoints = pod.journeyCheckpoints || [];
   
   // Initialize if empty
   if (checkpoints.length === 0) {
@@ -990,14 +1009,23 @@ export async function updateJourneyCheckpoint(
   // Update current stage
   const currentStage = getCurrentStage(checkpoints);
 
-  await db
-    .update(pods)
-    .set({
-      journeyCheckpoints: checkpoints,
-      currentJourneyStage: currentStage,
-      updatedAt: new Date(),
-    })
-    .where(eq(pods.id, podId));
+  // Update with error handling if columns don't exist yet
+  try {
+    await db
+      .update(pods)
+      .set({
+        journeyCheckpoints: checkpoints,
+        currentJourneyStage: currentStage,
+        updatedAt: new Date(),
+      })
+      .where(eq(pods.id, podId));
+  } catch (err: unknown) {
+    const error = err as { message?: string };
+    if (error.message?.includes("journey_checkpoints") || error.message?.includes("current_journey_stage")) {
+      throw new Error("Database migration required. Please run migrations/006_pod_journey.sql in Supabase SQL Editor.");
+    }
+    throw err;
+  }
 
   return { success: true };
 }
