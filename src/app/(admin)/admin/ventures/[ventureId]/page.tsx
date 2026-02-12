@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { stages } from "@/lib/data";
 import { allWorkflows, getTotalRequiredQuestions, getWorkflowForAsset } from "@/lib/questions";
+import VentureConnectionsDisplay from "@/components/connections/VentureConnections";
 
 interface VentureDetail {
   id: string;
@@ -157,16 +158,24 @@ export default function AdminVentureDetailPage() {
           <div className="text-right">
             <div className="text-2xl font-medium text-accent">{totalCompleted}/{totalAssets}</div>
             <div className="text-sm text-muted">assets complete</div>
-            {venture.google_drive_url && (
-              <a
-                href={venture.google_drive_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gold hover:underline mt-2 inline-block"
+            <div className="flex flex-col gap-1 mt-2">
+              {venture.google_drive_url && (
+                <a
+                  href={venture.google_drive_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-accent hover:underline"
+                >
+                  Google Drive Folder →
+                </a>
+              )}
+              <Link
+                href={`/admin/ventures/${ventureId}/slack`}
+                className="text-xs text-accent hover:underline"
               >
-                Google Drive Folder →
-              </a>
-            )}
+                Manage Slack Channel →
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -183,6 +192,9 @@ export default function AdminVentureDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Connection Status */}
+      <VentureConnectionsDisplay ventureId={ventureId} showVerifyButton={true} />
 
       {/* Stages and Assets */}
       <div className="space-y-4">

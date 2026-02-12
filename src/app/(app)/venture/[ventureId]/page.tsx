@@ -8,6 +8,7 @@ import { stages } from "@/lib/data";
 import { allWorkflows, getTotalRequiredQuestions } from "@/lib/questions";
 import { getAssetRequirementsForVenture } from "@/app/actions/ventures";
 import DriveFiles from "@/components/google-drive/DriveFiles";
+import VentureConnectionsDisplay from "@/components/connections/VentureConnections";
 
 interface VentureData {
   id: string;
@@ -149,6 +150,9 @@ export default function VentureOverviewPage() {
           )}
         </div>
       </div>
+
+      {/* Connection Status */}
+      <VentureConnectionsDisplay ventureId={venture.id} />
 
       {/* Google Drive Files */}
       <DriveFiles ventureId={venture.id} googleDriveUrl={venture.googleDriveUrl} />

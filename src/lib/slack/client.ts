@@ -80,6 +80,20 @@ export async function listChannels() {
 }
 
 /**
+ * Get info about a Slack channel (name, is_private, etc.).
+ */
+export async function getChannelInfo(channelId: string) {
+  const data = await slackFetch("conversations.info", { channel: channelId });
+  if (!data.ok) return null;
+  return {
+    id: data.channel.id,
+    name: data.channel.name,
+    isPrivate: data.channel.is_private,
+    isArchived: data.channel.is_archived,
+  };
+}
+
+/**
  * Open a Slack modal (view) in response to a shortcut.
  * Used to show the user a confirmation/editing modal after the AI classifies.
  */
