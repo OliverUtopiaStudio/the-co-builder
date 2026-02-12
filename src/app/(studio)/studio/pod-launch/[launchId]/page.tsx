@@ -854,6 +854,43 @@ export default function PodLaunchDetailPage() {
                       );
                     })}
                 </div>
+
+                {/* Log a week */}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <div className="label-uppercase text-muted mb-2 text-[10px]">Log Completed Week</div>
+                  <div className="flex gap-2 mb-3">
+                    <input type="text" value={weekNote} onChange={(e) => setWeekNote(e.target.value)} placeholder="Week summary notes..." className="flex-1 px-3 py-1.5 bg-background border border-border text-xs" style={{ borderRadius: 2 }} />
+                    <select value={weekMode} onChange={(e) => setWeekMode(e.target.value as typeof weekMode)} className="px-2 py-1.5 bg-background border border-border text-xs" style={{ borderRadius: 2 }}>
+                      <option value="live">Live</option>
+                      <option value="learn">Learn</option>
+                      <option value="farm">Farm</option>
+                    </select>
+                    <button onClick={handleLogWeek} disabled={!weekNote.trim() || isPending} className="px-3 py-1.5 bg-accent text-white text-xs font-semibold disabled:opacity-50" style={{ borderRadius: 2 }}>Log</button>
+                  </div>
+                  {opRhythm.weekLog && opRhythm.weekLog.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="text-[9px] text-muted uppercase mb-1">Week History</div>
+                      {opRhythm.weekLog.slice().reverse().slice(0, 8).map((wl, i) => {
+                        const ms = MODE_STYLES[wl.mode as keyof typeof MODE_STYLES];
+                        return (
+                          <div key={i} className="flex items-start gap-2 p-2 bg-background border border-border" style={{ borderRadius: 2 }}>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-semibold text-foreground text-[10px]">Week {wl.weekNumber}</span>
+                              <span className="font-bold uppercase text-[9px] px-1.5 py-0.5 border" style={{ color: ms?.color || "#8F898B", borderColor: ms?.color || "#8F898B", borderRadius: 1 }}>{wl.mode}</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-[10px] text-foreground">{wl.notes}</div>
+                              <div className="text-[8px] text-muted mt-0.5">{new Date(wl.startDate).toLocaleDateString()}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {opRhythm.weekLog.length > 8 && (
+                        <div className="text-[9px] text-muted text-center">+ {opRhythm.weekLog.length - 8} more weeks</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </section>
 
               {/* Current Week Operational Tasks */}
@@ -928,44 +965,7 @@ export default function PodLaunchDetailPage() {
                   </div>
                 </div>
               </section>
-
-              {/* Log a week */}
-              <div className="mt-4 pt-4 border-t border-border">
-                <div className="label-uppercase text-muted mb-2 text-[10px]">Log Completed Week</div>
-                <div className="flex gap-2 mb-3">
-                  <input type="text" value={weekNote} onChange={(e) => setWeekNote(e.target.value)} placeholder="Week summary notes..." className="flex-1 px-3 py-1.5 bg-background border border-border text-xs" style={{ borderRadius: 2 }} />
-                  <select value={weekMode} onChange={(e) => setWeekMode(e.target.value as typeof weekMode)} className="px-2 py-1.5 bg-background border border-border text-xs" style={{ borderRadius: 2 }}>
-                    <option value="live">Live</option>
-                    <option value="learn">Learn</option>
-                    <option value="farm">Farm</option>
-                  </select>
-                  <button onClick={handleLogWeek} disabled={!weekNote.trim() || isPending} className="px-3 py-1.5 bg-accent text-white text-xs font-semibold disabled:opacity-50" style={{ borderRadius: 2 }}>Log</button>
-                </div>
-                {opRhythm.weekLog && opRhythm.weekLog.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="text-[9px] text-muted uppercase mb-1">Week History</div>
-                    {opRhythm.weekLog.slice().reverse().slice(0, 8).map((wl, i) => {
-                      const ms = MODE_STYLES[wl.mode as keyof typeof MODE_STYLES];
-                      return (
-                        <div key={i} className="flex items-start gap-2 p-2 bg-background border border-border" style={{ borderRadius: 2 }}>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <span className="font-semibold text-foreground text-[10px]">Week {wl.weekNumber}</span>
-                            <span className="font-bold uppercase text-[9px] px-1.5 py-0.5 border" style={{ color: ms?.color || "#8F898B", borderColor: ms?.color || "#8F898B", borderRadius: 1 }}>{wl.mode}</span>
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-[10px] text-foreground">{wl.notes}</div>
-                            <div className="text-[8px] text-muted mt-0.5">{new Date(wl.startDate).toLocaleDateString()}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {opRhythm.weekLog.length > 8 && (
-                      <div className="text-[9px] text-muted text-center">+ {opRhythm.weekLog.length - 8} more weeks</div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </section>
+            </>
           )}
         </div>
       )}
