@@ -6,12 +6,15 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { stages } from "@/lib/data";
 import { allWorkflows, getTotalRequiredQuestions } from "@/lib/questions";
+import { getAssetRequirementsForVenture } from "@/app/actions/ventures";
+import DriveFiles from "@/components/google-drive/DriveFiles";
 
 interface VentureData {
   id: string;
   name: string;
   description: string | null;
   industry: string | null;
+  googleDriveUrl: string | null;
 }
 
 interface ResponseRow {
@@ -29,6 +32,7 @@ export default function VentureOverviewPage() {
   const [venture, setVenture] = useState<VentureData | null>(null);
   const [responseCounts, setResponseCounts] = useState<Record<number, number>>({});
   const [completions, setCompletions] = useState<Record<number, boolean>>({});
+  const [requirements, setRequirements] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,21 +40,35 @@ export default function VentureOverviewPage() {
       try {
         const supabase = createClient();
 
-        // Fetch venture
-        const { data: v } = await supabase
-          .from("ventures")
-          .select("id, name, description, industry")
-          .eq("id", ventureId)
-          .single();
+        // Fetch venture, responses, completions, and requirements in parallel
+        const [ventureRes, respRes, compRes, reqRes] = await Promise.all([
+          supabase
+            .from("ventures")
+            .select("id, name, description, industry, google_drive_url")
+            .eq("id", ventureId)
+            .single(),
+          supabase
+            .from("responses")
+            .select("asset_number, question_id")
+            .eq("venture_id", ventureId),
+          supabase
+            .from("asset_completion")
+            .select("asset_number, is_complete")
+            .eq("venture_id", ventureId),
+          getAssetRequirementsForVenture(ventureId).catch(() => ({})),
+        ]);
 
-        if (v) setVenture(v);
+        const v = ventureRes.data;
+        if (v)
+          setVenture({
+            id: v.id,
+            name: v.name,
+            description: v.description,
+            industry: v.industry,
+            googleDriveUrl: v.google_drive_url,
+          });
 
-        // Fetch all responses for this venture (just counts)
-        const { data: respData } = await supabase
-          .from("responses")
-          .select("asset_number, question_id")
-          .eq("venture_id", ventureId);
-
+        const respData = respRes.data;
         if (respData) {
           const counts: Record<number, number> = {};
           respData.forEach((r: ResponseRow) => {
@@ -59,12 +77,7 @@ export default function VentureOverviewPage() {
           setResponseCounts(counts);
         }
 
-        // Fetch completions
-        const { data: compData } = await supabase
-          .from("asset_completion")
-          .select("asset_number, is_complete")
-          .eq("venture_id", ventureId);
-
+        const compData = compRes.data;
         if (compData) {
           const comps: Record<number, boolean> = {};
           compData.forEach((c: CompletionRow) => {
@@ -72,6 +85,8 @@ export default function VentureOverviewPage() {
           });
           setCompletions(comps);
         }
+
+        setRequirements(reqRes as Record<number, boolean>);
       } catch (err) {
         console.error("Failed to load venture:", err);
       } finally {
@@ -105,6 +120,11 @@ export default function VentureOverviewPage() {
   const completedAssets = Object.values(completions).filter(Boolean).length;
   const overallPercent = totalAssets > 0 ? Math.round((completedAssets / totalAssets) * 100) : 0;
 
+  // Determine "working edge" — the earliest stage with incomplete assets
+  const workingEdgeStageId = stages.find((stage) =>
+    stage.assets.some((a) => !completions[a.number])
+  )?.id || null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -129,6 +149,9 @@ export default function VentureOverviewPage() {
           )}
         </div>
       </div>
+
+      {/* Google Drive Files */}
+      <DriveFiles ventureId={venture.id} googleDriveUrl={venture.googleDriveUrl} />
 
       {/* Overall Progress */}
       <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
@@ -161,19 +184,24 @@ export default function VentureOverviewPage() {
             stageTotal > 0
               ? Math.round((stageCompleted / stageTotal) * 100)
               : 0;
+          const isWorkingEdge = stage.id === workingEdgeStageId;
 
           return (
             <div
               key={stage.id}
-              className="bg-surface border border-border overflow-hidden"
+              className={`bg-surface border overflow-hidden ${
+                isWorkingEdge ? "border-accent/40" : "border-border"
+              }`}
               style={{ borderRadius: 2 }}
             >
               {/* Stage header */}
-              <div className="p-5 border-b border-border">
+              <div className={`p-5 border-b ${isWorkingEdge ? "border-accent/20" : "border-border"}`}>
                 <div className="flex items-center gap-3 mb-2">
                   <div
                     className={`w-10 h-10 flex items-center justify-center text-sm font-medium ${
                       stagePercent === 100
+                        ? "bg-accent text-white"
+                        : isWorkingEdge
                         ? "bg-accent text-white"
                         : "bg-accent/10 text-accent"
                     }`}
@@ -182,7 +210,17 @@ export default function VentureOverviewPage() {
                     {stagePercent === 100 ? "✓" : stage.number}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold">{stage.title}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{stage.title}</h3>
+                      {isWorkingEdge && (
+                        <span
+                          className="text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 bg-accent/10 text-accent"
+                          style={{ borderRadius: 2 }}
+                        >
+                          Current
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted">{stage.subtitle}</p>
                   </div>
                   <span className="text-sm text-muted">
@@ -195,6 +233,10 @@ export default function VentureOverviewPage() {
                     style={{ width: `${stagePercent}%` }}
                   />
                 </div>
+                {/* Stage narrative — only for working edge */}
+                {isWorkingEdge && (
+                  <p className="text-xs text-muted mt-3 leading-relaxed">{stage.description}</p>
+                )}
               </div>
 
               {/* Assets */}
@@ -209,12 +251,16 @@ export default function VentureOverviewPage() {
                   const answeredQ = responseCounts[asset.number] || 0;
                   const isComplete = completions[asset.number] || false;
                   const hasStarted = answeredQ > 0;
+                  // Default to required if not specified in requirements map
+                  const isOptional = requirements[asset.number] === false;
 
                   return (
                     <Link
                       key={asset.number}
                       href={`/venture/${ventureId}/asset/${asset.number}`}
-                      className="flex items-center gap-4 px-5 py-4 hover:bg-background/50 transition-colors"
+                      className={`flex items-center gap-4 px-5 py-4 hover:bg-background/50 transition-colors ${
+                        isOptional && !isComplete && !hasStarted ? "opacity-70" : ""
+                      }`}
                     >
                       <div
                         className={`w-8 h-8 flex items-center justify-center text-xs font-medium ${
@@ -229,8 +275,15 @@ export default function VentureOverviewPage() {
                         {isComplete ? "✓" : `#${asset.number}`}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm truncate">
-                          {asset.title}
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-medium text-sm truncate">
+                            {asset.title}
+                          </span>
+                          {isOptional && (
+                            <span className="text-[9px] font-medium px-1 py-0.5 bg-border/50 text-muted flex-shrink-0" style={{ borderRadius: 2 }}>
+                              Optional
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-muted truncate">
                           {asset.purpose}

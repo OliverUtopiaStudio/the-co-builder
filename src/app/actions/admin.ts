@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { fellows, ventures, responses, assetCompletion, assetRequirements } from "@/db/schema";
+import { fellows, ventures, responses, assetCompletion, assetRequirements, pods } from "@/db/schema";
 import { eq, sql, and, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import type { ExperienceProfile, LifecycleStage, OnboardingStatus } from "@/lib/onboarding";
@@ -235,17 +235,41 @@ export async function updateFellowOnboardingAdmin(
 
 export async function updateFellowDetails(
   fellowId: string,
-  data: { domain?: string; background?: string; selectionRationale?: string }
+  data: { domain?: string; background?: string; selectionRationale?: string; role?: string }
+) {
+  await requireAdmin();
+  const validRoles = ["fellow", "admin", "studio", "stakeholder"];
+  const updates: Record<string, unknown> = {
+    ...(data.domain !== undefined && { domain: data.domain }),
+    ...(data.background !== undefined && { background: data.background }),
+    ...(data.selectionRationale !== undefined && { selectionRationale: data.selectionRationale }),
+    updatedAt: new Date(),
+  };
+  if (data.role !== undefined && validRoles.includes(data.role)) {
+    updates.role = data.role;
+  }
+  await db
+    .update(fellows)
+    .set(updates as Record<string, string>)
+    .where(eq(fellows.id, fellowId));
+  return { success: true };
+}
+
+// ─── Pod Assignment ──────────────────────────────────────────────
+
+export async function getAllPods() {
+  await requireAdmin();
+  return db.select().from(pods).orderBy(pods.displayOrder);
+}
+
+export async function updateFellowPod(
+  fellowId: string,
+  podId: string | null
 ) {
   await requireAdmin();
   await db
     .update(fellows)
-    .set({
-      ...(data.domain !== undefined && { domain: data.domain }),
-      ...(data.background !== undefined && { background: data.background }),
-      ...(data.selectionRationale !== undefined && { selectionRationale: data.selectionRationale }),
-      updatedAt: new Date(),
-    })
+    .set({ podId, updatedAt: new Date() })
     .where(eq(fellows.id, fellowId));
   return { success: true };
 }

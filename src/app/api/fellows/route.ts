@@ -13,7 +13,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { fullName, email } = await request.json();
+    const body = await request.json();
+    const fullName =
+      typeof body?.fullName === "string"
+        ? body.fullName.slice(0, 200).trim()
+        : undefined;
+    const email =
+      typeof body?.email === "string"
+        ? body.email.slice(0, 254).trim()
+        : undefined;
 
     // Check if fellow already exists
     const existing = await db
@@ -26,12 +34,16 @@ export async function POST(request: Request) {
       return NextResponse.json(existing[0]);
     }
 
+    const safeFullName =
+      (fullName && fullName.length > 0 ? fullName : user.user_metadata?.full_name) || "Fellow";
+    const safeEmail = (email && email.length > 0 ? email : user.email) || "";
+
     const [fellow] = await db
       .insert(fellows)
       .values({
         authUserId: user.id,
-        email: email || user.email || "",
-        fullName: fullName || user.user_metadata?.full_name || "Fellow",
+        email: safeEmail,
+        fullName: safeFullName.slice(0, 200),
       })
       .returning();
 

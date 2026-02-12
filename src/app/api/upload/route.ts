@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { verifyVentureAccess, sanitizeFileName } from "@/lib/venture-access";
 
 export async function POST(request: Request) {
   try {
@@ -10,17 +11,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { ventureId, assetNumber, fileName, fileType } = await request.json();
+    const body = await request.json();
+    const ventureId = body?.ventureId;
+    const assetNumber = body?.assetNumber;
+    const fileName = typeof body?.fileName === "string" ? body.fileName : "";
 
-    if (!ventureId || !assetNumber || !fileName) {
+    if (!ventureId || assetNumber == null || !fileName) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    // Generate upload path
-    const path = `${ventureId}/${assetNumber}/${Date.now()}-${fileName}`;
+    if (assetNumber < 1 || assetNumber > 27) {
+      return NextResponse.json({ error: "Invalid asset number" }, { status: 400 });
+    }
+
+    await verifyVentureAccess(ventureId);
+
+    const safeFileName = sanitizeFileName(fileName);
+    const path = `${ventureId}/${assetNumber}/${Date.now()}-${safeFileName}`;
 
     // Create a signed upload URL
     const { data, error } = await supabase.storage

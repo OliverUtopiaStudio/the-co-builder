@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -39,12 +40,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(callbackUrl);
   }
 
+  // Use getSession instead of getUser — reads from cookies, no network round-trip
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
 
   // Protect authenticated routes
-  const protectedPaths = ["/dashboard", "/venture", "/profile", "/admin"];
+  const protectedPaths = ["/dashboard", "/venture", "/profile", "/tools", "/admin", "/studio", "/portfolio"];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -62,7 +65,7 @@ export async function middleware(request: NextRequest) {
 
   if (user && isAuthPage) {
     const redirect = request.nextUrl.searchParams.get("redirect");
-    const target = redirect || "/dashboard";
+    const target = getSafeRedirect(redirect, "/dashboard");
     return NextResponse.redirect(new URL(target, request.url));
   }
 
@@ -75,7 +78,10 @@ export const config = {
     "/dashboard/:path*",
     "/venture/:path*",
     "/profile/:path*",
+    "/tools/:path*",
     "/admin/:path*",
+    "/studio/:path*",
+    "/portfolio/:path*",
     "/login",
     "/signup",
   ],

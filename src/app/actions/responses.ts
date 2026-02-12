@@ -1,27 +1,9 @@
 "use server";
 
 import { db } from "@/db";
-import { responses, assetCompletion, fellows, ventures } from "@/db/schema";
+import { responses, assetCompletion, ventures } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
-import { createClient } from "@/lib/supabase/server";
-
-async function verifyVentureAccess(ventureId: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  const result = await db
-    .select({ ventureId: ventures.id })
-    .from(ventures)
-    .innerJoin(fellows, eq(ventures.fellowId, fellows.id))
-    .where(
-      and(eq(ventures.id, ventureId), eq(fellows.authUserId, user.id))
-    )
-    .limit(1);
-
-  if (result.length === 0) throw new Error("Venture not found");
-  return true;
-}
+import { verifyVentureAccess } from "@/lib/venture-access";
 
 export async function saveResponse(
   ventureId: string,

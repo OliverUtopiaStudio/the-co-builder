@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { ventures, fellows } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { ventures, fellows, assetRequirements } from "@/db/schema";
+import { eq, and, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import type { OnboardingStatus } from "@/lib/onboarding";
@@ -89,4 +89,37 @@ export async function getVenture(ventureId: string) {
     )
     .limit(1);
   return venture || null;
+}
+
+/**
+ * Get asset requirement flags for a venture.
+ * Merges global defaults (venture_id IS NULL) with per-venture overrides.
+ * Returns a map of { assetNumber: isRequired }.
+ * Assets not in the table default to required=true.
+ */
+export async function getAssetRequirementsForVenture(ventureId: string) {
+  await getFellow(); // auth check
+
+  // Get global defaults
+  const globalReqs = await db
+    .select()
+    .from(assetRequirements)
+    .where(isNull(assetRequirements.ventureId));
+
+  // Get per-venture overrides
+  const ventureReqs = await db
+    .select()
+    .from(assetRequirements)
+    .where(eq(assetRequirements.ventureId, ventureId));
+
+  // Build map: start with globals, then override with venture-specific
+  const reqMap: Record<number, boolean> = {};
+  for (const req of globalReqs) {
+    reqMap[req.assetNumber] = req.isRequired;
+  }
+  for (const req of ventureReqs) {
+    reqMap[req.assetNumber] = req.isRequired;
+  }
+
+  return reqMap;
 }

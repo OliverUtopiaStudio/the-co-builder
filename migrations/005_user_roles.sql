@@ -1,0 +1,12 @@
+-- Add studio and stakeholder roles for user management
+-- fellows.role: fellow (default), admin, studio, stakeholder
+--
+-- fellow: Co-Build app (dashboard, ventures, profile)
+-- studio: Studio OS (pods, pipeline, campaigns) + can view admin
+-- admin: Full admin (fellows, ventures, stipends, settings)
+-- stakeholder: Read-only portfolio view
+--
+-- To create a stakeholder or studio user:
+-- 1. User signs up (or admin invites via Supabase)
+-- 2. Admin updates fellows.role in Admin > Fellows
+-- No schema change needed - role is text, values are enforced in app

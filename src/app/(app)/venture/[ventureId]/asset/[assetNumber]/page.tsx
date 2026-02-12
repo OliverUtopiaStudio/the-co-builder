@@ -11,6 +11,48 @@ import {
   type WorkflowStep,
 } from "@/lib/questions";
 import { formatFileSize } from "@/lib/utils";
+import { saveAssetToDrive } from "@/app/actions/google-drive";
+
+// ─── Experience-based guidance tips ──────────────────────────────
+// Maps experience_profile to asset-type-appropriate guidance.
+// Grouped by stage range for broad relevance.
+
+const GUIDANCE_TIPS: Record<string, Record<string, string>> = {
+  first_time_builder: {
+    "01": "Start broad, then narrow. First-timers often commit to a solution too early — validate the problem space first.",
+    "02": "Don't build in a vacuum. Even quick conversations with 3-5 potential users will save you months.",
+    "03": "Your MVP doesn't need to be a product — a landing page, mockup, or even a pitch deck can validate demand.",
+    "04": "Think about the business model early, even if it changes. Revenue thinking sharpens your proposition.",
+    "05": "Document everything. As a first-timer, your learning curve IS your competitive advantage if you capture it.",
+    "06": "Don't be afraid to pivot. The best ventures rarely look like the original idea.",
+    "07": "Build in public where you can. Feedback loops accelerate learning dramatically.",
+  },
+  experienced_founder: {
+    "01": "You know the playbook — but watch for confirmation bias. Challenge your own assumptions harder than usual.",
+    "02": "Leverage your network for fast validation, but also seek signal from outside your bubble.",
+    "03": "You can move faster to MVP, but resist the temptation to over-engineer. Ship the simplest thing first.",
+    "04": "Use your experience to build a stronger financial model earlier — investors will expect this from you.",
+    "05": "Your biggest risk is assuming this market works like your last one. Stay curious.",
+    "06": "Apply your fundraising experience, but be open to new funding models specific to this ecosystem.",
+    "07": "Use your operational experience to set realistic milestones — but don't let past patterns limit ambition.",
+  },
+  corporate_innovator: {
+    "01": "Think founder, not project manager. Startups need conviction under uncertainty, not perfect plans.",
+    "02": "Your corporate network is gold for B2B validation — but learn to talk to real end-users too.",
+    "03": "Ship something small and imperfect. Corporate quality bars can slow you down here.",
+    "04": "Translate your enterprise experience into unit economics. The language is different but the logic transfers.",
+    "05": "Your structured thinking is an asset, but practice making decisions with 30% of the data you're used to.",
+    "06": "Corporate partnerships can be your unfair advantage — but don't let them define your entire strategy.",
+    "07": "Build a team culture that's fast and scrappy, not process-heavy. This is the biggest mindset shift.",
+  },
+};
+
+function getGuidanceTip(experienceProfile: string | null, stageNumber: string): string | null {
+  if (!experienceProfile) return null;
+  const tips = GUIDANCE_TIPS[experienceProfile];
+  if (!tips) return null;
+  return tips[stageNumber] || null;
+}
 
 // Find asset metadata from data.ts
 function findAsset(assetNumber: number) {
@@ -99,9 +141,13 @@ export default function AssetWorkflowPage() {
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [isComplete, setIsComplete] = useState(false);
+  const [savingToDrive, setSavingToDrive] = useState(false);
+  const [driveSaveError, setDriveSaveError] = useState<string | null>(null);
+  const [driveSaveSuccess, setDriveSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string | null>>({});
+  const [experienceProfile, setExperienceProfile] = useState<string | null>(null);
   const saveTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Load existing responses
@@ -135,6 +181,25 @@ export default function AssetWorkflowPage() {
 
         if (compData) {
           setIsComplete(compData.is_complete);
+        }
+
+        // Fetch fellow's experience profile (for conditional guidance)
+        const { data: ventureData } = await supabase
+          .from("ventures")
+          .select("fellow_id")
+          .eq("id", ventureId)
+          .single();
+
+        if (ventureData?.fellow_id) {
+          const { data: fellowData } = await supabase
+            .from("fellows")
+            .select("experience_profile")
+            .eq("id", ventureData.fellow_id)
+            .single();
+
+          if (fellowData?.experience_profile) {
+            setExperienceProfile(fellowData.experience_profile);
+          }
         }
       } catch (err) {
         console.error("Failed to load responses:", err);
@@ -276,6 +341,35 @@ export default function AssetWorkflowPage() {
     [ventureId, assetNumber, saveValue]
   );
 
+  // Save to Google Drive
+  const handleSaveToDrive = useCallback(async () => {
+    setSavingToDrive(true);
+    setDriveSaveError(null);
+    setDriveSaveSuccess(false);
+
+    try {
+      const title = assetInfo?.asset?.title ?? `Asset ${assetNumber}`;
+      const result = await saveAssetToDrive(
+        ventureId,
+        assetNumber,
+        title,
+        values
+      );
+
+      if (result.success && result.fileUrl) {
+        setDriveSaveSuccess(true);
+        setTimeout(() => setDriveSaveSuccess(false), 3000);
+      } else {
+        setDriveSaveError(result.error || "Failed to save to Google Drive");
+      }
+    } catch (err) {
+      console.error("Failed to save to Google Drive:", err);
+      setDriveSaveError(err instanceof Error ? err.message : "Failed to save to Google Drive");
+    } finally {
+      setSavingToDrive(false);
+    }
+  }, [ventureId, assetNumber, assetInfo?.asset?.title, values]);
+
   // Mark asset complete/incomplete
   const toggleComplete = useCallback(async () => {
     try {
@@ -397,6 +491,25 @@ export default function AssetWorkflowPage() {
         </div>
       )}
 
+      {/* Experience-based guidance tip */}
+      {(() => {
+        const tip = getGuidanceTip(experienceProfile, stage.number);
+        if (!tip) return null;
+        const profileLabels: Record<string, string> = {
+          first_time_builder: "First-Time Builder",
+          experienced_founder: "Experienced Founder",
+          corporate_innovator: "Corporate Innovator",
+        };
+        return (
+          <div className="bg-blue-50 border border-blue-200 p-4" style={{ borderRadius: 2 }}>
+            <div className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">
+              💡 Guidance for {profileLabels[experienceProfile!] || "you"}
+            </div>
+            <p className="text-sm text-blue-800">{tip}</p>
+          </div>
+        );
+      })()}
+
       {/* Step Progress */}
       <div className="bg-surface border border-border p-4" style={{ borderRadius: 2 }}>
         <div className="flex items-center justify-between mb-3">
@@ -488,20 +601,43 @@ export default function AssetWorkflowPage() {
           </button>
         ) : (
           <div className="flex flex-col items-end gap-2">
-            <button
-              onClick={toggleComplete}
-              disabled={!isComplete && !canMarkComplete}
-              className={`px-6 py-2 text-sm font-medium transition-colors ${
-                isComplete
-                  ? "bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20"
-                  : canMarkComplete
-                  ? "bg-accent text-white hover:bg-accent/90"
-                  : "bg-accent/40 text-white/60 cursor-not-allowed"
-              }`}
-              style={{ borderRadius: 2 }}
-            >
-              {isComplete ? "✓ Marked Complete" : "Mark as Complete"}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSaveToDrive}
+                disabled={savingToDrive || Object.keys(values).length === 0}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${
+                  savingToDrive || Object.keys(values).length === 0
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : driveSaveSuccess
+                    ? "bg-green-600 text-white"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+                style={{ borderRadius: 2 }}
+              >
+                {savingToDrive
+                  ? "Saving..."
+                  : driveSaveSuccess
+                  ? "✓ Saved to Drive"
+                  : "Save to Drive"}
+              </button>
+              <button
+                onClick={toggleComplete}
+                disabled={!isComplete && !canMarkComplete}
+                className={`px-6 py-2 text-sm font-medium transition-colors ${
+                  isComplete
+                    ? "bg-gold/10 text-gold border border-gold/20 hover:bg-gold/20"
+                    : canMarkComplete
+                    ? "bg-accent text-white hover:bg-accent/90"
+                    : "bg-accent/40 text-white/60 cursor-not-allowed"
+                }`}
+                style={{ borderRadius: 2 }}
+              >
+                {isComplete ? "✓ Marked Complete" : "Mark as Complete"}
+              </button>
+            </div>
+            {driveSaveError && (
+              <p className="text-xs text-red-600 text-right">{driveSaveError}</p>
+            )}
             {!isComplete && !canMarkComplete && (
               <div className="text-right max-w-xs">
                 <p className="text-red-500 text-xs">

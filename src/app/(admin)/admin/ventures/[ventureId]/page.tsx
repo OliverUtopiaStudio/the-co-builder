@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { stages } from "@/lib/data";
+import { allWorkflows, getTotalRequiredQuestions, getWorkflowForAsset } from "@/lib/questions";
 
 interface VentureDetail {
   id: string;
@@ -17,6 +18,7 @@ interface VentureDetail {
 }
 
 interface FellowInfo {
+  id: string;
   full_name: string;
   email: string;
 }
@@ -40,6 +42,7 @@ export default function AdminVentureDetailPage() {
   const [responses, setResponses] = useState<Response[]>([]);
   const [completions, setCompletions] = useState<Completion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedAsset, setExpandedAsset] = useState<number | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -59,7 +62,7 @@ export default function AdminVentureDetailPage() {
         // Fetch fellow
         const { data: fellowData } = await supabase
           .from("fellows")
-          .select("full_name, email")
+          .select("id, full_name, email")
           .eq("id", ventureData.fellow_id)
           .single();
 
@@ -106,12 +109,16 @@ export default function AdminVentureDetailPage() {
   }
 
   const completionMap = new Map(completions.map((c) => [c.asset_number, c.is_complete]));
-  const responsesByAsset = new Map<number, number>();
+  const responsesByAsset = new Map<number, Response[]>();
   responses.forEach((r) => {
-    responsesByAsset.set(r.asset_number, (responsesByAsset.get(r.asset_number) || 0) + 1);
+    const existing = responsesByAsset.get(r.asset_number) || [];
+    existing.push(r);
+    responsesByAsset.set(r.asset_number, existing);
   });
 
   const totalCompleted = completions.filter((c) => c.is_complete).length;
+  const totalAssets = allWorkflows.length;
+  const overallPercent = totalAssets > 0 ? Math.round((totalCompleted / totalAssets) * 100) : 0;
 
   return (
     <div className="space-y-8">
@@ -136,12 +143,19 @@ export default function AdminVentureDetailPage() {
             </div>
             {fellow && (
               <p className="text-sm text-muted mt-3">
-                Fellow: <span className="text-foreground font-medium">{fellow.full_name}</span> ({fellow.email})
+                Fellow:{" "}
+                <Link
+                  href={`/admin/fellows/${fellow.id}`}
+                  className="text-accent hover:underline font-medium"
+                >
+                  {fellow.full_name}
+                </Link>{" "}
+                ({fellow.email})
               </p>
             )}
           </div>
           <div className="text-right">
-            <div className="text-2xl font-medium text-accent">{totalCompleted}/27</div>
+            <div className="text-2xl font-medium text-accent">{totalCompleted}/{totalAssets}</div>
             <div className="text-sm text-muted">assets complete</div>
             {venture.google_drive_url && (
               <a
@@ -150,7 +164,7 @@ export default function AdminVentureDetailPage() {
                 rel="noopener noreferrer"
                 className="text-xs text-gold hover:underline mt-2 inline-block"
               >
-                Google Drive Folder
+                Google Drive Folder →
               </a>
             )}
           </div>
@@ -161,8 +175,11 @@ export default function AdminVentureDetailPage() {
           <div className="w-full bg-border rounded-full h-2.5">
             <div
               className="bg-accent rounded-full h-2.5 transition-all"
-              style={{ width: `${(totalCompleted / 27) * 100}%` }}
+              style={{ width: `${overallPercent}%` }}
             />
+          </div>
+          <div className="text-right mt-1">
+            <span className="text-xs text-muted">{overallPercent}%</span>
           </div>
         </div>
       </div>
@@ -171,14 +188,23 @@ export default function AdminVentureDetailPage() {
       <div className="space-y-4">
         {stages.map((stage) => {
           const stageCompleted = stage.assets.filter((a) => completionMap.get(a.number)).length;
+          const stageTotal = stage.assets.length;
+          const stagePercent = stageTotal > 0 ? Math.round((stageCompleted / stageTotal) * 100) : 0;
 
           return (
             <div key={stage.id} className="bg-surface border border-border" style={{ borderRadius: 2 }}>
               <div className="p-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-accent/10 flex items-center justify-center font-medium text-accent text-sm" style={{ borderRadius: 2 }}>
-                      {stage.number}
+                    <div
+                      className={`w-8 h-8 flex items-center justify-center font-medium text-sm ${
+                        stagePercent === 100
+                          ? "bg-accent text-white"
+                          : "bg-accent/10 text-accent"
+                      }`}
+                      style={{ borderRadius: 2 }}
+                    >
+                      {stagePercent === 100 ? "✓" : stage.number}
                     </div>
                     <div>
                       <h3 className="font-semibold">{stage.title}</h3>
@@ -186,51 +212,112 @@ export default function AdminVentureDetailPage() {
                     </div>
                   </div>
                   <div className="text-sm text-muted">
-                    {stageCompleted}/{stage.assets.length} complete
+                    {stageCompleted}/{stageTotal} complete
                   </div>
+                </div>
+                {/* Stage progress bar */}
+                <div className="w-full bg-border/50 rounded-full h-1 mt-3">
+                  <div
+                    className="bg-accent rounded-full h-1 transition-all"
+                    style={{ width: `${stagePercent}%` }}
+                  />
                 </div>
               </div>
 
               <div className="divide-y divide-border">
                 {stage.assets.map((asset) => {
                   const isComplete = completionMap.get(asset.number) || false;
-                  const answerCount = responsesByAsset.get(asset.number) || 0;
+                  const assetResponses = responsesByAsset.get(asset.number) || [];
+                  const answerCount = assetResponses.length;
+                  const workflow = getWorkflowForAsset(asset.number);
+                  const totalQ = workflow ? getTotalRequiredQuestions(workflow) : 0;
+                  const isExpanded = expandedAsset === asset.number;
 
                   return (
-                    <div key={asset.number} className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-7 h-7 flex items-center justify-center text-xs font-medium ${
-                            isComplete
-                              ? "bg-accent text-white"
-                              : answerCount > 0
-                              ? "bg-gold/10 text-gold"
-                              : "bg-background text-muted"
-                          }`}
-                          style={{ borderRadius: 2 }}
-                        >
-                          {isComplete ? "✓" : asset.number}
+                    <div key={asset.number}>
+                      <button
+                        onClick={() => setExpandedAsset(isExpanded ? null : asset.number)}
+                        className="w-full p-4 flex items-center justify-between hover:bg-background/50 transition-colors text-left"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`w-7 h-7 flex items-center justify-center text-xs font-medium ${
+                              isComplete
+                                ? "bg-accent text-white"
+                                : answerCount > 0
+                                ? "bg-gold/10 text-gold"
+                                : "bg-background text-muted"
+                            }`}
+                            style={{ borderRadius: 2 }}
+                          >
+                            {isComplete ? "✓" : asset.number}
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">{asset.title}</div>
+                            <div className="text-xs text-muted">{asset.purpose}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium">{asset.title}</div>
-                          <div className="text-xs text-muted">{asset.purpose}</div>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="text-muted">{answerCount}/{totalQ} responses</span>
+                          <span
+                            className={`px-2 py-0.5 font-medium ${
+                              isComplete
+                                ? "bg-accent/10 text-accent"
+                                : answerCount > 0
+                                ? "bg-gold/10 text-gold"
+                                : "bg-background text-muted"
+                            }`}
+                            style={{ borderRadius: 2 }}
+                          >
+                            {isComplete ? "Complete" : answerCount > 0 ? "In Progress" : "Not Started"}
+                          </span>
+                          <span className="text-muted">{isExpanded ? "▾" : "▸"}</span>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-xs">
-                        <span className="text-muted">{answerCount} responses</span>
-                        <span
-                          className={`px-2 py-0.5 font-medium ${
-                            isComplete
-                              ? "bg-accent/10 text-accent"
-                              : answerCount > 0
-                              ? "bg-gold/10 text-gold"
-                              : "bg-background text-muted"
-                          }`}
-                          style={{ borderRadius: 2 }}
-                        >
-                          {isComplete ? "Complete" : answerCount > 0 ? "In Progress" : "Not Started"}
-                        </span>
-                      </div>
+                      </button>
+
+                      {/* Expanded response detail */}
+                      {isExpanded && (
+                        <div className="px-4 pb-4 border-t border-border/50 bg-background/30">
+                          {assetResponses.length === 0 ? (
+                            <p className="text-sm text-muted py-3">No responses yet.</p>
+                          ) : (
+                            <div className="space-y-3 pt-3">
+                              {assetResponses.map((resp, idx) => {
+                                // Try to find the question label from the workflow
+                                let questionLabel = resp.question_id;
+                                if (workflow) {
+                                  for (const step of workflow.steps) {
+                                    const q = step.questions.find((q) => q.id === resp.question_id);
+                                    if (q) {
+                                      questionLabel = q.label;
+                                      break;
+                                    }
+                                  }
+                                }
+
+                                return (
+                                  <div
+                                    key={`${resp.question_id}-${idx}`}
+                                    className="bg-surface p-3 border border-border"
+                                    style={{ borderRadius: 2 }}
+                                  >
+                                    <div className="text-xs font-medium text-muted mb-1">
+                                      {questionLabel}
+                                    </div>
+                                    <div className="text-sm">
+                                      {typeof resp.value === "string"
+                                        ? resp.value
+                                        : typeof resp.value === "object" && resp.value !== null
+                                        ? JSON.stringify(resp.value, null, 2)
+                                        : String(resp.value ?? "—")}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

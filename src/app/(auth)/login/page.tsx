@@ -4,13 +4,32 @@ import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { GlassCard } from "@/components/ui";
+import LandingHero from "@/components/auth/LandingHero";
+import {
+  authInputClass,
+  authLabelClass,
+  authButtonClass,
+  authErrorStyle,
+  authSuccessStyle,
+} from "@/components/auth/styles";
+import { getSafeRedirect } from "@/lib/safe-redirect";
 
-type LoginMode = "choose" | "admin" | "fellow" | "reset";
+type LoginMode = "landing" | "fellow" | "studio" | "stakeholder" | "reset";
 
+/* ─── Main login orchestrator ─── */
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialMode = searchParams.get("mode") === "admin" ? "admin" as LoginMode : "choose" as LoginMode;
+  const modeParam = searchParams.get("mode");
+  const initialMode: LoginMode =
+    modeParam === "studio"
+      ? "studio"
+      : modeParam === "stakeholder"
+        ? "stakeholder"
+        : modeParam === "admin"
+          ? "studio"
+          : "landing";
   const [mode, setMode] = useState<LoginMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,14 +43,12 @@ function LoginForm() {
     setLoading(true);
     try {
       const supabase = createClient();
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/callback?next=/reset-password`,
-      });
-      if (resetError) {
-        setError(resetError.message);
-      } else {
-        setResetSent(true);
-      }
+      const { error: resetError } =
+        await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/callback?next=/reset-password`,
+        });
+      if (resetError) setError(resetError.message);
+      else setResetSent(true);
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -43,50 +60,38 @@ function LoginForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const rawRedirect = searchParams.get("redirect");
 
+      const { error: signInError } =
+        await supabase.auth.signInWithPassword({ email, password });
       if (signInError) {
-        setError(signInError.message);
+        if (signInError.message.includes("Invalid login credentials")) {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          setError(signInError.message);
+        }
         return;
       }
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        const { data: fellow } = await supabase
-          .from("fellows")
-          .select("role")
-          .eq("auth_user_id", user.id)
-          .single();
-
-        if (mode === "admin") {
-          if (fellow?.role === "admin") {
-            router.push("/admin");
-            router.refresh();
-            return;
-          } else {
-            setError("This account does not have admin access.");
-            await supabase.auth.signOut();
-            return;
-          }
-        }
-
-        if (fellow?.role === "admin") {
-          router.push("/admin");
-          router.refresh();
-          return;
-        }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("Unable to verify session. Please try again.");
+        return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      const { data: fellow } = await supabase
+        .from("fellows")
+        .select("role, lifecycle_stage")
+        .eq("auth_user_id", user.id)
+        .single();
+
+      const target = getSafeRedirect(rawRedirect, "") || getDefaultTarget(mode, fellow?.role);
+      if (target) {
+        router.push(target);
+        router.refresh();
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -94,259 +99,264 @@ function LoginForm() {
     }
   }
 
-  // Reset password screen
+  function getDefaultTarget(
+    mode: LoginMode,
+    role: string | null | undefined
+  ): string {
+    if (mode === "stakeholder") {
+      if (role === "stakeholder") return "/portfolio";
+      setError(
+        "This account does not have stakeholder access. Try Fellow or Studio sign in."
+      );
+      return "";
+    }
+    if (mode === "studio") {
+      if (role === "admin" || role === "studio") return "/studio";
+      setError(
+        "This account does not have Studio access. Try Fellow sign in."
+      );
+      return "";
+    }
+    if (role === "stakeholder") return "/portfolio";
+    if (role === "admin" || role === "studio") return "/studio";
+    return "/dashboard";
+  }
+
+  function goBack() {
+    setMode("landing");
+    setEmail("");
+    setPassword("");
+    setError("");
+    setResetSent(false);
+  }
+
+  /* ═══ LANDING ═══ */
+  if (mode === "landing") {
+    return <LandingHero onSelectMode={(target) => setMode(target)} />;
+  }
+
+  /* ═══ RESET PASSWORD ═══ */
   if (mode === "reset") {
     return (
-      <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
-        <div className="bg-accent px-10 pt-10 pb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
-                THE<br />UTOPIA<br />STUDIO
+      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+        <div className="w-full" style={{ maxWidth: 420 }}>
+          <GlassCard>
+            <div className="px-10 pt-10 pb-8">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-white/40 font-bold text-xs tracking-[2px] leading-relaxed mb-5">
+                    THE<br />UTOPIA<br />STUDIO
+                  </div>
+                  <h1 className="text-[28px] font-medium text-white leading-tight">
+                    Reset Password
+                  </h1>
+                  <p className="text-white/50 text-sm mt-1.5">
+                    {resetSent
+                      ? "Check your email"
+                      : "Enter your email to receive a reset link"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className="text-white/40 hover:text-white transition-colors text-sm mt-1"
+                >
+                  ← Back
+                </button>
               </div>
-              <h1 className="text-[28px] font-medium text-white leading-tight">Reset Password</h1>
-              <p className="text-white/80 text-sm mt-1.5">
-                {resetSent ? "Check your email" : "Enter your email to receive a reset link"}
+            </div>
+
+            {resetSent ? (
+              <div className="px-10 pb-8">
+                <div className="border p-4 text-sm" style={authSuccessStyle}>
+                  Password reset email sent to <strong>{email}</strong>. Check
+                  your inbox and follow the link to set a new password.
+                </div>
+                <button
+                  type="button"
+                  onClick={goBack}
+                  className={authButtonClass + " mt-5"}
+                  style={{ borderRadius: 2 }}
+                >
+                  Back to Sign In →
+                </button>
+              </div>
+            ) : (
+              <form
+                onSubmit={handleResetPassword}
+                className="px-10 pb-8 space-y-5"
+              >
+                {error && (
+                  <div className="border p-3 text-sm" style={authErrorStyle}>
+                    {error}
+                  </div>
+                )}
+                <div>
+                  <label htmlFor="reset-email" className={authLabelClass}>
+                    Email
+                  </label>
+                  <input
+                    id="reset-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className={authInputClass}
+                    style={{ borderRadius: 2 }}
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className={authButtonClass}
+                  style={{ borderRadius: 2 }}
+                >
+                  {loading ? "Sending..." : "Send Reset Link →"}
+                </button>
+              </form>
+            )}
+
+            <div className="px-10 pb-6 text-center">
+              <p className="text-xs text-white/25">
+                The Utopia Studio — Internal Use Only
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("choose");
-                setError("");
-                setResetSent(false);
-              }}
-              className="text-white/60 hover:text-white transition-colors text-sm mt-1"
-            >
-              ← Back
-            </button>
-          </div>
+          </GlassCard>
         </div>
+      </div>
+    );
+  }
 
-        {resetSent ? (
-          <div className="px-10 py-8">
-            <div className="bg-green-50 border border-green-200 rounded-sm p-4 text-sm text-green-700" style={{ borderRadius: 2 }}>
-              Password reset email sent to <strong>{email}</strong>. Check your inbox and follow the link to set a new password.
+  /* ═══ LOGIN FORM (Fellow / Studio / Stakeholder) ═══ */
+  const isStaffOrStakeholder = mode === "studio" || mode === "stakeholder";
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="w-full" style={{ maxWidth: 420 }}>
+        <GlassCard>
+          <div className="px-10 pt-10 pb-8 relative">
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-accent" />
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="text-white/40 font-bold text-xs tracking-[2px] leading-relaxed mb-5">
+                  THE<br />UTOPIA<br />STUDIO
+                </div>
+                <h1 className="text-[28px] font-medium text-white leading-tight">
+                  {mode === "studio"
+                    ? "Studio Sign In"
+                    : mode === "stakeholder"
+                      ? "Stakeholder Sign In"
+                      : "Fellow Sign In"}
+                </h1>
+                <p className="text-white/50 text-sm mt-1.5">
+                  {mode === "studio"
+                    ? "Access the Studio dashboard"
+                    : mode === "stakeholder"
+                      ? "View fellow portfolio and ventures"
+                      : "Continue your Co-Build journey"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={goBack}
+                className="text-white/40 hover:text-white transition-colors text-sm mt-1"
+              >
+                ← Back
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("choose");
-                setEmail("");
-                setResetSent(false);
-              }}
-              className="w-full mt-5 py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors"
-              style={{ borderRadius: 2 }}
-            >
-              Back to Sign In →
-            </button>
           </div>
-        ) : (
-          <form onSubmit={handleResetPassword} className="px-10 py-8 space-y-5">
+
+          <form onSubmit={handleSubmit} className="px-10 pb-8 space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-sm p-3 text-sm text-red-700" style={{ borderRadius: 2 }}>
+              <div className="border p-3 text-sm" style={authErrorStyle}>
                 {error}
               </div>
             )}
+
             <div>
-              <label htmlFor="reset-email" className="label-uppercase block mb-2">
+              <label htmlFor="email" className={authLabelClass}>
                 Email
               </label>
               <input
-                id="reset-email"
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
+                className={authInputClass}
                 style={{ borderRadius: 2 }}
-                placeholder="you@example.com"
+                placeholder={
+                  isStaffOrStakeholder ? "you@company.com" : "you@example.com"
+                }
               />
             </div>
+
+            <div>
+              <div className="flex items-baseline justify-between mb-2">
+                <label
+                  htmlFor="password"
+                  className={authLabelClass.replace(" block mb-2", "")}
+                >
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("reset");
+                    setPassword("");
+                    setError("");
+                  }}
+                  className="text-xs text-accent hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className={authInputClass}
+                style={{ borderRadius: 2 }}
+                placeholder="Enter your password"
+              />
+            </div>
+
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={authButtonClass}
               style={{ borderRadius: 2 }}
             >
-              {loading ? "Sending..." : "Send Reset Link →"}
+              {loading
+                ? "Signing in..."
+                : mode === "studio"
+                  ? "Sign In to Studio →"
+                  : mode === "stakeholder"
+                    ? "Sign In →"
+                    : "Sign In →"}
             </button>
           </form>
-        )}
 
-        <div className="px-10 pb-6 text-center">
-          <p className="text-xs text-muted-light">The Utopia Studio — Internal Use Only</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Choose screen
-  if (mode === "choose") {
-    return (
-      <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
-        {/* Terracotta header */}
-        <div className="bg-accent px-10 pt-10 pb-8">
-          <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
-            THE<br />UTOPIA<br />STUDIO
-          </div>
-          <h1 className="text-[28px] font-medium text-white leading-tight">The Co-Builder</h1>
-          <p className="text-white/80 text-sm mt-1.5">Choose how you&apos;d like to sign in</p>
-        </div>
-
-        {/* Login options */}
-        <div className="px-10 py-8 space-y-3">
-          <button
-            onClick={() => setMode("fellow")}
-            className="w-full flex items-center justify-between px-4 py-3.5 rounded-sm bg-background border border-border hover:border-accent/40 transition-colors text-left group"
-            style={{ borderRadius: 2 }}
-          >
-            <div>
-              <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">Fellow Login</div>
-              <div className="text-xs text-muted mt-0.5">Access your venture workspace</div>
+          {!isStaffOrStakeholder && (
+            <div className="px-10 pb-6 -mt-2">
+              <p className="text-center text-xs text-white/30">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="text-accent hover:underline">
+                  Create one
+                </Link>
+              </p>
             </div>
-            <span className="text-muted group-hover:text-accent transition-colors">→</span>
-          </button>
+          )}
 
-          <button
-            onClick={() => setMode("admin")}
-            className="w-full flex items-center justify-between px-4 py-3.5 rounded-sm bg-background border border-border hover:border-accent/40 transition-colors text-left group"
-            style={{ borderRadius: 2 }}
-          >
-            <div>
-              <div className="text-sm font-semibold text-foreground group-hover:text-accent transition-colors">Admin Login</div>
-              <div className="text-xs text-muted mt-0.5">Manage fellows and ventures</div>
-            </div>
-            <span className="text-muted group-hover:text-accent transition-colors">→</span>
-          </button>
-        </div>
-
-        <div className="px-10 pb-6">
-          <p className="text-center text-xs text-muted-light">
-            New fellow?{" "}
-            <Link href="/signup" className="text-accent hover:underline">
-              Create an account
-            </Link>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Login form (admin or fellow)
-  const isAdmin = mode === "admin";
-
-  return (
-    <div className="bg-surface rounded-sm overflow-hidden" style={{ borderRadius: 2 }}>
-      {/* Terracotta header */}
-      <div className="bg-accent px-10 pt-10 pb-8">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-white font-bold text-xs tracking-[2px] leading-relaxed mb-5">
-              THE<br />UTOPIA<br />STUDIO
-            </div>
-            <h1 className="text-[28px] font-medium text-white leading-tight">
-              {isAdmin ? "Admin Sign In" : "Fellow Sign In"}
-            </h1>
-            <p className="text-white/80 text-sm mt-1.5">
-              {isAdmin ? "Access the admin dashboard" : "Continue your Co-Build journey"}
+          <div className="px-10 pb-6 text-center">
+            <p className="text-xs text-white/25">
+              The Utopia Studio — Internal Use Only
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setMode("choose");
-              setEmail("");
-              setPassword("");
-              setError("");
-            }}
-            className="text-white/60 hover:text-white transition-colors text-sm mt-1"
-          >
-            ← Back
-          </button>
-        </div>
-      </div>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="px-10 py-8 space-y-5">
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-sm p-3 text-sm text-red-700" style={{ borderRadius: 2 }}>
-            {error}
-          </div>
-        )}
-
-        <div>
-          <label htmlFor="email" className="label-uppercase block mb-2">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
-            style={{ borderRadius: 2 }}
-            placeholder={isAdmin ? "admin@company.com" : "you@example.com"}
-          />
-        </div>
-
-        <div>
-          <div className="flex items-baseline justify-between mb-2">
-            <label htmlFor="password" className="label-uppercase">
-              Password
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("reset");
-                setPassword("");
-                setError("");
-              }}
-              className="text-xs text-accent hover:underline"
-            >
-              Forgot password?
-            </button>
-          </div>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-3.5 bg-background border border-border text-foreground focus:outline-none focus:border-accent placeholder:text-muted-light text-base"
-            style={{ borderRadius: 2 }}
-            placeholder="Enter your password"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3.5 bg-accent text-white font-semibold text-[15px] hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ borderRadius: 2 }}
-        >
-          {loading
-            ? "Signing in..."
-            : isAdmin
-            ? "Sign In as Admin →"
-            : "Sign In →"}
-        </button>
-      </form>
-
-      {!isAdmin && (
-        <div className="px-10 pb-6 -mt-2">
-          <p className="text-center text-xs text-muted-light">
-            Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-accent hover:underline">
-              Create one
-            </Link>
-          </p>
-        </div>
-      )}
-
-      <div className="px-10 pb-6 text-center">
-        <p className="text-xs text-muted-light">The Utopia Studio — Internal Use Only</p>
+        </GlassCard>
       </div>
     </div>
   );
@@ -356,8 +366,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="bg-surface p-6 text-center" style={{ borderRadius: 2 }}>
-          <div className="text-muted text-sm">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-white/30 text-sm">Loading...</div>
         </div>
       }
     >

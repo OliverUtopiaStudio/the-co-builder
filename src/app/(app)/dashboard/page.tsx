@@ -6,6 +6,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { stages } from "@/lib/data";
 import { getMyStipendStatus } from "@/app/actions/stipends";
+import { getFellowDiagnosis, type DiagnosisResult } from "@/app/actions/diagnosis";
+import VentureDiagnosis from "@/components/diagnosis/VentureDiagnosis";
+import PrimaryActionCard from "@/components/dashboard/PrimaryActionCard";
+import TodaysFocus from "@/components/dashboard/TodaysFocus";
+import StudioActivityFeed from "@/components/dashboard/StudioActivityFeed";
 
 interface Venture {
   id: string;
@@ -27,6 +32,12 @@ interface NextAssetInfo {
   title: string;
   purpose: string;
   ventureId: string;
+  stageName: string;
+  stageNumber: string;
+  feedsInto: string | null;
+  coreQuestion: string | null;
+  completedCount: number;
+  totalCount: number;
 }
 
 interface StipendMilestone {
@@ -47,12 +58,21 @@ interface StipendStatus {
 
 /**
  * Look up asset info from the stages data structure by asset number.
+ * Returns enriched data including stage context and downstream connections.
  */
 function getAssetInfo(assetNumber: number) {
   for (const stage of stages) {
     for (const asset of stage.assets) {
       if (asset.number === assetNumber) {
-        return { number: asset.number, title: asset.title, purpose: asset.purpose };
+        return {
+          number: asset.number,
+          title: asset.title,
+          purpose: asset.purpose,
+          stageName: stage.title,
+          stageNumber: stage.number,
+          feedsInto: asset.feedsInto || null,
+          coreQuestion: asset.coreQuestion || null,
+        };
       }
     }
   }
@@ -79,6 +99,7 @@ export default function DashboardPage() {
   const [nextAsset, setNextAsset] = useState<NextAssetInfo | null>(null);
   const [allComplete, setAllComplete] = useState(false);
   const [stipendStatus, setStipendStatus] = useState<StipendStatus | null>(null);
+  const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -111,15 +132,20 @@ export default function DashboardPage() {
 
         const fellowId = fellowData.id;
 
-        // Fetch ventures
-        const { data: ventureData } = await supabase
-          .from("ventures")
-          .select("*")
-          .eq("fellow_id", fellowId)
-          .order("created_at", { ascending: false });
+        // Fetch ventures and stipend in parallel
+        const [ventureResult, stipendResult] = await Promise.all([
+          supabase
+            .from("ventures")
+            .select("*")
+            .eq("fellow_id", fellowId)
+            .order("created_at", { ascending: false }),
+          getMyStipendStatus().catch(() => null),
+        ]);
 
+        const ventureData = ventureResult.data;
+        let mapped: Venture[] = [];
         if (ventureData) {
-          const mapped = ventureData.map((v: Record<string, unknown>) => ({
+          mapped = ventureData.map((v: Record<string, unknown>) => ({
             id: v.id as string,
             name: v.name as string,
             description: v.description as string | null,
@@ -154,6 +180,8 @@ export default function DashboardPage() {
                 setNextAsset({
                   ...info,
                   ventureId: activeVenture.id,
+                  completedCount: completedNumbers.size,
+                  totalCount: allNumbers.length,
                 });
               }
             } else {
@@ -163,17 +191,24 @@ export default function DashboardPage() {
           }
         }
 
-        // Fetch stipend status via server action
-        try {
-          const stipendData = await getMyStipendStatus();
+        if (stipendResult) {
           setStipendStatus({
-            myMilestones: stipendData.myMilestones as StipendMilestone[],
-            totalBudget: stipendData.totalBudget,
-            computeBudget: stipendData.computeBudget,
+            myMilestones: stipendResult.myMilestones as StipendMilestone[],
+            totalBudget: stipendResult.totalBudget,
+            computeBudget: stipendResult.computeBudget,
           });
-        } catch {
-          // Fellow may not have stipend records yet — that's fine
+        } else {
           setStipendStatus(null);
+        }
+
+        // Load diagnosis for enhanced dashboard
+        if (mapped.length > 0) {
+          try {
+            const diagnosisResult = await getFellowDiagnosis();
+            setDiagnosis(diagnosisResult);
+          } catch (err) {
+            console.error("Failed to load diagnosis:", err);
+          }
         }
       } catch (err) {
         console.error("Failed to load dashboard:", err);
@@ -205,40 +240,29 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* What to work on next */}
-      {ventures.length > 0 && (
-        <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>
-          <div className="label-uppercase mb-3">Next Step</div>
-          <div
-            className="border-t border-border mt-1 mb-4"
-            style={{ borderColor: "var(--border)" }}
-          />
-          {allComplete ? (
-            <div>
-              <h3 className="text-lg font-medium mb-2">
-                All 27 assets complete
-              </h3>
-              <p className="text-muted text-sm">
-                Talk to your studio team about spin-out readiness.
-              </p>
-            </div>
-          ) : nextAsset ? (
-            <div>
-              <h3 className="text-lg font-medium mb-1">
-                Asset #{nextAsset.number}: {nextAsset.title}
-              </h3>
-              <p className="text-muted text-sm mb-4">{nextAsset.purpose}</p>
-              <Link
-                href={`/venture/${nextAsset.ventureId}/asset/${nextAsset.number}`}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors"
-                style={{ borderRadius: 2 }}
-              >
-                Start Asset →
-              </Link>
-            </div>
-          ) : null}
-        </div>
+      {/* Primary Action Card - Most Prominent */}
+      {diagnosis && diagnosis.criticalActions.length > 0 && ventures.length > 0 && (
+        <PrimaryActionCard
+          action={diagnosis.criticalActions[0]}
+          ventureId={diagnosis.ventureId}
+          completedCount={diagnosis.completedAssets}
+          totalCount={diagnosis.totalAssets}
+        />
       )}
+
+      {/* Today's Focus Section */}
+      {ventures.length > 0 && (
+        <TodaysFocus
+          diagnosis={diagnosis}
+          ventureId={ventures[0]?.id || null}
+        />
+      )}
+
+      {/* Studio Team Activity Feed */}
+      {ventures.length > 0 && <StudioActivityFeed />}
+
+      {/* Comprehensive Diagnosis Feature */}
+      {ventures.length > 0 && <VentureDiagnosis />}
 
       {/* Stipend & Compute */}
       <div className="bg-surface border border-border p-6" style={{ borderRadius: 2 }}>

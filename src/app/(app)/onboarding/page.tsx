@@ -241,44 +241,112 @@ export default function OnboardingPage() {
           </div>
           <StepIndicator complete={status.toolstackComplete} />
         </div>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-4">
           {TOOLSTACK_ITEMS.map((tool) => (
             <div
               key={tool.id}
-              className="flex items-start gap-3 p-3 bg-background"
+              className="bg-background border border-border p-4"
               style={{ borderRadius: 2 }}
             >
-              <input
-                type="checkbox"
-                checked={toolChecks[tool.id] || false}
-                onChange={(e) => handleToolCheck(tool.id, e.target.checked)}
-                disabled={status.toolstackComplete || saving === "toolstackComplete"}
-                className="mt-1 accent-accent"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{tool.name}</span>
-                  <span className="text-muted text-xs">
-                    ({tool.recommended})
-                  </span>
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={toolChecks[tool.id] || false}
+                  onChange={(e) => handleToolCheck(tool.id, e.target.checked)}
+                  disabled={status.toolstackComplete || saving === "toolstackComplete"}
+                  className="mt-1 accent-accent w-5 h-5"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-base font-semibold">{tool.name}</span>
+                    <span className="text-muted text-xs">
+                      ({tool.recommended})
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted mb-3">
+                    {tool.description}
+                  </p>
+                  
+                  {/* Enhanced "Why you need this" section */}
+                  <div className="bg-surface p-3 mb-3" style={{ borderRadius: 2 }}>
+                    <div className="text-xs font-medium text-foreground mb-1">
+                      Why you need this:
+                    </div>
+                    <ul className="text-xs text-foreground space-y-0.5">
+                      {tool.id === "claude" && (
+                        <>
+                          <li>→ Review your asset responses before submission</li>
+                          <li>→ Get suggestions for improvement</li>
+                          <li>→ Learn concepts as you build</li>
+                        </>
+                      )}
+                      {tool.id === "github" && (
+                        <>
+                          <li>→ Track changes to your venture documents</li>
+                          <li>→ Collaborate with studio team</li>
+                          <li>→ Build a portfolio of your work</li>
+                        </>
+                      )}
+                      {tool.id === "markdown" && (
+                        <>
+                          <li>→ Export assets as markdown files</li>
+                          <li>→ Create pitch decks and documents</li>
+                          <li>→ Standard format for AI tools</li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
+
+                  {/* "How you'll use it" section */}
+                  <div className="mb-3">
+                    <div className="text-xs font-medium text-muted mb-1 italic">
+                      How you&apos;ll use it:
+                    </div>
+                    <div className="text-xs text-muted">
+                      {tool.id === "claude" && "Daily: Review and improve your work | Weekly: Deep dives on complex concepts"}
+                      {tool.id === "github" && "Daily: Commit your asset work | Weekly: Review changes with studio team"}
+                      {tool.id === "markdown" && "Daily: Write asset responses | Weekly: Export to Google Drive"}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={tool.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-accent text-sm font-medium hover:underline"
+                    >
+                      Get Started →
+                    </a>
+                    {toolChecks[tool.id] && (
+                      <span className="text-xs text-muted">Already have it?</span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-muted text-sm mt-0.5">
-                  {tool.description}
-                </p>
-                <a
-                  href={tool.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent text-sm hover:underline mt-1 inline-block"
-                >
-                  {tool.link} &rarr;
-                </a>
               </div>
             </div>
           ))}
           {saving === "toolstackComplete" && (
             <div className="text-muted text-sm">Saving...</div>
           )}
+          
+          {/* Progress indicator */}
+          <div className="mt-4 pt-4 border-t border-border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium">
+                {Object.values(toolChecks).filter(Boolean).length}/{TOOLSTACK_ITEMS.length} tools ready
+              </span>
+            </div>
+            <div className="w-full bg-border/50 h-2" style={{ borderRadius: 2 }}>
+              <div
+                className="h-full bg-accent transition-all"
+                style={{
+                  borderRadius: 2,
+                  width: `${(Object.values(toolChecks).filter(Boolean).length / TOOLSTACK_ITEMS.length) * 100}%`,
+                }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -488,19 +556,42 @@ export default function OnboardingPage() {
         className="bg-surface border border-border p-6 text-center"
         style={{ borderRadius: 2 }}
       >
-        <button
-          onClick={handleComplete}
-          disabled={!status.ventureCreated || completing}
-          className="px-6 py-3 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ borderRadius: 2 }}
-        >
-          {completing ? "Setting up..." : "Begin Building \u2192"}
-        </button>
-        {!status.ventureCreated && (
-          <p className="text-muted text-sm mt-3">
-            Create your venture above to unlock this step.
-          </p>
-        )}
+        {(() => {
+          const allComplete = progress.completed === progress.total;
+          const missingSteps: string[] = [];
+          if (!status.agreementSigned) missingSteps.push("Participation Agreement");
+          if (!status.kycVerified) missingSteps.push("KYC Verification");
+          if (!status.toolstackComplete) missingSteps.push("Toolstack Setup");
+          if (!status.computeBudgetAcknowledged) missingSteps.push("Compute Budget");
+          if (!status.frameworkIntroComplete) missingSteps.push("Framework Introduction");
+          if (!status.browserSetupComplete) missingSteps.push("Browser Setup");
+          if (!status.ventureCreated) missingSteps.push("Create Venture");
+
+          return (
+            <>
+              <button
+                onClick={handleComplete}
+                disabled={!allComplete || completing}
+                className="px-6 py-3 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ borderRadius: 2 }}
+              >
+                {completing ? "Setting up..." : "Begin Building \u2192"}
+              </button>
+              {!allComplete && (
+                <div className="mt-3">
+                  <p className="text-muted text-sm">
+                    Complete all steps above to begin building.
+                  </p>
+                  {missingSteps.length <= 3 && (
+                    <p className="text-xs text-muted mt-1">
+                      Remaining: {missingSteps.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          );
+        })()}
       </div>
     </div>
   );

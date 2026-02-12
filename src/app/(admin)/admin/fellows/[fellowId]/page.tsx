@@ -10,6 +10,8 @@ import {
   updateFellowLifecycleStage,
   updateFellowOnboardingAdmin,
   updateFellowDetails,
+  getAllPods,
+  updateFellowPod,
 } from "@/app/actions/admin";
 import {
   LIFECYCLE_STAGE_LABELS,
@@ -29,6 +31,7 @@ interface Fellow {
   id: string;
   fullName: string;
   email: string;
+  role?: string;
   bio: string | null;
   linkedinUrl: string | null;
   lifecycleStage: string;
@@ -37,8 +40,22 @@ interface Fellow {
   background: string | null;
   selectionRationale: string | null;
   onboardingStatus: OnboardingStatus | null;
+  podId: string | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  fellow: "Fellow",
+  studio: "Studio",
+  admin: "Admin",
+  stakeholder: "Stakeholder",
+};
+
+interface PodInfo {
+  id: string;
+  name: string;
+  color: string | null;
 }
 
 interface Venture {
@@ -75,6 +92,7 @@ export default function AdminFellowDetailPage() {
 
   const [fellow, setFellow] = useState<Fellow | null>(null);
   const [ventures, setVentures] = useState<Venture[]>([]);
+  const [allPodsList, setAllPodsList] = useState<PodInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
 
@@ -87,9 +105,10 @@ export default function AdminFellowDetailPage() {
 
   async function loadData() {
     try {
-      const [fellowData, ventureData] = await Promise.all([
+      const [fellowData, ventureData, podsData] = await Promise.all([
         getFellowById(fellowId),
         getVenturesForFellow(fellowId),
+        getAllPods(),
       ]);
       if (fellowData) {
         setFellow(fellowData as Fellow);
@@ -98,6 +117,7 @@ export default function AdminFellowDetailPage() {
         setSelectionRationale(fellowData.selectionRationale || "");
       }
       if (ventureData) setVentures(ventureData as Venture[]);
+      if (podsData) setAllPodsList(podsData as PodInfo[]);
     } catch (err) {
       console.error("Failed to load fellow:", err);
     } finally {
@@ -131,6 +151,18 @@ export default function AdminFellowDetailPage() {
       setFellow((prev) => prev ? { ...prev, lifecycleStage: value } : prev);
     } catch (err) {
       console.error("Failed to update lifecycle stage:", err);
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  async function handleRoleChange(value: string) {
+    setSaving("role");
+    try {
+      await updateFellowDetails(fellowId, { role: value });
+      setFellow((prev) => prev ? { ...prev, role: value } : prev);
+    } catch (err) {
+      console.error("Failed to update role:", err);
     } finally {
       setSaving(null);
     }
@@ -211,6 +243,18 @@ export default function AdminFellowDetailPage() {
       );
     } catch (err) {
       console.error("Failed to update fellow details:", err);
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  async function handlePodChange(podId: string) {
+    setSaving("pod");
+    try {
+      await updateFellowPod(fellowId, podId || null);
+      setFellow((prev) => prev ? { ...prev, podId: podId || null } : prev);
+    } catch (err) {
+      console.error("Failed to update pod:", err);
     } finally {
       setSaving(null);
     }
@@ -309,14 +353,43 @@ export default function AdminFellowDetailPage() {
         </div>
       </div>
 
-      {/* ── Lifecycle Controls ─────────────────────────────────── */}
+      {/* ── User & Lifecycle Controls ───────────────────────────── */}
       <div
         className="bg-surface border border-border p-6"
         style={{ borderRadius: 2 }}
       >
-        <p className="label-uppercase mb-4">Lifecycle Controls</p>
+        <p className="label-uppercase mb-4">User &amp; Lifecycle</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Role */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              User Role
+            </label>
+            <select
+              value={fellow.role || "fellow"}
+              onChange={(e) => handleRoleChange(e.target.value)}
+              disabled={saving === "role"}
+              className="w-full border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+              style={{ borderRadius: 2 }}
+            >
+              {(["fellow", "studio", "admin", "stakeholder"] as const).map(
+                (r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r] || r}
+                  </option>
+                )
+              )}
+            </select>
+            <p className="text-xs text-muted mt-1">
+              Fellow: Co-Build app. Studio: Studio OS. Admin: full access.
+              Stakeholder: read-only portfolio.
+            </p>
+            {saving === "role" && (
+              <p className="text-xs text-muted mt-1">Saving...</p>
+            )}
+          </div>
+
           {/* Experience Profile */}
           <div>
             <label className="text-sm font-medium block mb-1">
@@ -374,6 +447,30 @@ export default function AdminFellowDetailPage() {
               ))}
             </select>
             {saving === "lifecycleStage" && (
+              <p className="text-xs text-muted mt-1">Saving...</p>
+            )}
+          </div>
+
+          {/* Pod Assignment */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Pod Assignment
+            </label>
+            <select
+              value={fellow.podId || ""}
+              onChange={(e) => handlePodChange(e.target.value)}
+              disabled={saving === "pod"}
+              className="w-full border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+              style={{ borderRadius: 2 }}
+            >
+              <option value="">-- No Pod --</option>
+              {allPodsList.map((pod) => (
+                <option key={pod.id} value={pod.id}>
+                  {pod.name}
+                </option>
+              ))}
+            </select>
+            {saving === "pod" && (
               <p className="text-xs text-muted mt-1">Saving...</p>
             )}
           </div>

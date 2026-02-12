@@ -9,6 +9,7 @@ const config: SidebarConfig = {
     { href: "/studio/pods", label: "Pods" },
     { href: "/studio/pod-launch", label: "Pod Launch" },
     { href: "/studio/pipeline", label: "Pipeline" },
+    { href: "/studio/wiki", label: "Wiki" },
   ],
   homeHref: "/studio",
   mobileTitle: "STUDIO",
@@ -18,7 +19,7 @@ const config: SidebarConfig = {
     { href: "/admin", label: "Admin View" },
     { href: "/dashboard", label: "Fellow View" },
   ],
-  requireAdmin: true,
+  requireStudio: true,
   maxWidth: "max-w-6xl",
 };
 
