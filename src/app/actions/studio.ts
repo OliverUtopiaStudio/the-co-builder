@@ -13,6 +13,13 @@ import {
 } from "@/db/schema";
 import { eq, sql, desc } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
+import {
+  type ThesisVersion,
+  type EvidenceEntry,
+  type AlignmentCriterion,
+  DEFAULT_ALIGNMENT_CRITERIA,
+  calculateAlignmentScore,
+} from "@/data/thesis-alignment";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -1023,6 +1030,192 @@ export async function updateJourneyCheckpoint(
     const error = err as { message?: string };
     if (error.message?.includes("journey_checkpoints") || error.message?.includes("current_journey_stage")) {
       throw new Error("Database migration required. Please run migrations/006_pod_journey.sql in Supabase SQL Editor.");
+    }
+    throw err;
+  }
+
+  return { success: true };
+}
+
+// ─── Living Thesis Management ───────────────────────────────────────
+
+export async function getPodThesis(podId: string) {
+  await requireAdmin();
+  // Select with graceful handling of missing columns
+  const [pod] = await db
+    .select({
+      id: pods.id,
+      thesis: pods.thesis,
+      marketGap: pods.marketGap,
+      targetArchetype: pods.targetArchetype,
+      thesisVersion: sql<number | null>`COALESCE(${pods.thesisVersion}, 1)`,
+      thesisHistory: sql<ThesisVersion[] | null>`COALESCE(${pods.thesisHistory}, '[]'::jsonb)`,
+      evidenceLog: sql<EvidenceEntry[] | null>`COALESCE(${pods.evidenceLog}, '[]'::jsonb)`,
+      alignmentCriteria: sql<AlignmentCriterion[] | null>`COALESCE(${pods.alignmentCriteria}, '[]'::jsonb)`,
+    })
+    .from(pods)
+    .where(eq(pods.id, podId))
+    .limit(1);
+  
+  if (!pod) return null;
+
+  // Get ventures for this pod (via fellows)
+  const podFellows = await db
+    .select({ id: fellows.id })
+    .from(fellows)
+    .where(eq(fellows.podId, podId));
+
+  const fellowIds = podFellows.map((f) => f.id);
+  const podVentures = fellowIds.length > 0
+    ? await db
+        .select({
+          id: ventures.id,
+          name: ventures.name,
+          podAlignmentScore: sql<number | null>`COALESCE(${ventures.podAlignmentScore}, NULL)`,
+          alignmentNotes: ventures.alignmentNotes,
+          currentStage: ventures.currentStage,
+        })
+        .from(ventures)
+        .where(sql`${ventures.fellowId} = ANY(${fellowIds})`)
+    : [];
+
+  const thesisHistory = pod.thesisHistory || [];
+  const evidenceLog = pod.evidenceLog || [];
+  const alignmentCriteria = (pod.alignmentCriteria && pod.alignmentCriteria.length > 0) 
+    ? pod.alignmentCriteria 
+    : DEFAULT_ALIGNMENT_CRITERIA;
+
+  // Calculate average alignment score
+  const alignmentScores = podVentures
+    .map((v) => v.podAlignmentScore ? Number(v.podAlignmentScore) : null)
+    .filter((s): s is number => s !== null);
+  const avgAlignment = alignmentScores.length > 0
+    ? alignmentScores.reduce((a, b) => a + b, 0) / alignmentScores.length
+    : null;
+
+  return {
+    podId: pod.id,
+    currentThesis: pod.thesis,
+    currentMarketGap: pod.marketGap,
+    currentTargetArchetype: pod.targetArchetype,
+    thesisVersion: pod.thesisVersion || 1,
+    thesisHistory,
+    evidenceLog,
+    alignmentCriteria,
+    ventures: podVentures.map((v) => ({
+      ...v,
+      podAlignmentScore: v.podAlignmentScore ? Number(v.podAlignmentScore) : null,
+    })),
+    avgAlignment,
+  };
+}
+
+export async function updateThesisVersion(
+  podId: string,
+  newThesis: string,
+  newMarketGap: string | null,
+  newTargetArchetype: string | null,
+  rationale: string,
+  changes: string[]
+) {
+  await requireAdmin();
+  const [pod] = await db.select().from(pods).where(eq(pods.id, podId)).limit(1);
+  if (!pod) throw new Error("Pod not found");
+
+  const currentVersion = pod.thesisVersion || 1;
+  const newVersion = currentVersion + 1;
+  const thesisHistory = (pod.thesisHistory as ThesisVersion[] | null) || [];
+
+  // Create version entry
+  const versionEntry: ThesisVersion = {
+    version: currentVersion,
+    thesis: pod.thesis || "",
+    marketGap: pod.marketGap || null,
+    targetArchetype: pod.targetArchetype || null,
+    updatedAt: pod.updatedAt.toISOString(),
+    updatedBy: null, // TODO: Get current user
+    rationale,
+    changes,
+  };
+
+  const updatedHistory = [...thesisHistory, versionEntry];
+
+  try {
+    await db
+      .update(pods)
+      .set({
+        thesis: newThesis,
+        marketGap: newMarketGap,
+        targetArchetype: newTargetArchetype,
+        thesisVersion: newVersion,
+        thesisHistory: updatedHistory,
+        updatedAt: new Date(),
+      })
+      .where(eq(pods.id, podId));
+  } catch (err: unknown) {
+    const error = err as { message?: string };
+    if (error.message?.includes("thesis_version") || error.message?.includes("thesis_history")) {
+      throw new Error("Database migration required. Please run migrations/007_living_thesis.sql in Supabase SQL Editor.");
+    }
+    throw err;
+  }
+
+  return { success: true, newVersion };
+}
+
+export async function addEvidence(
+  podId: string,
+  evidence: Omit<EvidenceEntry, "id" | "date">
+) {
+  await requireAdmin();
+  const [pod] = await db.select().from(pods).where(eq(pods.id, podId)).limit(1);
+  if (!pod) throw new Error("Pod not found");
+
+  const evidenceLog = (pod.evidenceLog as EvidenceEntry[] | null) || [];
+  const newEvidence: EvidenceEntry = {
+    ...evidence,
+    id: crypto.randomUUID(),
+    date: new Date().toISOString(),
+  };
+
+  try {
+    await db
+      .update(pods)
+      .set({
+        evidenceLog: [...evidenceLog, newEvidence],
+        updatedAt: new Date(),
+      })
+      .where(eq(pods.id, podId));
+  } catch (err: unknown) {
+    const error = err as { message?: string };
+    if (error.message?.includes("evidence_log")) {
+      throw new Error("Database migration required. Please run migrations/007_living_thesis.sql in Supabase SQL Editor.");
+    }
+    throw err;
+  }
+
+  return { success: true };
+}
+
+export async function updateVentureAlignment(
+  ventureId: string,
+  alignmentScore: number,
+  alignmentNotes: string | null
+) {
+  await requireAdmin();
+  try {
+    await db
+      .update(ventures)
+      .set({
+        podAlignmentScore: alignmentScore.toString(),
+        alignmentNotes,
+        updatedAt: new Date(),
+      })
+      .where(eq(ventures.id, ventureId));
+  } catch (err: unknown) {
+    const error = err as { message?: string };
+    if (error.message?.includes("pod_alignment_score") || error.message?.includes("alignment_notes")) {
+      throw new Error("Database migration required. Please run migrations/007_living_thesis.sql in Supabase SQL Editor.");
     }
     throw err;
   }

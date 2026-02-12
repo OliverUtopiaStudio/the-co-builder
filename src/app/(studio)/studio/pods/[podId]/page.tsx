@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getPod, getCampaignsForPod, getPodLaunchForPod, getPodJourney, updateJourneyCheckpoint, deletePod } from "@/app/actions/studio";
+import { getPod, getCampaignsForPod, getPodLaunchForPod, getPodJourney, updateJourneyCheckpoint, deletePod, getPodThesis, updateThesisVersion, addEvidence, updateVentureAlignment } from "@/app/actions/studio";
+import { type ThesisVersion, type EvidenceEntry, type AlignmentCriterion, getEvidenceImpactColor, getAlignmentColor } from "@/data/thesis-alignment";
 import { POD_JOURNEY_STAGES, getJourneyProgress, getNextCheckpoint, type JourneyCheckpoint, type JourneyStage } from "@/data/pod-journey";
 
 type PodData = {
@@ -88,7 +89,7 @@ function ratingLabel(rating: number | null): string {
   return "C";
 }
 
-const TABS = ["Overview", "Journey", "Campaigns", "Launch"] as const;
+const TABS = ["Overview", "Thesis", "Journey", "Campaigns", "Launch"] as const;
 type TabKey = typeof TABS[number];
 
 export default function PodDetailPage() {
@@ -97,10 +98,13 @@ export default function PodDetailPage() {
   const [campaigns, setCampaigns] = useState<PodCampaign[]>([]);
   const [podLaunch, setPodLaunch] = useState<PodLaunchStatus | null>(null);
   const [journey, setJourney] = useState<{ checkpoints: JourneyCheckpoint[]; progress: ReturnType<typeof getJourneyProgress>; nextCheckpoint: JourneyCheckpoint | null; currentStage: JourneyStage | null } | null>(null);
+  const [thesis, setThesis] = useState<Awaited<ReturnType<typeof getPodThesis>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("Overview");
   const [updatingCheckpoint, setUpdatingCheckpoint] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showThesisEditor, setShowThesisEditor] = useState(false);
+  const [showEvidenceForm, setShowEvidenceForm] = useState(false);
 
   function reload() {
     if (!podId) return;
@@ -109,11 +113,13 @@ export default function PodDetailPage() {
       getCampaignsForPod(podId),
       getPodLaunchForPod(podId),
       getPodJourney(podId),
-    ]).then(([result, campData, launchData, journeyData]) => {
+      getPodThesis(podId),
+    ]).then(([result, campData, launchData, journeyData, thesisData]) => {
       setData(result as PodData | null);
       setCampaigns(campData as PodCampaign[]);
       setPodLaunch(launchData as PodLaunchStatus | null);
       setJourney(journeyData as typeof journey);
+      setThesis(thesisData);
       setLoading(false);
     });
   }
@@ -515,6 +521,226 @@ export default function PodDetailPage() {
           )}
         </div>
       </div>
+      )}
+
+      {/* ═══ TAB: Thesis ═══ */}
+      {activeTab === "Thesis" && thesis && (
+        <div className="space-y-6">
+          {/* Current Thesis */}
+          <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="label-uppercase text-muted text-[10px] mb-1">
+                  Current Thesis (v{thesis.thesisVersion})
+                </div>
+                <div className="text-xs text-muted">
+                  Last updated {thesis.thesisHistory.length > 0 
+                    ? new Date(thesis.thesisHistory[thesis.thesisHistory.length - 1].updatedAt).toLocaleDateString()
+                    : "Never"}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowThesisEditor(true)}
+                className="px-3 py-1.5 bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+                style={{ borderRadius: 2 }}
+              >
+                Update Thesis
+              </button>
+            </div>
+            {thesis.currentThesis && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-muted mb-1">Investment Thesis</div>
+                <p className="text-sm text-foreground leading-relaxed">{thesis.currentThesis}</p>
+              </div>
+            )}
+            {thesis.currentMarketGap && (
+              <div className="mb-4">
+                <div className="text-xs font-semibold text-muted mb-1">Market Gap</div>
+                <p className="text-sm text-foreground leading-relaxed">{thesis.currentMarketGap}</p>
+              </div>
+            )}
+            {thesis.currentTargetArchetype && (
+              <div>
+                <div className="text-xs font-semibold text-muted mb-1">Target Archetype</div>
+                <p className="text-sm text-foreground leading-relaxed">{thesis.currentTargetArchetype}</p>
+              </div>
+            )}
+          </section>
+
+          {/* Alignment Dashboard */}
+          <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+            <div className="label-uppercase text-muted mb-4 text-[10px]">Alignment Dashboard</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-4 border border-border" style={{ borderRadius: 2 }}>
+                <div className="text-xs text-muted mb-1">Average Alignment</div>
+                <div 
+                  className="text-3xl font-bold mb-1"
+                  style={{ color: thesis.avgAlignment ? getAlignmentColor(thesis.avgAlignment) : "#8F898B" }}
+                >
+                  {thesis.avgAlignment ? `${Math.round(thesis.avgAlignment)}%` : "—"}
+                </div>
+                <div className="text-xs text-muted">{thesis.ventures.length} ventures</div>
+              </div>
+              <div className="text-center p-4 border border-border" style={{ borderRadius: 2 }}>
+                <div className="text-xs text-muted mb-1">Evidence Points</div>
+                <div className="text-3xl font-bold text-foreground mb-1">{thesis.evidenceLog.length}</div>
+                <div className="text-xs text-muted">
+                  {thesis.evidenceLog.filter((e) => e.type === "validates").length} validates,{" "}
+                  {thesis.evidenceLog.filter((e) => e.type === "challenges").length} challenges
+                </div>
+              </div>
+              <div className="text-center p-4 border border-border" style={{ borderRadius: 2 }}>
+                <div className="text-xs text-muted mb-1">Thesis Versions</div>
+                <div className="text-3xl font-bold text-foreground mb-1">{thesis.thesisVersion}</div>
+                <div className="text-xs text-muted">{thesis.thesisHistory.length} historical versions</div>
+              </div>
+            </div>
+          </section>
+
+          {/* Venture Alignment */}
+          {thesis.ventures.length > 0 && (
+            <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+              <div className="label-uppercase text-muted mb-4 text-[10px]">Venture Alignment</div>
+              <div className="space-y-3">
+                {thesis.ventures.map((v) => (
+                  <div
+                    key={v.id}
+                    className="flex items-center justify-between p-3 border border-border"
+                    style={{ borderRadius: 2 }}
+                  >
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-foreground">{v.name}</div>
+                      {v.alignmentNotes && (
+                        <div className="text-xs text-muted mt-1">{v.alignmentNotes}</div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {v.podAlignmentScore && (
+                        <div className="text-right">
+                          <div 
+                            className="text-lg font-bold"
+                            style={{ color: getAlignmentColor(Number(v.podAlignmentScore)) }}
+                          >
+                            {Math.round(Number(v.podAlignmentScore))}%
+                          </div>
+                          <div className="text-[10px] text-muted">Alignment</div>
+                        </div>
+                      )}
+                      <Link
+                        href={`/admin/ventures/${v.id}`}
+                        className="text-xs text-accent hover:underline"
+                      >
+                        View →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Evidence Log */}
+          <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="label-uppercase text-muted text-[10px]">Evidence Log</div>
+              <button
+                onClick={() => setShowEvidenceForm(true)}
+                className="px-3 py-1.5 bg-accent text-white text-xs font-semibold hover:bg-accent/90 transition-colors"
+                style={{ borderRadius: 2 }}
+              >
+                + Add Evidence
+              </button>
+            </div>
+            {thesis.evidenceLog.length === 0 ? (
+              <p className="text-sm text-muted">No evidence logged yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {[...thesis.evidenceLog].reverse().map((evidence) => (
+                  <div
+                    key={evidence.id}
+                    className="p-3 border-l-3"
+                    style={{
+                      borderLeftColor: getEvidenceImpactColor(evidence.type),
+                      backgroundColor: `${getEvidenceImpactColor(evidence.type)}10`,
+                      borderRadius: 2,
+                    }}
+                  >
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="text-[9px] font-semibold uppercase px-1.5 py-0.5 text-white"
+                          style={{
+                            backgroundColor: getEvidenceImpactColor(evidence.type),
+                            borderRadius: 2,
+                          }}
+                        >
+                          {evidence.type}
+                        </span>
+                        <span className="text-xs text-muted">{evidence.source}</span>
+                        {evidence.sourceName && (
+                          <span className="text-xs font-medium text-foreground">{evidence.sourceName}</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted">
+                        {new Date(evidence.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-foreground mt-1">{evidence.description}</p>
+                    {evidence.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {evidence.tags.map((tag, i) => (
+                          <span
+                            key={i}
+                            className="text-[10px] text-muted bg-background px-2 py-0.5 border border-border"
+                            style={{ borderRadius: 2 }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* Thesis History */}
+          {thesis.thesisHistory.length > 0 && (
+            <section className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+              <div className="label-uppercase text-muted mb-4 text-[10px]">Version History</div>
+              <div className="space-y-4">
+                {[...thesis.thesisHistory].reverse().map((version) => (
+                  <div
+                    key={version.version}
+                    className="p-4 border border-border"
+                    style={{ borderRadius: 2 }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-semibold text-foreground">
+                        Version {version.version}
+                      </div>
+                      <div className="text-xs text-muted">
+                        {new Date(version.updatedAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    {version.rationale && (
+                      <div className="text-xs text-muted mb-2">
+                        <strong>Rationale:</strong> {version.rationale}
+                      </div>
+                    )}
+                    {version.changes.length > 0 && (
+                      <div className="text-xs text-muted mb-2">
+                        <strong>Changes:</strong> {version.changes.join(", ")}
+                      </div>
+                    )}
+                    <div className="text-xs text-foreground mt-2">{version.thesis}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
       )}
 
       {/* ═══ TAB: Journey ═══ */}

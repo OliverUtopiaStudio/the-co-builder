@@ -30,6 +30,11 @@ export const pods = pgTable("pods", {
   displayOrder: integer("display_order").default(0),
   journeyCheckpoints: jsonb("journey_checkpoints").default([]),
   currentJourneyStage: text("current_journey_stage"),
+  // Living thesis fields
+  thesisVersion: integer("thesis_version").default(1),
+  thesisHistory: jsonb("thesis_history").default([]), // Array of {version, thesis, marketGap, updatedAt, updatedBy, rationale}
+  alignmentCriteria: jsonb("alignment_criteria").default([]), // Array of {id, criterion, weight, description}
+  evidenceLog: jsonb("evidence_log").default([]), // Array of {id, type: 'validates'|'challenges', source, description, date, impact}
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -74,6 +79,9 @@ export const ventures = pgTable(
     currentStage: text("current_stage").default("00"),
     googleDriveUrl: text("google_drive_url"),
     isActive: boolean("is_active").default(true).notNull(),
+    // Alignment tracking
+    podAlignmentScore: numeric("pod_alignment_score", { precision: 5, scale: 2 }), // 0-100 score
+    alignmentNotes: text("alignment_notes"), // Notes on how venture aligns with pod thesis
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
