@@ -18,6 +18,7 @@ import {
   LIFECYCLE_STAGE_COLORS,
   EXPERIENCE_PROFILE_LABELS,
   getOnboardingProgress,
+  formatOnboardingDate,
 } from "@/lib/onboarding";
 import type {
   OnboardingStatus,
@@ -41,8 +42,18 @@ interface Fellow {
   selectionRationale: string | null;
   onboardingStatus: OnboardingStatus | null;
   podId: string | null;
+  googleDriveUrl: string | null;
+  websiteUrl: string | null;
+  resourceLinks: ResourceLinks | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+interface ResourceLinks {
+  prd?: string;
+  contextualDocs?: string[];
+  notes?: string;
+  other?: Array<{ label: string; url: string }>;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -100,6 +111,15 @@ export default function AdminFellowDetailPage() {
   const [domain, setDomain] = useState("");
   const [background, setBackground] = useState("");
   const [selectionRationale, setSelectionRationale] = useState("");
+  const [googleDriveUrl, setGoogleDriveUrl] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [prdUrl, setPrdUrl] = useState("");
+  const [notesUrl, setNotesUrl] = useState("");
+  const [contextualDocs, setContextualDocs] = useState<string[]>([]);
+  const [newContextualDoc, setNewContextualDoc] = useState("");
+  const [customLinks, setCustomLinks] = useState<Array<{ label: string; url: string }>>([]);
+  const [newCustomLinkLabel, setNewCustomLinkLabel] = useState("");
+  const [newCustomLinkUrl, setNewCustomLinkUrl] = useState("");
 
   // ─── Load data ─────────────────────────────────────────────────
 
@@ -115,6 +135,13 @@ export default function AdminFellowDetailPage() {
         setDomain(fellowData.domain || "");
         setBackground(fellowData.background || "");
         setSelectionRationale(fellowData.selectionRationale || "");
+        setGoogleDriveUrl(fellowData.googleDriveUrl || "");
+        setWebsiteUrl(fellowData.websiteUrl || "");
+        const resourceLinks = (fellowData.resourceLinks as ResourceLinks | null) || {};
+        setPrdUrl(resourceLinks.prd || "");
+        setNotesUrl(resourceLinks.notes || "");
+        setContextualDocs(resourceLinks.contextualDocs || []);
+        setCustomLinks(resourceLinks.other || []);
       }
       if (ventureData) setVentures(ventureData as Venture[]);
       if (podsData) setAllPodsList(podsData as PodInfo[]);
@@ -231,14 +258,31 @@ export default function AdminFellowDetailPage() {
   async function handleSaveDetails() {
     setSaving("details");
     try {
+      const resourceLinks: ResourceLinks = {};
+      if (prdUrl) resourceLinks.prd = prdUrl;
+      if (notesUrl) resourceLinks.notes = notesUrl;
+      if (contextualDocs.length > 0) resourceLinks.contextualDocs = contextualDocs;
+      if (customLinks.length > 0) resourceLinks.other = customLinks;
+
       await updateFellowDetails(fellowId, {
         domain,
         background,
         selectionRationale,
+        googleDriveUrl: googleDriveUrl || null,
+        websiteUrl: websiteUrl || null,
+        resourceLinks: Object.keys(resourceLinks).length > 0 ? (resourceLinks as Record<string, unknown>) : null,
       });
       setFellow((prev) =>
         prev
-          ? { ...prev, domain, background, selectionRationale }
+          ? { 
+              ...prev, 
+              domain, 
+              background, 
+              selectionRationale,
+              googleDriveUrl: googleDriveUrl || null,
+              websiteUrl: websiteUrl || null,
+              resourceLinks: Object.keys(resourceLinks).length > 0 ? resourceLinks : null,
+            }
           : prev
       );
     } catch (err) {
@@ -246,6 +290,29 @@ export default function AdminFellowDetailPage() {
     } finally {
       setSaving(null);
     }
+  }
+
+  function handleAddContextualDoc() {
+    if (newContextualDoc.trim()) {
+      setContextualDocs([...contextualDocs, newContextualDoc.trim()]);
+      setNewContextualDoc("");
+    }
+  }
+
+  function handleRemoveContextualDoc(index: number) {
+    setContextualDocs(contextualDocs.filter((_, i) => i !== index));
+  }
+
+  function handleAddCustomLink() {
+    if (newCustomLinkLabel.trim() && newCustomLinkUrl.trim()) {
+      setCustomLinks([...customLinks, { label: newCustomLinkLabel.trim(), url: newCustomLinkUrl.trim() }]);
+      setNewCustomLinkLabel("");
+      setNewCustomLinkUrl("");
+    }
+  }
+
+  function handleRemoveCustomLink(index: number) {
+    setCustomLinks(customLinks.filter((_, i) => i !== index));
   }
 
   async function handlePodChange(podId: string) {
@@ -490,7 +557,10 @@ export default function AdminFellowDetailPage() {
                 style={{ borderRadius: 2 }}
               >
                 {onboarding.agreementSigned
-                  ? `Signed ${new Date(onboarding.agreementSigned).toLocaleDateString()}`
+                  ? (() => {
+                      const d = formatOnboardingDate(onboarding.agreementSigned);
+                      return d && d !== "Complete" ? `Signed ${d}` : "Signed";
+                    })()
                   : "Not signed"}
               </span>
               <button
@@ -523,7 +593,10 @@ export default function AdminFellowDetailPage() {
                 style={{ borderRadius: 2 }}
               >
                 {onboarding.kycVerified
-                  ? `Verified ${new Date(onboarding.kycVerified).toLocaleDateString()}`
+                  ? (() => {
+                      const d = formatOnboardingDate(onboarding.kycVerified);
+                      return d && d !== "Complete" ? `Verified ${d}` : "Verified";
+                    })()
                   : "Not verified"}
               </span>
               <button
@@ -596,6 +669,298 @@ export default function AdminFellowDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Resource Links ───────────────────────────────────────────── */}
+      <div
+        className="bg-surface border border-border p-6"
+        style={{ borderRadius: 2 }}
+      >
+        <p className="label-uppercase mb-4">Resource Links</p>
+        
+        <div className="space-y-4">
+          {/* Google Drive */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Google Drive URL
+            </label>
+            <input
+              type="url"
+              value={googleDriveUrl}
+              onChange={(e) => setGoogleDriveUrl(e.target.value)}
+              placeholder="https://drive.google.com/drive/folders/..."
+              className="w-full border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+              style={{ borderRadius: 2 }}
+            />
+          </div>
+
+          {/* Website */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Website URL
+            </label>
+            <input
+              type="url"
+              value={websiteUrl}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              placeholder="https://example.com"
+              className="w-full border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+              style={{ borderRadius: 2 }}
+            />
+          </div>
+
+          {/* PRD */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              PRD (Product Requirements Document)
+            </label>
+            <input
+              type="url"
+              value={prdUrl}
+              onChange={(e) => setPrdUrl(e.target.value)}
+              placeholder="https://..."
+              className="w-full border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+              style={{ borderRadius: 2 }}
+            />
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Notes/Documentation URL
+            </label>
+            <input
+              type="url"
+              value={notesUrl}
+              onChange={(e) => setNotesUrl(e.target.value)}
+              placeholder="https://..."
+              className="w-full border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+              style={{ borderRadius: 2 }}
+            />
+          </div>
+
+          {/* Contextual Docs */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Contextual Documents
+            </label>
+            <div className="space-y-2">
+              {contextualDocs.map((doc, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={doc}
+                    onChange={(e) => {
+                      const updated = [...contextualDocs];
+                      updated[idx] = e.target.value;
+                      setContextualDocs(updated);
+                    }}
+                    className="flex-1 border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                    style={{ borderRadius: 2 }}
+                  />
+                  <button
+                    onClick={() => handleRemoveContextualDoc(idx)}
+                    className="text-xs px-2 py-1 border border-border hover:border-red-300 text-red-600"
+                    style={{ borderRadius: 2 }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  type="url"
+                  value={newContextualDoc}
+                  onChange={(e) => setNewContextualDoc(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddContextualDoc()}
+                  placeholder="Add contextual document URL..."
+                  className="flex-1 border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                  style={{ borderRadius: 2 }}
+                />
+                <button
+                  onClick={handleAddContextualDoc}
+                  className="text-xs px-3 py-2 border border-border hover:border-accent text-foreground"
+                  style={{ borderRadius: 2 }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Custom Links */}
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Custom Links
+            </label>
+            <div className="space-y-2">
+              {customLinks.map((link, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={link.label}
+                    onChange={(e) => {
+                      const updated = [...customLinks];
+                      updated[idx].label = e.target.value;
+                      setCustomLinks(updated);
+                    }}
+                    placeholder="Link label"
+                    className="w-32 border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                    style={{ borderRadius: 2 }}
+                  />
+                  <input
+                    type="url"
+                    value={link.url}
+                    onChange={(e) => {
+                      const updated = [...customLinks];
+                      updated[idx].url = e.target.value;
+                      setCustomLinks(updated);
+                    }}
+                    placeholder="https://..."
+                    className="flex-1 border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                    style={{ borderRadius: 2 }}
+                  />
+                  <button
+                    onClick={() => handleRemoveCustomLink(idx)}
+                    className="text-xs px-2 py-1 border border-border hover:border-red-300 text-red-600"
+                    style={{ borderRadius: 2 }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newCustomLinkLabel}
+                  onChange={(e) => setNewCustomLinkLabel(e.target.value)}
+                  placeholder="Label"
+                  className="w-32 border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                  style={{ borderRadius: 2 }}
+                />
+                <input
+                  type="url"
+                  value={newCustomLinkUrl}
+                  onChange={(e) => setNewCustomLinkUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddCustomLink()}
+                  placeholder="URL"
+                  className="flex-1 border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                  style={{ borderRadius: 2 }}
+                />
+                <button
+                  onClick={handleAddCustomLink}
+                  className="text-xs px-3 py-2 border border-border hover:border-accent text-foreground"
+                  style={{ borderRadius: 2 }}
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={handleSaveDetails}
+            disabled={saving === "details"}
+            className="text-sm px-4 py-2 bg-accent text-white hover:bg-accent/90"
+            style={{ borderRadius: 2 }}
+          >
+            {saving === "details" ? "Saving..." : "Save Resource Links"}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Resource Links Preview ───────────────────────────────────── */}
+      {(fellow.googleDriveUrl || fellow.websiteUrl || fellow.resourceLinks) && (
+        <div
+          className="bg-surface border border-border p-6"
+          style={{ borderRadius: 2 }}
+        >
+          <p className="label-uppercase mb-4">Resource Links Preview</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {fellow.googleDriveUrl && (
+              <a
+                href={fellow.googleDriveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 border border-border hover:border-accent/30 transition-colors text-sm"
+                style={{ borderRadius: 2 }}
+              >
+                <span className="text-accent">📁</span>
+                <span className="truncate">Google Drive</span>
+                <span className="ml-auto text-xs text-muted">↗</span>
+              </a>
+            )}
+            {fellow.websiteUrl && (
+              <a
+                href={fellow.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 border border-border hover:border-accent/30 transition-colors text-sm"
+                style={{ borderRadius: 2 }}
+              >
+                <span className="text-accent">🌐</span>
+                <span className="truncate">Website</span>
+                <span className="ml-auto text-xs text-muted">↗</span>
+              </a>
+            )}
+            {fellow.resourceLinks?.prd && (
+              <a
+                href={fellow.resourceLinks.prd}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 border border-border hover:border-accent/30 transition-colors text-sm"
+                style={{ borderRadius: 2 }}
+              >
+                <span className="text-accent">📄</span>
+                <span className="truncate">PRD</span>
+                <span className="ml-auto text-xs text-muted">↗</span>
+              </a>
+            )}
+            {fellow.resourceLinks?.notes && (
+              <a
+                href={fellow.resourceLinks.notes}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 border border-border hover:border-accent/30 transition-colors text-sm"
+                style={{ borderRadius: 2 }}
+              >
+                <span className="text-accent">📝</span>
+                <span className="truncate">Notes</span>
+                <span className="ml-auto text-xs text-muted">↗</span>
+              </a>
+            )}
+            {fellow.resourceLinks?.contextualDocs?.map((doc, idx) => (
+              <a
+                key={idx}
+                href={doc}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 border border-border hover:border-accent/30 transition-colors text-sm"
+                style={{ borderRadius: 2 }}
+              >
+                <span className="text-accent">📎</span>
+                <span className="truncate">Contextual Doc {idx + 1}</span>
+                <span className="ml-auto text-xs text-muted">↗</span>
+              </a>
+            ))}
+            {fellow.resourceLinks?.other?.map((link, idx) => (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 p-2 border border-border hover:border-accent/30 transition-colors text-sm"
+                style={{ borderRadius: 2 }}
+              >
+                <span className="text-accent">🔗</span>
+                <span className="truncate">{link.label}</span>
+                <span className="ml-auto text-xs text-muted">↗</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Onboarding Progress ────────────────────────────────── */}
       <div

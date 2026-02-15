@@ -49,6 +49,10 @@ export const fellows = pgTable("fellows", {
   avatarUrl: text("avatar_url"),
   bio: text("bio"),
   linkedinUrl: text("linkedin_url"),
+  // Resource links
+  googleDriveUrl: text("google_drive_url"),
+  websiteUrl: text("website_url"),
+  resourceLinks: jsonb("resource_links").default({}),
   // Lifecycle fields (MVP)
   lifecycleStage: text("lifecycle_stage").notNull().default("onboarding"),
   experienceProfile: text("experience_profile"),
@@ -374,3 +378,39 @@ export const ashbyPipeline = pgTable("ashby_pipeline", {
   displayOrder: integer("display_order").default(0),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+// ─── Framework Edits (admin overlay on 27-asset framework) ─────────
+export const frameworkEdits = pgTable(
+  "framework_edits",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    assetNumber: integer("asset_number").notNull(),
+    adminId: uuid("admin_id")
+      .notNull()
+      .references(() => fellows.id, { onDelete: "cascade" }),
+    fieldType: text("field_type").notNull(), // 'title' | 'purpose' | 'coreQuestion' | 'checklist' | 'question'
+    fieldId: text("field_id").notNull().default(""), // checklist item id or question id; '' for title/purpose/coreQuestion
+    fieldKey: text("field_key").notNull().default(""), // for question: 'label' | 'description'; '' otherwise
+    value: text("value").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_framework_edits_asset").on(table.assetNumber),
+    index("idx_framework_edits_admin").on(table.adminId),
+    uniqueIndex("idx_framework_edits_unique").on(
+      table.assetNumber,
+      table.fieldType,
+      table.fieldId,
+      table.fieldKey
+    ),
+    check(
+      "framework_edits_asset_range",
+      sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`
+    ),
+    check(
+      "framework_edits_field_type",
+      sql`${table.fieldType} IN ('title','purpose','coreQuestion','checklist','question')`
+    ),
+  ]
+);

@@ -2,9 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { stages } from "@/lib/data";
-import { allWorkflows, getWorkflowForAsset } from "@/lib/questions";
+import { getWorkflowForAsset } from "@/lib/questions";
 import type { Asset, Stage } from "@/lib/data";
 import type { AssetWorkflow, Question, WorkflowStep } from "@/lib/questions";
+import { useFrameworkEdits } from "./hooks/useFrameworkEdits";
+import { useRealTimeFramework } from "./hooks/useRealTimeFramework";
+import MigrationDialog, { useMigrationDialog } from "./components/MigrationDialog";
+import ConflictResolutionDialog from "./components/ConflictResolutionDialog";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -12,11 +16,11 @@ interface AssetEdits {
   title?: string;
   purpose?: string;
   coreQuestion?: string;
-  checklist?: Record<string, string>; // checklistItemId -> edited text
+  checklist?: Record<string, string>;
   questions?: Record<
     string,
     { label?: string; description?: string }
-  >; // questionId -> edits
+  >;
 }
 
 interface AllEdits {
@@ -24,48 +28,6 @@ interface AllEdits {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────
-
-function getStorageKey(assetNumber: number) {
-  return `framework-edits-${assetNumber}`;
-}
-
-function loadEditsForAsset(assetNumber: number): AssetEdits | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(getStorageKey(assetNumber));
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveEditsForAsset(assetNumber: number, edits: AssetEdits) {
-  if (typeof window === "undefined") return;
-  const isEmpty =
-    !edits.title &&
-    !edits.purpose &&
-    !edits.coreQuestion &&
-    (!edits.checklist || Object.keys(edits.checklist).length === 0) &&
-    (!edits.questions || Object.keys(edits.questions).length === 0);
-  if (isEmpty) {
-    localStorage.removeItem(getStorageKey(assetNumber));
-  } else {
-    localStorage.setItem(getStorageKey(assetNumber), JSON.stringify(edits));
-  }
-}
-
-function loadAllEdits(): AllEdits {
-  const all: AllEdits = {};
-  for (const stage of stages) {
-    for (const asset of stage.assets) {
-      const edits = loadEditsForAsset(asset.number);
-      if (edits) {
-        all[asset.number] = edits;
-      }
-    }
-  }
-  return all;
-}
 
 function hasEdits(edits: AssetEdits | undefined): boolean {
   if (!edits) return false;
@@ -225,20 +187,40 @@ export default function AdminFrameworkPage() {
     new Set()
   );
   const [selectedAsset, setSelectedAsset] = useState<number | null>(null);
-  const [allEdits, setAllEdits] = useState<AllEdits>({});
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  // Load all edits from localStorage on mount
+  const {
+    allEdits,
+    loading,
+    saving,
+    error,
+    conflicts,
+    loadEdits,
+    saveEdit,
+    clearAssetEdits: clearAssetEditsFromHook,
+    exportEdits,
+    importEdits,
+    resolveConflict,
+    resolveAllConflicts,
+  } = useFrameworkEdits();
+
+  const { show: showMigrationFromStorage, assetCount: migrationAssetCount } = useMigrationDialog();
+  const [migrationDialogDismissed, setMigrationDialogDismissed] = useState(false);
+  const showMigration = showMigrationFromStorage && !migrationDialogDismissed;
+
+  // Load all edits from database on mount
   useEffect(() => {
-    setAllEdits(loadAllEdits());
-    // Auto-expand the first stage and select first asset
+    loadEdits();
     if (stages.length > 0) {
       setExpandedStages(new Set([stages[0].id]));
       if (stages[0].assets.length > 0) {
         setSelectedAsset(stages[0].assets[0].number);
       }
     }
-  }, []);
+  }, [loadEdits]);
+
+  // Real-time: refetch when another admin edits
+  useRealTimeFramework(loadEdits);
 
   // Find current asset data
   const currentAsset: Asset | undefined = selectedAsset
@@ -260,38 +242,18 @@ export default function AdminFrameworkPage() {
   // Count total modified assets
   const modifiedCount = Object.values(allEdits).filter(hasEdits).length;
 
-  // ─── Edit handlers ────────────────────────────────────────────
-
-  const updateEdits = useCallback(
-    (assetNumber: number, updater: (prev: AssetEdits) => AssetEdits) => {
-      setAllEdits((prev) => {
-        const current = prev[assetNumber] || {};
-        const next = updater(current);
-        saveEditsForAsset(assetNumber, next);
-        return { ...prev, [assetNumber]: next };
-      });
-    },
-    []
-  );
+  // ─── Edit handlers (delegate to hook) ───────────────────────────
 
   const setFieldEdit = useCallback(
     (
       assetNumber: number,
       field: "title" | "purpose" | "coreQuestion",
       value: string,
-      original: string
+      _original: string
     ) => {
-      updateEdits(assetNumber, (prev) => {
-        const next = { ...prev };
-        if (value === original || value.trim() === "") {
-          delete next[field];
-        } else {
-          next[field] = value;
-        }
-        return next;
-      });
+      saveEdit(assetNumber, field, "", "", value);
     },
-    [updateEdits]
+    [saveEdit]
   );
 
   const setChecklistEdit = useCallback(
@@ -299,19 +261,11 @@ export default function AdminFrameworkPage() {
       assetNumber: number,
       itemId: string,
       value: string,
-      original: string
+      _original: string
     ) => {
-      updateEdits(assetNumber, (prev) => {
-        const checklist = { ...(prev.checklist || {}) };
-        if (value === original || value.trim() === "") {
-          delete checklist[itemId];
-        } else {
-          checklist[itemId] = value;
-        }
-        return { ...prev, checklist };
-      });
+      saveEdit(assetNumber, "checklist", itemId, "", value);
     },
-    [updateEdits]
+    [saveEdit]
   );
 
   const setQuestionEdit = useCallback(
@@ -320,55 +274,17 @@ export default function AdminFrameworkPage() {
       questionId: string,
       field: "label" | "description",
       value: string,
-      original: string
+      _original: string
     ) => {
-      updateEdits(assetNumber, (prev) => {
-        const questions = { ...(prev.questions || {}) };
-        const current = questions[questionId] || {};
-        if (value === original || value.trim() === "") {
-          delete current[field];
-          if (Object.keys(current).length === 0) {
-            delete questions[questionId];
-          } else {
-            questions[questionId] = current;
-          }
-        } else {
-          questions[questionId] = { ...current, [field]: value };
-        }
-        return { ...prev, questions };
-      });
+      saveEdit(assetNumber, "question", questionId, field, value);
     },
-    [updateEdits]
+    [saveEdit]
   );
 
-  // ─── Export ───────────────────────────────────────────────────
+  // ─── Export & clear ────────────────────────────────────────────
 
   function exportAllChanges() {
-    const exportData: Record<string, unknown> = {};
-    for (const [assetNum, edits] of Object.entries(allEdits)) {
-      if (hasEdits(edits)) {
-        const asset = stages
-          .flatMap((s) => s.assets)
-          .find((a) => a.number === Number(assetNum));
-        exportData[assetNum] = {
-          assetNumber: Number(assetNum),
-          assetTitle: asset?.title || `Asset #${assetNum}`,
-          modifications: edits,
-        };
-      }
-    }
-    if (Object.keys(exportData).length === 0) {
-      alert("No modifications to export.");
-      return;
-    }
-    downloadJson(
-      {
-        exportedAt: new Date().toISOString(),
-        totalModified: Object.keys(exportData).length,
-        assets: exportData,
-      },
-      `framework-edits-${new Date().toISOString().slice(0, 10)}.json`
-    );
+    exportEdits();
   }
 
   function exportAssetChanges(assetNumber: number) {
@@ -392,12 +308,7 @@ export default function AdminFrameworkPage() {
   }
 
   function clearAssetEdits(assetNumber: number) {
-    localStorage.removeItem(getStorageKey(assetNumber));
-    setAllEdits((prev) => {
-      const next = { ...prev };
-      delete next[assetNumber];
-      return next;
-    });
+    clearAssetEditsFromHook(assetNumber);
   }
 
   // ─── Sidebar Toggle ──────────────────────────────────────────
@@ -430,26 +341,49 @@ export default function AdminFrameworkPage() {
 
   return (
     <div className="space-y-6">
+      {showMigration && (
+        <MigrationDialog
+          assetCount={migrationAssetCount}
+          onImport={importEdits}
+          onDismiss={() => setMigrationDialogDismissed(true)}
+        />
+      )}
+      {conflicts.length > 0 && (
+        <ConflictResolutionDialog
+          conflicts={conflicts}
+          onResolve={resolveConflict}
+          onResolveAll={resolveAllConflicts}
+        />
+      )}
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="label-uppercase mb-2">Admin</div>
           <h1 className="text-2xl font-medium">Framework Editor</h1>
           <p className="text-muted text-sm mt-1">
-            View and edit the 27-asset Co-Build framework. Changes are stored
-            locally until exported.
+            View and edit the 27-asset Co-Build framework. Changes are saved to
+            the database and visible to other admins.
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          {modifiedCount > 0 && (
+          {error && (
+            <span className="text-xs text-red-600">{error}</span>
+          )}
+          {(loading || saving) && (
+            <span className="text-xs text-muted">
+              {loading ? "Loading…" : "Saving…"}
+            </span>
+          )}
+          {modifiedCount > 0 && !loading && (
             <span className="text-xs text-muted">
               {modifiedCount} asset{modifiedCount !== 1 ? "s" : ""} modified
             </span>
           )}
           <button
             onClick={exportAllChanges}
-            className="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 transition-colors"
+            disabled={loading || saving}
+            className="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 transition-colors disabled:opacity-50"
             style={{ borderRadius: 2 }}
           >
             Export All Changes
@@ -474,6 +408,11 @@ export default function AdminFrameworkPage() {
       </div>
 
       {/* Two-column layout */}
+      {loading ? (
+        <div className="bg-surface border border-border p-8 text-center" style={{ borderRadius: 2 }}>
+          <p className="text-muted text-sm">Loading framework edits…</p>
+        </div>
+      ) : (
       <div className="flex gap-6 items-start">
         {/* Left sidebar: Stage / Asset nav */}
         <aside
@@ -1114,6 +1053,7 @@ export default function AdminFrameworkPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

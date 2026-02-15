@@ -13,6 +13,7 @@ import {
   TOOLSTACK_ITEMS,
   RECOMMENDED_COMPUTE_STACK,
   getOnboardingProgress,
+  formatOnboardingDate,
 } from "@/lib/onboarding";
 import { stages } from "@/lib/data";
 
@@ -67,9 +68,9 @@ export default function OnboardingPage() {
     setSaving(step as string);
     try {
       const result = await updateOnboardingStep(step, value);
-      if (result.success) {
+      if (result.success && result.status != null) {
         setState((prev) =>
-          prev ? { ...prev, status: result.status } : prev
+          prev ? { ...prev, status: result.status! } : prev
         );
       }
     } catch (err) {
@@ -186,8 +187,10 @@ export default function OnboardingPage() {
         <div className="mt-4">
           {status.agreementSigned ? (
             <div className="text-sm text-green-700 bg-green-50 px-3 py-2 inline-block" style={{ borderRadius: 2 }}>
-              Signed on{" "}
-              {new Date(status.agreementSigned).toLocaleDateString()}
+              Signed
+              {formatOnboardingDate(status.agreementSigned) && formatOnboardingDate(status.agreementSigned) !== "Complete"
+                ? ` on ${formatOnboardingDate(status.agreementSigned)}`
+                : ""}
             </div>
           ) : (
             <div className="text-muted text-sm">
@@ -215,8 +218,10 @@ export default function OnboardingPage() {
         <div className="mt-4">
           {status.kycVerified ? (
             <div className="text-sm text-green-700 bg-green-50 px-3 py-2 inline-block" style={{ borderRadius: 2 }}>
-              Verified on{" "}
-              {new Date(status.kycVerified).toLocaleDateString()}
+              Verified
+              {formatOnboardingDate(status.kycVerified) && formatOnboardingDate(status.kycVerified) !== "Complete"
+                ? ` on ${formatOnboardingDate(status.kycVerified)}`
+                : ""}
             </div>
           ) : (
             <div className="text-muted text-sm">

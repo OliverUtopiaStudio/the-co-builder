@@ -106,13 +106,76 @@ export const TOOLSTACK_ITEMS = [
   },
 ];
 
+// Admin-tracked fields: only admins can set these (timestamps)
+export const ADMIN_TRACKED_FIELDS: (keyof OnboardingStatus)[] = [
+  "agreementSigned",
+  "kycVerified",
+];
+
+export function isAdminTrackedField(field: keyof OnboardingStatus): boolean {
+  return ADMIN_TRACKED_FIELDS.includes(field);
+}
+
+/** Format a date string or legacy boolean for display (e.g. "Jan 15, 2024" or "Signed") */
+export function formatOnboardingDate(
+  value: string | boolean | null | undefined
+): string | null {
+  if (value == null) return null;
+  if (typeof value === "boolean") return value ? "Complete" : null;
+  try {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return null;
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** Latest completion date among agreementSigned and kycVerified (for list views) */
+export function getLatestCompletionDate(
+  status: OnboardingStatus | null
+): string | null {
+  if (!status) return null;
+  const dates: string[] = [];
+  if (typeof status.agreementSigned === "string") dates.push(status.agreementSigned);
+  if (typeof status.kycVerified === "string") dates.push(status.kycVerified);
+  if (dates.length === 0) return null;
+  dates.sort();
+  return dates[dates.length - 1];
+}
+
+/** Validate value for admin-only fields: null or ISO date string */
+export function validateOnboardingUpdate(
+  step: "agreementSigned" | "kycVerified",
+  value: string | null
+): { valid: true } | { valid: false; error: string } {
+  if (value === null || value === "") return { valid: true };
+  const trimmed = value.trim();
+  if (!trimmed) return { valid: true }; // treat as null
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return { valid: false, error: "Invalid date; use ISO format (e.g. YYYY-MM-DD)." };
+  return { valid: true };
+}
+
+/** Whether agreement/KYC value counts as complete (string date or legacy boolean true) */
+function isAgreementOrKycComplete(value: string | boolean | null | undefined): boolean {
+  if (value == null) return false;
+  if (value === true) return true;
+  if (typeof value === "string" && value.trim().length > 0) return true;
+  return false;
+}
+
 // Count how many onboarding steps are complete
 export function getOnboardingProgress(status: OnboardingStatus | null): { completed: number; total: number } {
   if (!status) return { completed: 0, total: 7 };
   const total = 7;
   let completed = 0;
-  if (status.agreementSigned) completed++;
-  if (status.kycVerified) completed++;
+  if (isAgreementOrKycComplete(status.agreementSigned)) completed++;
+  if (isAgreementOrKycComplete(status.kycVerified)) completed++;
   if (status.toolstackComplete) completed++;
   if (status.computeBudgetAcknowledged) completed++;
   if (status.frameworkIntroComplete) completed++;

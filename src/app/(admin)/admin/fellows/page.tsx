@@ -5,6 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import {
   getOnboardingProgress,
+  getLatestCompletionDate,
+  formatOnboardingDate,
   LIFECYCLE_STAGE_LABELS,
   EXPERIENCE_PROFILE_LABELS,
 } from "@/lib/onboarding";
@@ -234,8 +236,15 @@ export default function AdminFellowsPage() {
                 {/* Right side: progress, ventures, date */}
                 <div className="flex items-center gap-6 text-xs text-muted shrink-0">
                   {progress && (
-                    <div>
-                      {progress.completed}/{progress.total} steps
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span>
+                        {progress.completed}/{progress.total} steps
+                      </span>
+                      {formatOnboardingDate(getLatestCompletionDate(fellow.onboarding_status)) && (
+                        <span className="text-[11px] text-muted">
+                          Agreement/KYC: {formatOnboardingDate(getLatestCompletionDate(fellow.onboarding_status))}
+                        </span>
+                      )}
                     </div>
                   )}
                   <div>

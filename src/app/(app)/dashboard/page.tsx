@@ -103,6 +103,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     async function load() {
       try {
         const supabase = createClient();
@@ -120,10 +121,12 @@ export default function DashboardPage() {
 
         // Redirect to onboarding if lifecycle_stage is "onboarding"
         if (fellowData.lifecycle_stage === "onboarding") {
+          if (!cancelled) setLoading(false);
           router.push("/onboarding");
           return;
         }
 
+        if (cancelled) return;
         setFellow({
           fullName: fellowData.full_name,
           email: fellowData.email,
@@ -144,7 +147,7 @@ export default function DashboardPage() {
 
         const ventureData = ventureResult.data;
         let mapped: Venture[] = [];
-        if (ventureData) {
+        if (ventureData && !cancelled) {
           mapped = ventureData.map((v: Record<string, unknown>) => ({
             id: v.id as string,
             name: v.name as string,
@@ -164,6 +167,8 @@ export default function DashboardPage() {
               .select("asset_number, is_complete")
               .eq("venture_id", activeVenture.id)
               .eq("is_complete", true);
+
+            if (cancelled) return;
 
             const completedNumbers = new Set(
               (completions || []).map((c: { asset_number: number }) => c.asset_number)
@@ -191,32 +196,33 @@ export default function DashboardPage() {
           }
         }
 
-        if (stipendResult) {
+        if (stipendResult && !cancelled) {
           setStipendStatus({
             myMilestones: stipendResult.myMilestones as StipendMilestone[],
             totalBudget: stipendResult.totalBudget,
             computeBudget: stipendResult.computeBudget,
           });
-        } else {
+        } else if (!cancelled) {
           setStipendStatus(null);
         }
 
         // Load diagnosis for enhanced dashboard
-        if (mapped.length > 0) {
+        if (mapped.length > 0 && !cancelled) {
           try {
             const diagnosisResult = await getFellowDiagnosis();
-            setDiagnosis(diagnosisResult);
+            if (!cancelled) setDiagnosis(diagnosisResult);
           } catch (err) {
-            console.error("Failed to load diagnosis:", err);
+            if (!cancelled) console.error("Failed to load diagnosis:", err);
           }
         }
       } catch (err) {
-        console.error("Failed to load dashboard:", err);
+        if (!cancelled) console.error("Failed to load dashboard:", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }
     load();
+    return () => { cancelled = true; };
   }, [router]);
 
   if (loading) {

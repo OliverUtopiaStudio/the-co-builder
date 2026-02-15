@@ -5,6 +5,7 @@ import { fellows, ventures, responses, assetCompletion, assetRequirements, pods,
 import { eq, sql, and, isNull } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import type { ExperienceProfile, LifecycleStage, OnboardingStatus } from "@/lib/onboarding";
+import { validateOnboardingUpdate } from "@/lib/onboarding";
 import { extractSlackChannelId, buildSlackChannelUrl } from "@/lib/slack/utils";
 
 async function requireAdmin() {
@@ -206,6 +207,10 @@ export async function updateFellowOnboardingAdmin(
 ) {
   await requireAdmin();
 
+  const normalized = value === "" ? null : (value?.trim() || null);
+  const validation = validateOnboardingUpdate(step, normalized);
+  if (!validation.valid) throw new Error(validation.error);
+
   const [fellow] = await db
     .select()
     .from(fellows)
@@ -224,7 +229,7 @@ export async function updateFellowOnboardingAdmin(
     ventureCreated: false,
   };
 
-  const updated = { ...current, [step]: value };
+  const updated = { ...current, [step]: normalized };
 
   await db
     .update(fellows)
@@ -236,7 +241,15 @@ export async function updateFellowOnboardingAdmin(
 
 export async function updateFellowDetails(
   fellowId: string,
-  data: { domain?: string; background?: string; selectionRationale?: string; role?: string }
+  data: { 
+    domain?: string; 
+    background?: string; 
+    selectionRationale?: string; 
+    role?: string;
+    googleDriveUrl?: string | null;
+    websiteUrl?: string | null;
+    resourceLinks?: Record<string, unknown> | null;
+  }
 ) {
   await requireAdmin();
   const validRoles = ["fellow", "admin", "studio", "stakeholder"];
@@ -244,6 +257,9 @@ export async function updateFellowDetails(
     ...(data.domain !== undefined && { domain: data.domain }),
     ...(data.background !== undefined && { background: data.background }),
     ...(data.selectionRationale !== undefined && { selectionRationale: data.selectionRationale }),
+    ...(data.googleDriveUrl !== undefined && { googleDriveUrl: data.googleDriveUrl }),
+    ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl }),
+    ...(data.resourceLinks !== undefined && { resourceLinks: data.resourceLinks }),
     updatedAt: new Date(),
   };
   if (data.role !== undefined && validRoles.includes(data.role)) {
@@ -251,7 +267,7 @@ export async function updateFellowDetails(
   }
   await db
     .update(fellows)
-    .set(updates as Record<string, string>)
+    .set(updates as Record<string, unknown>)
     .where(eq(fellows.id, fellowId));
   return { success: true };
 }

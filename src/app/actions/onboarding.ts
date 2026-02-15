@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { fellows, ventures } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
-import { DEFAULT_ONBOARDING_STATUS, type OnboardingStatus } from "@/lib/onboarding";
+import { DEFAULT_ONBOARDING_STATUS, isAdminTrackedField, type OnboardingStatus } from "@/lib/onboarding";
 
 async function getCurrentFellow() {
   const supabase = await createClient();
@@ -58,6 +58,11 @@ export async function updateOnboardingStep(
   step: keyof OnboardingStatus,
   value: boolean
 ) {
+  // Agreement and KYC are admin-only; fellows cannot set these
+  if (isAdminTrackedField(step)) {
+    return { success: false, error: "This step can only be updated by your studio team.", status: null };
+  }
+
   const fellow = await getCurrentFellow();
   const current = (fellow.onboardingStatus as OnboardingStatus | null) || DEFAULT_ONBOARDING_STATUS;
 
