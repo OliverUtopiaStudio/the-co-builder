@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { GlassCard } from "@/components/ui";
 import {
   authInputClass,
@@ -9,6 +10,10 @@ import {
   authButtonClass,
   authErrorStyle,
 } from "@/components/auth/styles";
+
+const GenerativeArt = dynamic(() => import("@/components/GenerativeArt"), {
+  ssr: false,
+});
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
@@ -75,7 +80,11 @@ export default function ReportLayout({
   /* ─── Password gate ─── */
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-8">
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <GenerativeArt />
+        </div>
+        <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-8">
         <div className="w-full" style={{ maxWidth: 420 }}>
           <GlassCard>
             <div className="px-10 pt-10 pb-8">
@@ -130,6 +139,7 @@ export default function ReportLayout({
               </p>
             </div>
           </GlassCard>
+        </div>
         </div>
       </div>
     );
