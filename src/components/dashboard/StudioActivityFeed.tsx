@@ -2,26 +2,33 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-interface ActivityItem {
-  id: string;
-  type: "review" | "approval" | "comment" | "stipend";
-  title: string;
-  message: string;
-  timestamp: string;
-  assetNumber?: number;
-  ventureId?: string;
-}
+import { getActivityFeed, type ActivityItem } from "@/app/actions/activity";
 
 export default function StudioActivityFeed() {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Implement actual activity feed API call
-    // For now, return empty array
-    setActivities([]);
-    setLoading(false);
+    let cancelled = false;
+    async function load() {
+      try {
+        const feed = await getActivityFeed(15);
+        if (!cancelled) {
+          setActivities(feed);
+        }
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "Failed to load activity");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   const activityIcons = {
@@ -64,13 +71,19 @@ export default function StudioActivityFeed() {
         </div>
       </div>
 
-      {activities.length === 0 ? (
+      {error ? (
+        <div className="text-center py-8">
+          <div className="text-muted text-sm">
+            Unable to load activity feed
+          </div>
+        </div>
+      ) : activities.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-muted text-sm mb-2">
-            No recent activity from your studio team
+            No recent activity yet
           </div>
           <div className="text-xs text-muted">
-            Activity will appear here when your studio team reviews your work
+            Activity will appear here as you complete assets and reach milestones
           </div>
         </div>
       ) : (
