@@ -476,3 +476,17 @@ export const frameworkNotifications = pgTable(
     ),
   ]
 );
+
+// ─── Report Config (stakeholder report section settings) ─────────
+export const reportConfig = pgTable("report_config", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sectionKey: text("section_key").notNull().unique(), // 'kpis' | 'pods' | 'fellows' | 'pipeline' | 'impact'
+  visible: boolean("visible").default(true).notNull(),
+  displayOrder: integer("display_order").default(0),
+  narrativeTitle: text("narrative_title"),
+  narrativeText: text("narrative_text"),
+  highlightedIds: jsonb("highlighted_ids").default([]),
+  highlightMode: text("highlight_mode").default("all"), // 'all' | 'highlighted_only'
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedBy: uuid("updated_by").references(() => fellows.id, { onDelete: "set null" }),
+});

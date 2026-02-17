@@ -9,6 +9,7 @@ const config: SidebarConfig = {
     { href: "/studio/pods", label: "Pods" },
     { href: "/studio/pod-launch", label: "Pod Launch" },
     { href: "/studio/pipeline", label: "Pipeline" },
+    { href: "/studio/report", label: "Report" },
     { href: "/studio/wiki", label: "Wiki" },
   ],
   homeHref: "/studio",

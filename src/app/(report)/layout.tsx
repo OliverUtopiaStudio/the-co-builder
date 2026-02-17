@@ -83,7 +83,7 @@ export default function ReportLayout({
                 THE<br />UTOPIA<br />STUDIO
               </div>
               <h1 className="text-[28px] font-medium text-white leading-tight">
-                Fellow Portfolio
+                Stakeholder Report
               </h1>
               <p className="text-white/50 text-sm mt-1.5">
                 Enter the report password to view
@@ -144,7 +144,7 @@ export default function ReportLayout({
             href="/report"
             className="text-foreground font-semibold text-sm hover:text-accent transition-colors"
           >
-            Fellow Portfolio
+            Stakeholder Report
           </a>
           <div className="flex items-center gap-4">
             <span className="text-xs text-muted">Report view</span>
