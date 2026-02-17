@@ -199,11 +199,18 @@ export default function PodLaunchPage() {
   const [targetDeals, setTargetDeals] = useState(3);
 
   useEffect(() => {
-    Promise.all([getPodLaunches(), getPods()]).then(([l, p]) => {
-      setLaunches(l as Launch[]);
-      setPodsState(p as PodOption[]);
-      setLoading(false);
-    });
+    Promise.all([getPodLaunches(), getPods()])
+      .then(([l, p]) => {
+        setLaunches(l as Launch[]);
+        setPodsState(p as PodOption[]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load pod launches:", error);
+        setLoading(false);
+        setLaunches([]);
+        setPodsState([]);
+      });
   }, []);
 
   // Auto-suggest name when pod changes

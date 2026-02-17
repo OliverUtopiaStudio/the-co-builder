@@ -3,12 +3,26 @@
 import Link from "next/link";
 import type { DiagnosisResult } from "@/app/actions/diagnosis";
 
+const PROFILE_ENCOURAGEMENT: Record<string, string> = {
+  first_time_builder:
+    "You're making progress. Keep going — each asset adds to your foundation.",
+  experienced_founder:
+    "Stay in flow. One asset at a time.",
+  corporate_innovator:
+    "Apply your structured thinking — but move fast. Ship, then refine.",
+};
+
 interface TodaysFocusProps {
   diagnosis: DiagnosisResult | null;
   ventureId: string | null;
+  experienceProfile?: string | null;
 }
 
-export default function TodaysFocus({ diagnosis, ventureId }: TodaysFocusProps) {
+export default function TodaysFocus({
+  diagnosis,
+  ventureId,
+  experienceProfile,
+}: TodaysFocusProps) {
   const currentAsset = diagnosis?.criticalActions[0];
   const upcomingMilestones = diagnosis
     ? [
@@ -32,6 +46,11 @@ export default function TodaysFocus({ diagnosis, ventureId }: TodaysFocusProps) 
         {/* Current Asset */}
         <div className="bg-background p-4" style={{ borderRadius: 2 }}>
           <div className="text-sm font-medium mb-2">Current Asset</div>
+          {experienceProfile && PROFILE_ENCOURAGEMENT[experienceProfile] && (
+            <p className="text-xs text-muted mb-2 italic">
+              {PROFILE_ENCOURAGEMENT[experienceProfile]}
+            </p>
+          )}
           {currentAsset ? (
             <>
               <div className="text-sm font-semibold mb-1">

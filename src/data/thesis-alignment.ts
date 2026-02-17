@@ -119,8 +119,9 @@ export function calculateAlignmentScore(
     weightedSum += weighted;
     totalWeight += criterion.weight;
 
-    // Add to category breakdown
-    breakdown[criterion.category] += weighted;
+    // Add to category breakdown (map snake_case to camelCase)
+    const breakdownKey = criterion.category === "business_model" ? "businessModel" : criterion.category;
+    breakdown[breakdownKey as keyof typeof breakdown] += weighted;
   }
 
   const overall = totalWeight > 0 ? Math.round((weightedSum / totalWeight) * 100) / 100 : 0;

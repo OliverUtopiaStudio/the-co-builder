@@ -97,11 +97,18 @@ export default function CampaignsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([getCampaigns(), getPods()]).then(([c, p]) => {
-      setCampaigns(c as Campaign[]);
-      setPodsState(p as PodOption[]);
-      setLoading(false);
-    });
+    Promise.all([getCampaigns(), getPods()])
+      .then(([c, p]) => {
+        setCampaigns(c as Campaign[]);
+        setPodsState(p as PodOption[]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load campaigns:", error);
+        setLoading(false);
+        setCampaigns([]);
+        setPodsState([]);
+      });
   }, []);
 
   function handleCreate() {

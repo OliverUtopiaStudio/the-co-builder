@@ -54,10 +54,16 @@ export default function PodsPage() {
   }
 
   useEffect(() => {
-    getPods().then((data) => {
-      setPods(data as Pod[]);
-      setLoading(false);
-    });
+    getPods()
+      .then((data) => {
+        setPods(data as Pod[]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load pods:", error);
+        setLoading(false);
+        setPods([]);
+      });
   }, []);
 
   if (loading) {

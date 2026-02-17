@@ -5,6 +5,7 @@ import { assetCompletion, ventures, fellows, assetRequirements } from "@/db/sche
 import { eq, and, isNull, sql, desc } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { stages, type Asset, type Stage } from "@/lib/data";
+import { getNextStepRecommendations, type NextStepRecommendation } from "@/lib/guidance/next-step";
 
 export interface CriticalAction {
   assetNumber: number;
@@ -14,9 +15,12 @@ export interface CriticalAction {
   stageName: string;
   priority: "critical" | "high" | "medium";
   reason: string;
+  whyThisMatters?: string[];
   blockers?: string[];
   dependencies?: number[];
+  unlocksAssets?: number[];
   estimatedDays?: number;
+  isBlocked?: boolean;
 }
 
 export interface PathwayStage {
@@ -162,85 +166,37 @@ function estimateAssetDays(assetNumber: number): number {
 }
 
 /**
- * Identify critical next actions considering dependencies
+ * Identify critical next actions using enhanced guidance system
  */
 function identifyCriticalActions(
   completedAssets: Set<number>,
   assetRequirements: Record<number, boolean>,
-  allAssets: Asset[]
+  currentStageNumber: string
 ): CriticalAction[] {
-  const criticalActions: CriticalAction[] = [];
-  const processed = new Set<number>();
+  // Use enhanced guidance system
+  const recommendations = getNextStepRecommendations(
+    completedAssets,
+    currentStageNumber,
+    assetRequirements,
+    5
+  );
 
-  // Find the first incomplete required asset
-  for (const asset of allAssets) {
-    if (completedAssets.has(asset.number) || processed.has(asset.number)) {
-      continue;
-    }
-
-    // Skip optional assets for critical path
-    if (!assetRequirements[asset.number]) {
-      continue;
-    }
-
-    // Check if prerequisites are met (simplified: sequential for now)
-    const previousAsset = asset.number > 1 ? asset.number - 1 : null;
-    const hasPrerequisites =
-      previousAsset === null || completedAssets.has(previousAsset);
-
-    if (!hasPrerequisites) {
-      // This is a blocker - need to complete previous assets first
-      continue;
-    }
-
-    // Determine priority
-    let priority: "critical" | "high" | "medium" = "medium";
-    let reason = "";
-
-    if (asset.number <= 2) {
-      priority = "critical";
-      reason = "Foundation assets - must complete before proceeding";
-    } else if (asset.number <= 8) {
-      priority = "high";
-      reason = "Early stage - builds core evidence base";
-    } else if (asset.number >= 23) {
-      priority = "high";
-      reason = "Investment readiness - required for spinout";
-    } else {
-      priority = "medium";
-      reason = "Next in sequence";
-    }
-
-    // Check for specific blockers
-    const blockers: string[] = [];
-    if (asset.number === 26 && !completedAssets.has(24)) {
-      blockers.push("Complete Investor Pack (#24) first");
-    }
-    if (asset.number === 27 && !completedAssets.has(26)) {
-      blockers.push("Complete Spinout Legal Pack (#26) first");
-    }
-
-    criticalActions.push({
-      assetNumber: asset.number,
-      title: asset.title,
-      purpose: asset.purpose,
-      stageNumber: getStageForAsset(asset.number)?.number || "00",
-      stageName: getStageForAsset(asset.number)?.title || "Unknown",
-      priority,
-      reason,
-      blockers: blockers.length > 0 ? blockers : undefined,
-      estimatedDays: estimateAssetDays(asset.number),
-    });
-
-    processed.add(asset.number);
-
-    // Limit to top 3 critical actions
-    if (criticalActions.length >= 3) {
-      break;
-    }
-  }
-
-  return criticalActions;
+  // Convert to CriticalAction format
+  return recommendations.map((rec) => ({
+    assetNumber: rec.assetNumber,
+    title: rec.title,
+    purpose: rec.purpose,
+    stageNumber: rec.stageNumber,
+    stageName: rec.stageName,
+    priority: rec.priority,
+    reason: rec.reason,
+    whyThisMatters: rec.whyThisMatters,
+    blockers: rec.blockers.length > 0 ? rec.blockers : undefined,
+    dependencies: rec.dependencies.length > 0 ? rec.dependencies : undefined,
+    unlocksAssets: rec.unlocksAssets.length > 0 ? rec.unlocksAssets : undefined,
+    estimatedDays: rec.estimatedDays,
+    isBlocked: rec.isBlocked,
+  }));
 }
 
 /**
@@ -393,15 +349,19 @@ export async function getVentureDiagnosis(ventureId: string): Promise<DiagnosisR
     allAssets.push(...stage.assets);
   }
 
-  // Identify critical actions
+  // Build pathway first to determine current stage
+  const pathway = buildPathway(completedAssets, assetRequirements, velocity);
+
+  // Find current stage
+  const currentStageInfo = pathway.find((s) => s.isCurrent) || pathway[pathway.length - 1];
+  const currentStage = currentStageInfo?.stageNumber || "00";
+
+  // Identify critical actions using enhanced guidance
   const criticalActions = identifyCriticalActions(
     completedAssets,
     assetRequirements,
-    allAssets
+    currentStage
   );
-
-  // Build pathway
-  const pathway = buildPathway(completedAssets, assetRequirements, velocity);
 
   // Estimate time to spinout
   const spinoutEstimate = estimateTimeToSpinout(
@@ -430,10 +390,6 @@ export async function getVentureDiagnosis(ventureId: string): Promise<DiagnosisR
       action: "Complete Investor Pack + Data Room (Asset #24)",
     });
   }
-
-  // Find current stage
-  const currentStageInfo = pathway.find((s) => s.isCurrent) || pathway[pathway.length - 1];
-  const currentStage = currentStageInfo?.stageNumber || "00";
 
   return {
     ventureId,

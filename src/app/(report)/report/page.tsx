@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { LifecycleStage } from "@/lib/onboarding";
 import { LIFECYCLE_STAGE_LABELS } from "@/lib/onboarding";
 
@@ -22,7 +23,7 @@ const STAGE_COLORS: Record<string, string> = {
   graduated: "bg-accent/20 text-accent",
 };
 
-export default function PortfolioPage() {
+export default function ReportPage() {
   const [fellows, setFellows] = useState<PortfolioFellow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,9 +102,10 @@ export default function PortfolioPage() {
           style={{ borderRadius: 2 }}
         >
           {fellows.map((fellow) => (
-            <div
+            <Link
               key={fellow.id}
-              className="bg-surface border border-border p-5 hover:border-accent/30 transition-all"
+              href={`/report/${fellow.id}`}
+              className="block bg-surface border border-border p-5 hover:border-accent/30 transition-all"
               style={{ borderRadius: 2 }}
             >
               <div className="flex gap-4">
@@ -159,6 +161,7 @@ export default function PortfolioPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-accent hover:underline"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         LinkedIn →
                       </a>
@@ -166,7 +169,7 @@ export default function PortfolioPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

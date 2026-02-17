@@ -39,10 +39,16 @@ export default function PipelinePage() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    getPipeline().then((data) => {
-      setRoles(data as PipelineRole[]);
-      setLoading(false);
-    });
+    getPipeline()
+      .then((data) => {
+        setRoles(data as PipelineRole[]);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Failed to load pipeline:", error);
+        setLoading(false);
+        setRoles([]);
+      });
   }, []);
 
   function startEdit(role: PipelineRole) {

@@ -25,6 +25,7 @@ interface FellowProfile {
   fullName: string;
   email: string;
   lifecycleStage: string;
+  experienceProfile: string | null;
 }
 
 interface NextAssetInfo {
@@ -110,10 +111,10 @@ export default function DashboardPage() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch fellow profile including lifecycle_stage
+        // Fetch fellow profile including lifecycle_stage and experience_profile (for guidance adaptation)
         const { data: fellowData } = await supabase
           .from("fellows")
-          .select("id, full_name, email, lifecycle_stage")
+          .select("id, full_name, email, lifecycle_stage, experience_profile")
           .eq("auth_user_id", user.id)
           .single();
 
@@ -131,6 +132,7 @@ export default function DashboardPage() {
           fullName: fellowData.full_name,
           email: fellowData.email,
           lifecycleStage: fellowData.lifecycle_stage,
+          experienceProfile: fellowData.experience_profile ?? null,
         });
 
         const fellowId = fellowData.id;
@@ -253,6 +255,7 @@ export default function DashboardPage() {
           ventureId={diagnosis.ventureId}
           completedCount={diagnosis.completedAssets}
           totalCount={diagnosis.totalAssets}
+          experienceProfile={fellow?.experienceProfile ?? null}
         />
       )}
 
@@ -261,6 +264,7 @@ export default function DashboardPage() {
         <TodaysFocus
           diagnosis={diagnosis}
           ventureId={ventures[0]?.id || null}
+          experienceProfile={fellow?.experienceProfile ?? null}
         />
       )}
 

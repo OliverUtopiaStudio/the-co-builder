@@ -2,7 +2,7 @@
  * Safe redirect validation — prevent open redirect attacks.
  * Only allow same-origin paths.
  */
-const ALLOWED_PREFIXES = ["/dashboard", "/venture", "/admin", "/studio", "/portfolio", "/profile", "/tools", "/onboarding", "/login", "/signup", "/reset-password"];
+const ALLOWED_PREFIXES = ["/dashboard", "/venture", "/admin", "/studio", "/report", "/profile", "/tools", "/onboarding", "/login", "/signup", "/reset-password"];
 
 export function isSafeRedirect(target: string | null | undefined): boolean {
   if (!target || typeof target !== "string") return false;

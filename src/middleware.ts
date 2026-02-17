@@ -46,8 +46,16 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getSession();
   const user = session?.user;
 
-  // Protect authenticated routes
-  const protectedPaths = ["/dashboard", "/venture", "/profile", "/tools", "/admin", "/studio", "/portfolio"];
+  // Redirect old /portfolio bookmarks to /report
+  if (request.nextUrl.pathname.startsWith("/portfolio")) {
+    const newPath = request.nextUrl.pathname.replace(/^\/portfolio/, "/report");
+    const url = request.nextUrl.clone();
+    url.pathname = newPath;
+    return NextResponse.redirect(url, 308);
+  }
+
+  // Protect authenticated routes (Supabase auth)
+  const protectedPaths = ["/dashboard", "/venture", "/profile", "/tools", "/admin", "/studio"];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   );
@@ -82,6 +90,7 @@ export const config = {
     "/admin/:path*",
     "/studio/:path*",
     "/portfolio/:path*",
+    "/report/:path*",
     "/login",
     "/signup",
   ],

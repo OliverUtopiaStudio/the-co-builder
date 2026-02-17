@@ -9,6 +9,8 @@ import { useFrameworkEdits } from "./hooks/useFrameworkEdits";
 import { useRealTimeFramework } from "./hooks/useRealTimeFramework";
 import MigrationDialog, { useMigrationDialog } from "./components/MigrationDialog";
 import ConflictResolutionDialog from "./components/ConflictResolutionDialog";
+import VersionHistory from "./components/VersionHistory";
+import { notifyFellowsOfFrameworkUpdate } from "@/app/actions/framework";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -188,6 +190,7 @@ export default function AdminFrameworkPage() {
   );
   const [selectedAsset, setSelectedAsset] = useState<number | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [notifying, setNotifying] = useState(false);
 
   const {
     allEdits,
@@ -285,6 +288,25 @@ export default function AdminFrameworkPage() {
 
   function exportAllChanges() {
     exportEdits();
+  }
+
+  async function notifyFellows(assetNumber: number) {
+    if (!confirm("Send notifications to all fellows about this framework update?")) {
+      return;
+    }
+    setNotifying(true);
+    try {
+      const result = await notifyFellowsOfFrameworkUpdate(assetNumber);
+      if (result.success) {
+        alert(`Notifications sent to ${result.notified} fellow${result.notified !== 1 ? "s" : ""}.`);
+      } else {
+        alert(result.error || "Failed to send notifications");
+      }
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to send notifications");
+    } finally {
+      setNotifying(false);
+    }
   }
 
   function exportAssetChanges(assetNumber: number) {
@@ -575,6 +597,14 @@ export default function AdminFrameworkPage() {
                         style={{ borderRadius: 2 }}
                       >
                         Export
+                      </button>
+                      <button
+                        onClick={() => notifyFellows(currentAsset.number)}
+                        disabled={notifying}
+                        className="px-3 py-1.5 text-xs font-medium text-accent border border-accent hover:bg-accent/10 transition-colors disabled:opacity-50"
+                        style={{ borderRadius: 2 }}
+                      >
+                        {notifying ? "Notifying..." : "Notify Fellows"}
                       </button>
                     </div>
                   )}
@@ -1049,6 +1079,15 @@ export default function AdminFrameworkPage() {
                   </div>
                 </div>
               )}
+
+              {/* Version History */}
+              <VersionHistory
+                assetNumber={currentAsset.number}
+                onRollback={() => {
+                  // Reload edits after rollback
+                  loadEdits();
+                }}
+              />
             </div>
           )}
         </div>

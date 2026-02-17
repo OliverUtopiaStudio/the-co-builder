@@ -61,7 +61,9 @@ export default function SignUpPage() {
           body: JSON.stringify({ fullName, email }),
         });
         if (!res.ok) {
-          console.error("Failed to create fellow profile");
+          const err = await res.json().catch(() => ({}));
+          setError(err?.error || "Failed to create profile. Please try again.");
+          return;
         }
       }
 
@@ -88,8 +90,8 @@ export default function SignUpPage() {
               Create Account
             </h1>
             <p className="text-white/50 text-sm mt-1.5">
-              Join as a Fellow and start building your venture. Studio and
-              Stakeholder access is by invite only.
+              Join as a Fellow and start building your venture. Studio access
+              is by invite only.
             </p>
           </div>
 

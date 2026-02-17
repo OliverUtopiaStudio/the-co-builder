@@ -4,8 +4,14 @@
 // or null (not yet completed).
 
 export interface OnboardingStatus {
-  agreementSigned: string | null;       // ISO date when admin marked signed
-  kycVerified: string | null;           // ISO date when admin marked verified
+  agreementSigned: string | null;       // ISO date when signed
+  agreementSignedBy?: string | null;    // Admin fellow id who marked it
+  agreementSignedByName?: string | null;  // Admin name for display
+  agreementSignedMarkedAt?: string | null;  // ISO when admin set it
+  kycVerified: string | null;           // ISO date when verified
+  kycVerifiedBy?: string | null;        // Admin fellow id who marked it
+  kycVerifiedByName?: string | null;    // Admin name for display
+  kycVerifiedMarkedAt?: string | null;  // ISO when admin set it
   toolstackComplete: boolean;           // Fellow self-reports
   computeBudgetAcknowledged: boolean;   // Fellow self-reports
   frameworkIntroComplete: boolean;      // Fellow self-reports
@@ -80,6 +86,108 @@ export const RECOMMENDED_COMPUTE_STACK = [
     link: null,
   },
 ];
+
+// Profile-specific "Why you need this" for toolstack items
+export const TOOLSTACK_WHY_NEED_THIS: Record<
+  string,
+  Partial<Record<ExperienceProfile, string[]>>
+> = {
+  claude: {
+    first_time_builder: [
+      "→ Review your asset responses before submission — get AI feedback on clarity",
+      "→ Learn concepts as you build — ask questions when stuck",
+      "→ Get step-by-step guidance on unfamiliar topics",
+    ],
+    experienced_founder: [
+      "→ Speed up research and writing — you know the playbook, let AI handle the drafts",
+      "→ Get a second opinion on your venture logic",
+      "→ Learn this ecosystem's specifics quickly",
+    ],
+    corporate_innovator: [
+      "→ Bridge the gap between corporate and founder speed — use AI to move faster",
+      "→ Translate enterprise concepts into startup language",
+      "→ Get founder-style feedback without the bias of internal stakeholders",
+    ],
+  },
+  github: {
+    first_time_builder: [
+      "→ Track changes to your venture documents — every edit is saved",
+      "→ Collaborate with your studio team on feedback",
+      "→ Build a portfolio of your work for investors",
+    ],
+    experienced_founder: [
+      "→ Version control for assets — standard practice",
+      "→ Collaborate with studio team on reviews",
+      "→ Keep your venture docs in one place",
+    ],
+    corporate_innovator: [
+      "→ Version control — different from SharePoint, but same principle",
+      "→ Collaborate with studio team on feedback",
+      "→ Demonstrates technical fluency to stakeholders",
+    ],
+  },
+  markdown: {
+    first_time_builder: [
+      "→ Export assets as markdown files for sharing",
+      "→ Create pitch decks and documents easily",
+      "→ Standard format that works with AI tools",
+    ],
+    experienced_founder: [
+      "→ Export assets to markdown for pitch decks",
+      "→ Standard format for AI and collaboration",
+      "→ Keeps deliverables portable",
+    ],
+    corporate_innovator: [
+      "→ Markdown is the lingua franca of startups — learn it once",
+      "→ Export assets for stakeholder updates",
+      "→ Works seamlessly with Claude and other AI tools",
+    ],
+  },
+};
+
+// Profile-specific "How you'll use it" for toolstack
+export const TOOLSTACK_HOW_USE_IT: Record<
+  string,
+  Partial<Record<ExperienceProfile, string>>
+> = {
+  claude: {
+    first_time_builder: "Daily: Review and improve your work | Weekly: Deep dives on concepts you're learning",
+    experienced_founder: "Daily: Draft and refine assets | Weekly: Stress-test your venture logic",
+    corporate_innovator: "Daily: Accelerate research and writing | Weekly: Reframe enterprise thinking for startups",
+  },
+  github: {
+    first_time_builder: "Daily: Commit your asset work | Weekly: Review changes with studio team",
+    experienced_founder: "Daily: Commit asset updates | Weekly: Sync with studio feedback",
+    corporate_innovator: "Daily: Commit your work | Weekly: Review changes with studio team",
+  },
+  markdown: {
+    first_time_builder: "Daily: Write asset responses | Weekly: Export to Google Drive",
+    experienced_founder: "Daily: Write assets | Weekly: Export for pitch materials",
+    corporate_innovator: "Daily: Write asset responses | Weekly: Export for stakeholder updates",
+  },
+};
+
+// Profile-specific onboarding resource recommendations
+export const ONBOARDING_RESOURCES: Record<
+  ExperienceProfile,
+  { label: string; description: string; link: string }[]
+> = {
+  first_time_builder: [
+    { label: "YC Startup Library", description: "Classic founder resources for first-timers", link: "https://www.ycombinator.com/library" },
+    { label: "Paul Graham Essays", description: "Founder thinking in plain language", link: "https://paulgraham.com/articles.html" },
+    { label: "Lenny's Newsletter", description: "Product and growth for early-stage", link: "https://www.lennysnewsletter.com" },
+  ],
+  experienced_founder: [
+    { label: "First Round Review", description: "Operator perspectives for scaling", link: "https://review.firstround.com" },
+    { label: "NFX Signal", description: "Network effects and venture-building", link: "https://www.nfx.com/signal" },
+    { label: "Stripe Atlas", description: "Launch resources and guides", link: "https://stripe.com/atlas" },
+  ],
+  corporate_innovator: [
+    { label: "Corporate Innovation Playbook", description: "From corporate to founder mindset", link: "https://www.ycombinator.com/library" },
+    { label: "Steve Blank - Corporate Innovation", description: "Lean startup for intrapreneurs", link: "https://steveblank.com" },
+    { label: "a16z Startup School", description: "Startup fundamentals for corporate builders", link: "https://a16z.com/startupschool" },
+  ],
+};
 
 // Toolstack setup items
 export const TOOLSTACK_ITEMS = [

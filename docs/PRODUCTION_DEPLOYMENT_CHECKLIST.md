@@ -32,6 +32,7 @@ Set these in your hosting platform (Vercel, etc.). All are required unless marke
 | `SLACK_SIGNING_SECRET` | Slack API > Your App > Basic Info | For verifying Slack webhook signatures |
 | `SLACK_WORKSPACE_DOMAIN` | Your Slack workspace | Defaults to `thestudiofellows` |
 | `NEXT_PUBLIC_APP_URL` | Your deployment URL | Defaults to `https://the-co-builder.vercel.app` |
+| `REPORT_PASSWORD` | Choose a password | Shared password for the `/report` stakeholder portfolio page |
 
 ---
 
@@ -41,6 +42,16 @@ Run these in order in **Supabase Dashboard > SQL Editor**:
 
 ### Step 1: Core Schema
 If starting fresh, run `supabase-setup.sql` to create all base tables and RLS policies.
+
+### Automatic Schema Drift Detection
+
+The build automatically checks that all Drizzle schema columns exist in the database. If migrations are missing, the Vercel build fails with a clear message listing the exact missing columns. You can also run this manually:
+
+```bash
+npm run db:check
+```
+
+If the check fails, run the listed migrations in Supabase SQL Editor, then redeploy.
 
 ### Step 2: Migrations (run in order)
 | Migration | File | What it does |
@@ -57,6 +68,8 @@ If starting fresh, run `supabase-setup.sql` to create all base tables and RLS po
 | 011 | `migrations/011_restore_missing_data.sql` | Restore missing data |
 | 012 | `migrations/012_framework_edits.sql` | Framework editor table |
 | 013 | `migrations/013_fix_onboarding_status_types.sql` | Boolean to timestamp conversion |
+| 014 | `migrations/014_framework_edit_history.sql` | Framework edit version history |
+| 015 | `migrations/015_framework_notifications.sql` | Framework update notifications |
 
 ### Step 3: RLS for Framework Edits
 ```sql

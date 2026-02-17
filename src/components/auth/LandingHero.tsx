@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type LoginTarget = "fellow" | "studio" | "stakeholder";
+type LoginTarget = "fellow" | "studio";
 
 /**
  * Toolbox-style landing: minimal copy, quick access.
@@ -77,14 +77,6 @@ export default function LandingHero({
           >
             Studio
           </button>
-          <button
-            onClick={() => onSelectMode("stakeholder")}
-            className="px-5 py-2.5 bg-white/8 border border-white/12 text-white/70 text-sm font-medium hover:text-white hover:border-white/25 transition-all"
-            style={{ borderRadius: 2 }}
-          >
-            Stakeholder
-          </button>
-
           <span className="text-white/20 hidden sm:inline mx-1">|</span>
 
           <Link

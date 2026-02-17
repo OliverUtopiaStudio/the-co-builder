@@ -414,3 +414,65 @@ export const frameworkEdits = pgTable(
     ),
   ]
 );
+
+// ─── Framework Edit History (version history for rollback) ─────────
+export const frameworkEditHistory = pgTable(
+  "framework_edit_history",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    frameworkEditId: uuid("framework_edit_id").references(() => frameworkEdits.id, { onDelete: "set null" }),
+    assetNumber: integer("asset_number").notNull(),
+    adminId: uuid("admin_id")
+      .notNull()
+      .references(() => fellows.id, { onDelete: "cascade" }),
+    fieldType: text("field_type").notNull(),
+    fieldId: text("field_id").notNull().default(""),
+    fieldKey: text("field_key").notNull().default(""),
+    oldValue: text("old_value"),
+    newValue: text("new_value"),
+    action: text("action").notNull(), // 'created' | 'updated' | 'deleted'
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_framework_edit_history_asset").on(table.assetNumber),
+    index("idx_framework_edit_history_edit_id").on(table.frameworkEditId),
+    index("idx_framework_edit_history_admin").on(table.adminId),
+    index("idx_framework_edit_history_created").on(table.createdAt),
+    check(
+      "framework_edit_history_asset_range",
+      sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`
+    ),
+    check(
+      "framework_edit_history_field_type",
+      sql`${table.fieldType} IN ('title','purpose','coreQuestion','checklist','question')`
+    ),
+    check(
+      "framework_edit_history_action",
+      sql`${table.action} IN ('created','updated','deleted')`
+    ),
+  ]
+);
+
+// ─── Framework Notifications (notify fellows of updates) ──────────
+export const frameworkNotifications = pgTable(
+  "framework_notifications",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    fellowId: uuid("fellow_id").references(() => fellows.id, { onDelete: "cascade" }),
+    assetNumber: integer("asset_number").notNull(),
+    notificationType: text("notification_type").notNull().default("framework_updated"),
+    message: text("message").notNull(),
+    read: boolean("read").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("idx_framework_notifications_fellow").on(table.fellowId),
+    index("idx_framework_notifications_asset").on(table.assetNumber),
+    index("idx_framework_notifications_read").on(table.read, table.createdAt),
+    check(
+      "framework_notifications_asset_range",
+      sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`
+    ),
+  ]
+);

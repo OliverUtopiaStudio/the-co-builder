@@ -20,6 +20,7 @@ import {
   getOnboardingProgress,
   formatOnboardingDate,
 } from "@/lib/onboarding";
+import { GUIDANCE_TIPS, GUIDANCE_PREVIEW_STAGES } from "@/lib/guidance";
 import type {
   OnboardingStatus,
   LifecycleStage,
@@ -195,7 +196,7 @@ export default function AdminFellowDetailPage() {
     }
   }
 
-  async function handleAgreementToggle() {
+  async function handleAgreementDateChange(value: string | null) {
     if (!fellow) return;
     const onboarding = fellow.onboardingStatus || {
       agreementSigned: null,
@@ -206,7 +207,7 @@ export default function AdminFellowDetailPage() {
       browserSetupComplete: false,
       ventureCreated: false,
     };
-    const newValue = onboarding.agreementSigned ? null : new Date().toISOString();
+    const newValue = value?.trim() ? `${value}T00:00:00.000Z` : null;
     setSaving("agreement");
     try {
       await updateFellowOnboardingAdmin(fellowId, "agreementSigned", newValue);
@@ -225,7 +226,7 @@ export default function AdminFellowDetailPage() {
     }
   }
 
-  async function handleKycToggle() {
+  async function handleKycDateChange(value: string | null) {
     if (!fellow) return;
     const onboarding = fellow.onboardingStatus || {
       agreementSigned: null,
@@ -236,7 +237,7 @@ export default function AdminFellowDetailPage() {
       browserSetupComplete: false,
       ventureCreated: false,
     };
-    const newValue = onboarding.kycVerified ? null : new Date().toISOString();
+    const newValue = value?.trim() ? `${value}T00:00:00.000Z` : null;
     setSaving("kyc");
     try {
       await updateFellowOnboardingAdmin(fellowId, "kycVerified", newValue);
@@ -253,6 +254,24 @@ export default function AdminFellowDetailPage() {
     } finally {
       setSaving(null);
     }
+  }
+
+  function agreementDateInputValue(): string {
+    const v = onboarding.agreementSigned;
+    if (!v || typeof v !== "string") return "";
+    try {
+      const d = new Date(v);
+      return d.toISOString().slice(0, 10);
+    } catch { return ""; }
+  }
+
+  function kycDateInputValue(): string {
+    const v = onboarding.kycVerified;
+    if (!v || typeof v !== "string") return "";
+    try {
+      const d = new Date(v);
+      return d.toISOString().slice(0, 10);
+    } catch { return ""; }
   }
 
   async function handleSaveDetails() {
@@ -486,6 +505,27 @@ export default function AdminFellowDetailPage() {
             {saving === "experienceProfile" && (
               <p className="text-xs text-muted mt-1">Saving...</p>
             )}
+            {fellow.experienceProfile &&
+              (fellow.experienceProfile in GUIDANCE_TIPS) && (
+                <div className="mt-3 p-3 bg-surface border border-border" style={{ borderRadius: 2 }}>
+                  <div className="text-xs font-medium text-muted mb-2">
+                    Guidance preview (sample tips this fellow sees)
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-foreground">
+                    {GUIDANCE_PREVIEW_STAGES.map((stageNum) => {
+                      const tips = GUIDANCE_TIPS[fellow.experienceProfile! as keyof typeof GUIDANCE_TIPS];
+                      const tip = tips?.[stageNum];
+                      if (!tip) return null;
+                      return (
+                        <li key={stageNum} className="flex gap-2">
+                          <span className="text-muted shrink-0">Stage {stageNum}:</span>
+                          <span className="italic">{tip}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
           </div>
 
           {/* Lifecycle Stage */}
@@ -547,35 +587,55 @@ export default function AdminFellowDetailPage() {
             <label className="text-sm font-medium block mb-1">
               Fellowship Agreement
             </label>
-            <div className="flex items-center gap-3">
-              <span
-                className={`text-xs font-medium px-2 py-0.5 ${
-                  onboarding.agreementSigned
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-500"
-                }`}
-                style={{ borderRadius: 2 }}
-              >
-                {onboarding.agreementSigned
-                  ? (() => {
-                      const d = formatOnboardingDate(onboarding.agreementSigned);
-                      return d && d !== "Complete" ? `Signed ${d}` : "Signed";
-                    })()
-                  : "Not signed"}
-              </span>
-              <button
-                onClick={handleAgreementToggle}
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="date"
+                value={agreementDateInputValue()}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v) handleAgreementDateChange(v);
+                  else handleAgreementDateChange(null);
+                }}
                 disabled={saving === "agreement"}
-                className="text-xs px-3 py-1 border border-border hover:border-accent text-foreground"
+                className="border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                style={{ borderRadius: 2 }}
+              />
+              <button
+                onClick={() => handleAgreementDateChange(new Date().toISOString().slice(0, 10))}
+                disabled={saving === "agreement"}
+                className="text-xs px-3 py-2 border border-border hover:border-accent text-foreground"
                 style={{ borderRadius: 2 }}
               >
-                {saving === "agreement"
-                  ? "Saving..."
-                  : onboarding.agreementSigned
-                    ? "Clear"
-                    : "Mark Signed"}
+                {saving === "agreement" ? "Saving..." : "Mark as today"}
               </button>
+              {onboarding.agreementSigned && (
+                <button
+                  onClick={() => handleAgreementDateChange(null)}
+                  disabled={saving === "agreement"}
+                  className="text-xs px-3 py-2 border border-border hover:border-red-200 text-muted hover:text-foreground"
+                  style={{ borderRadius: 2 }}
+                >
+                  Clear
+                </button>
+              )}
             </div>
+            <p className="text-xs text-muted mt-1">
+              {onboarding.agreementSigned ? (
+                <>
+                  <span className="font-medium text-green-700">Signed on {formatOnboardingDate(onboarding.agreementSigned)}</span>
+                  {onboarding.agreementSignedByName && (
+                    <span className="text-muted">
+                      {" "}· Marked by {onboarding.agreementSignedByName}
+                      {onboarding.agreementSignedMarkedAt && (
+                        <> on {formatOnboardingDate(onboarding.agreementSignedMarkedAt)}</>
+                      )}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-gray-500">Not signed</span>
+              )}
+            </p>
           </div>
 
           {/* KYC Status */}
@@ -583,35 +643,55 @@ export default function AdminFellowDetailPage() {
             <label className="text-sm font-medium block mb-1">
               KYC Verification
             </label>
-            <div className="flex items-center gap-3">
-              <span
-                className={`text-xs font-medium px-2 py-0.5 ${
-                  onboarding.kycVerified
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-100 text-gray-500"
-                }`}
-                style={{ borderRadius: 2 }}
-              >
-                {onboarding.kycVerified
-                  ? (() => {
-                      const d = formatOnboardingDate(onboarding.kycVerified);
-                      return d && d !== "Complete" ? `Verified ${d}` : "Verified";
-                    })()
-                  : "Not verified"}
-              </span>
-              <button
-                onClick={handleKycToggle}
+            <div className="flex flex-wrap items-center gap-3">
+              <input
+                type="date"
+                value={kycDateInputValue()}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v) handleKycDateChange(v);
+                  else handleKycDateChange(null);
+                }}
                 disabled={saving === "kyc"}
-                className="text-xs px-3 py-1 border border-border hover:border-accent text-foreground"
+                className="border border-border px-3 py-2 text-sm bg-surface focus:outline-none focus:border-accent"
+                style={{ borderRadius: 2 }}
+              />
+              <button
+                onClick={() => handleKycDateChange(new Date().toISOString().slice(0, 10))}
+                disabled={saving === "kyc"}
+                className="text-xs px-3 py-2 border border-border hover:border-accent text-foreground"
                 style={{ borderRadius: 2 }}
               >
-                {saving === "kyc"
-                  ? "Saving..."
-                  : onboarding.kycVerified
-                    ? "Clear"
-                    : "Mark Verified"}
+                {saving === "kyc" ? "Saving..." : "Mark as today"}
               </button>
+              {onboarding.kycVerified && (
+                <button
+                  onClick={() => handleKycDateChange(null)}
+                  disabled={saving === "kyc"}
+                  className="text-xs px-3 py-2 border border-border hover:border-red-200 text-muted hover:text-foreground"
+                  style={{ borderRadius: 2 }}
+                >
+                  Clear
+                </button>
+              )}
             </div>
+            <p className="text-xs text-muted mt-1">
+              {onboarding.kycVerified ? (
+                <>
+                  <span className="font-medium text-green-700">Verified on {formatOnboardingDate(onboarding.kycVerified)}</span>
+                  {onboarding.kycVerifiedByName && (
+                    <span className="text-muted">
+                      {" "}· Marked by {onboarding.kycVerifiedByName}
+                      {onboarding.kycVerifiedMarkedAt && (
+                        <> on {formatOnboardingDate(onboarding.kycVerifiedMarkedAt)}</>
+                      )}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-gray-500">Not verified</span>
+              )}
+            </p>
           </div>
         </div>
 
@@ -1024,10 +1104,14 @@ export default function AdminFellowDetailPage() {
                 <div className="flex items-center gap-2">
                   {step.adminTracked ? (
                     <button
-                      onClick={
+                      onClick={() =>
                         step.key === "agreementSigned"
-                          ? handleAgreementToggle
-                          : handleKycToggle
+                          ? isComplete
+                            ? handleAgreementDateChange(null)
+                            : handleAgreementDateChange(new Date().toISOString().slice(0, 10))
+                          : isComplete
+                            ? handleKycDateChange(null)
+                            : handleKycDateChange(new Date().toISOString().slice(0, 10))
                       }
                       disabled={
                         saving === "agreement" || saving === "kyc"
@@ -1035,7 +1119,7 @@ export default function AdminFellowDetailPage() {
                       className="text-xs px-2 py-0.5 border border-border hover:border-accent text-foreground"
                       style={{ borderRadius: 2 }}
                     >
-                      {isComplete ? "Clear" : "Mark Done"}
+                      {saving === "agreement" || saving === "kyc" ? "Saving..." : isComplete ? "Clear" : "Mark Done"}
                     </button>
                   ) : (
                     <span

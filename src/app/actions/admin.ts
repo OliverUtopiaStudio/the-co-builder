@@ -205,7 +205,7 @@ export async function updateFellowOnboardingAdmin(
   step: "agreementSigned" | "kycVerified",
   value: string | null
 ) {
-  await requireAdmin();
+  const adminFellow = await requireAdmin();
 
   const normalized = value === "" ? null : (value?.trim() || null);
   const validation = validateOnboardingUpdate(step, normalized);
@@ -229,7 +229,18 @@ export async function updateFellowOnboardingAdmin(
     ventureCreated: false,
   };
 
-  const updated = { ...current, [step]: normalized };
+  const markedAt = new Date().toISOString();
+  const updated: OnboardingStatus & Record<string, unknown> = { ...current, [step]: normalized };
+
+  if (step === "agreementSigned") {
+    updated.agreementSignedBy = normalized ? adminFellow.id : null;
+    updated.agreementSignedByName = normalized ? adminFellow.fullName : null;
+    updated.agreementSignedMarkedAt = normalized ? markedAt : null;
+  } else {
+    updated.kycVerifiedBy = normalized ? adminFellow.id : null;
+    updated.kycVerifiedByName = normalized ? adminFellow.fullName : null;
+    updated.kycVerifiedMarkedAt = normalized ? markedAt : null;
+  }
 
   await db
     .update(fellows)

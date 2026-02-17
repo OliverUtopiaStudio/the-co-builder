@@ -42,8 +42,34 @@ async function requireAdmin() {
 // ─── KPIs ─────────────────────────────────────────────────────────
 
 export async function getKPIs() {
-  await requireAdmin();
-  return db.select().from(kpiMetrics).orderBy(kpiMetrics.displayOrder);
+  try {
+    console.log("[getKPIs] Starting...");
+    await requireAdmin();
+    console.log("[getKPIs] Admin check passed, querying database...");
+    const result = await db
+      .select()
+      .from(kpiMetrics)
+      .orderBy(sql`COALESCE(${kpiMetrics.displayOrder}, 999999), ${kpiMetrics.key}`);
+    
+    console.log(`[getKPIs] Query completed, found ${result.length} KPIs`);
+    
+    // Ensure dates are serialized properly for client components
+    const serialized = result.map((kpi) => ({
+      ...kpi,
+      updatedAt: kpi.updatedAt instanceof Date 
+        ? kpi.updatedAt.toISOString() 
+        : kpi.updatedAt,
+    }));
+    
+    return serialized;
+  } catch (error) {
+    console.error("[getKPIs] Error:", error);
+    // Re-throw with more context
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch KPIs: ${error.message}`);
+    }
+    throw new Error("Failed to fetch KPIs: Unknown error");
+  }
 }
 
 export async function updateKPI(
@@ -51,9 +77,18 @@ export async function updateKPI(
   data: { current?: number; pipelineNotes?: string }
 ) {
   await requireAdmin();
+  const updateData: { current?: number; pipelineNotes?: string; updatedAt: Date } = {
+    updatedAt: new Date(),
+  };
+  if (data.current !== undefined) {
+    updateData.current = data.current;
+  }
+  if (data.pipelineNotes !== undefined) {
+    updateData.pipelineNotes = data.pipelineNotes;
+  }
   await db
     .update(kpiMetrics)
-    .set({ ...data, updatedAt: new Date() })
+    .set(updateData)
     .where(eq(kpiMetrics.key, key));
   return { success: true };
 }

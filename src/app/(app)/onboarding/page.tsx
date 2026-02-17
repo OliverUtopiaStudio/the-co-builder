@@ -10,8 +10,13 @@ import {
 } from "@/app/actions/onboarding";
 import {
   type OnboardingStatus,
+  type ExperienceProfile,
   TOOLSTACK_ITEMS,
   RECOMMENDED_COMPUTE_STACK,
+  TOOLSTACK_WHY_NEED_THIS,
+  TOOLSTACK_HOW_USE_IT,
+  ONBOARDING_RESOURCES,
+  EXPERIENCE_PROFILE_LABELS,
   getOnboardingProgress,
   formatOnboardingDate,
 } from "@/lib/onboarding";
@@ -127,6 +132,8 @@ export default function OnboardingPage() {
 
   const { status, hasVenture, fellow } = state;
   const progress = getOnboardingProgress(status);
+  const experienceProfile = fellow.experienceProfile as ExperienceProfile | null;
+  const hasProfile = experienceProfile && ONBOARDING_RESOURCES[experienceProfile];
 
   return (
     <div className="space-y-6">
@@ -272,45 +279,58 @@ export default function OnboardingPage() {
                     {tool.description}
                   </p>
                   
-                  {/* Enhanced "Why you need this" section */}
+                  {/* "Why you need this" — profile-adaptive */}
                   <div className="bg-surface p-3 mb-3" style={{ borderRadius: 2 }}>
                     <div className="text-xs font-medium text-foreground mb-1">
                       Why you need this:
                     </div>
                     <ul className="text-xs text-foreground space-y-0.5">
-                      {tool.id === "claude" && (
+                      {(experienceProfile && TOOLSTACK_WHY_NEED_THIS[tool.id]?.[experienceProfile]) ? (
+                        TOOLSTACK_WHY_NEED_THIS[tool.id][experienceProfile]!.map((line, i) => (
+                          <li key={i}>{line}</li>
+                        ))
+                      ) : (
                         <>
-                          <li>→ Review your asset responses before submission</li>
-                          <li>→ Get suggestions for improvement</li>
-                          <li>→ Learn concepts as you build</li>
-                        </>
-                      )}
-                      {tool.id === "github" && (
-                        <>
-                          <li>→ Track changes to your venture documents</li>
-                          <li>→ Collaborate with studio team</li>
-                          <li>→ Build a portfolio of your work</li>
-                        </>
-                      )}
-                      {tool.id === "markdown" && (
-                        <>
-                          <li>→ Export assets as markdown files</li>
-                          <li>→ Create pitch decks and documents</li>
-                          <li>→ Standard format for AI tools</li>
+                          {tool.id === "claude" && (
+                            <>
+                              <li>→ Review your asset responses before submission</li>
+                              <li>→ Get suggestions for improvement</li>
+                              <li>→ Learn concepts as you build</li>
+                            </>
+                          )}
+                          {tool.id === "github" && (
+                            <>
+                              <li>→ Track changes to your venture documents</li>
+                              <li>→ Collaborate with studio team</li>
+                              <li>→ Build a portfolio of your work</li>
+                            </>
+                          )}
+                          {tool.id === "markdown" && (
+                            <>
+                              <li>→ Export assets as markdown files</li>
+                              <li>→ Create pitch decks and documents</li>
+                              <li>→ Standard format for AI tools</li>
+                            </>
+                          )}
                         </>
                       )}
                     </ul>
                   </div>
 
-                  {/* "How you'll use it" section */}
+                  {/* "How you'll use it" — profile-adaptive */}
                   <div className="mb-3">
                     <div className="text-xs font-medium text-muted mb-1 italic">
                       How you&apos;ll use it:
                     </div>
                     <div className="text-xs text-muted">
-                      {tool.id === "claude" && "Daily: Review and improve your work | Weekly: Deep dives on complex concepts"}
-                      {tool.id === "github" && "Daily: Commit your asset work | Weekly: Review changes with studio team"}
-                      {tool.id === "markdown" && "Daily: Write asset responses | Weekly: Export to Google Drive"}
+                      {experienceProfile && TOOLSTACK_HOW_USE_IT[tool.id]?.[experienceProfile]
+                        ? TOOLSTACK_HOW_USE_IT[tool.id][experienceProfile]
+                        : (() => {
+                            if (tool.id === "claude") return "Daily: Review and improve your work | Weekly: Deep dives on complex concepts";
+                            if (tool.id === "github") return "Daily: Commit your asset work | Weekly: Review changes with studio team";
+                            if (tool.id === "markdown") return "Daily: Write asset responses | Weekly: Export to Google Drive";
+                            return "";
+                          })()}
                     </div>
                   </div>
 
@@ -555,6 +575,34 @@ export default function OnboardingPage() {
           )}
         </div>
       </div>
+
+      {/* Profile-specific resource recommendations */}
+      {hasProfile && (
+        <div
+          className="bg-surface border border-border p-6"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="label-uppercase mb-2">Recommended for you</div>
+          <p className="text-muted text-sm mb-4">
+            Resources tailored for {EXPERIENCE_PROFILE_LABELS[experienceProfile]}:
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {ONBOARDING_RESOURCES[experienceProfile].map((res, i) => (
+              <a
+                key={i}
+                href={res.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block p-4 bg-background border border-border hover:border-accent/50 transition-colors"
+                style={{ borderRadius: 2 }}
+              >
+                <div className="font-medium text-sm">{res.label}</div>
+                <div className="text-muted text-xs mt-0.5">{res.description}</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Begin Building Button */}
       <div

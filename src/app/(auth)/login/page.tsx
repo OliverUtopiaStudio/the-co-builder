@@ -15,7 +15,7 @@ import {
 } from "@/components/auth/styles";
 import { getSafeRedirect } from "@/lib/safe-redirect";
 
-type LoginMode = "landing" | "fellow" | "studio" | "stakeholder" | "reset";
+type LoginMode = "landing" | "fellow" | "studio" | "reset";
 
 /* ─── Main login orchestrator ─── */
 function LoginForm() {
@@ -23,13 +23,9 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const modeParam = searchParams.get("mode");
   const initialMode: LoginMode =
-    modeParam === "studio"
+    modeParam === "studio" || modeParam === "admin"
       ? "studio"
-      : modeParam === "stakeholder"
-        ? "stakeholder"
-        : modeParam === "admin"
-          ? "studio"
-          : "landing";
+      : "landing";
   const [mode, setMode] = useState<LoginMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -81,11 +77,27 @@ function LoginForm() {
         return;
       }
 
-      const { data: fellow } = await supabase
+      let { data: fellow } = await supabase
         .from("fellows")
         .select("role, lifecycle_stage")
         .eq("auth_user_id", user.id)
         .single();
+
+      // Create fellow if missing (e.g. invited user who signed up elsewhere)
+      if (!fellow && user) {
+        const res = await fetch("/api/fellows", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: user.user_metadata?.full_name,
+            email: user.email,
+          }),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          fellow = { role: created.role ?? "fellow", lifecycle_stage: created.lifecycle_stage ?? "onboarding" };
+        }
+      }
 
       const target = getSafeRedirect(rawRedirect, "") || getDefaultTarget(mode, fellow?.role);
       if (target) {
@@ -103,13 +115,6 @@ function LoginForm() {
     mode: LoginMode,
     role: string | null | undefined
   ): string {
-    if (mode === "stakeholder") {
-      if (role === "stakeholder") return "/portfolio";
-      setError(
-        "This account does not have stakeholder access. Try Fellow or Studio sign in."
-      );
-      return "";
-    }
     if (mode === "studio") {
       if (role === "admin" || role === "studio") return "/studio";
       setError(
@@ -117,7 +122,6 @@ function LoginForm() {
       );
       return "";
     }
-    if (role === "stakeholder") return "/portfolio";
     if (role === "admin" || role === "studio") return "/studio";
     return "/dashboard";
   }
@@ -228,8 +232,8 @@ function LoginForm() {
     );
   }
 
-  /* ═══ LOGIN FORM (Fellow / Studio / Stakeholder) ═══ */
-  const isStaffOrStakeholder = mode === "studio" || mode === "stakeholder";
+  /* ═══ LOGIN FORM (Fellow / Studio) ═══ */
+  const isStudio = mode === "studio";
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
@@ -243,18 +247,12 @@ function LoginForm() {
                   THE<br />UTOPIA<br />STUDIO
                 </div>
                 <h1 className="text-[28px] font-medium text-white leading-tight">
-                  {mode === "studio"
-                    ? "Studio Sign In"
-                    : mode === "stakeholder"
-                      ? "Stakeholder Sign In"
-                      : "Fellow Sign In"}
+                  {isStudio ? "Studio Sign In" : "Fellow Sign In"}
                 </h1>
                 <p className="text-white/50 text-sm mt-1.5">
-                  {mode === "studio"
+                  {isStudio
                     ? "Access the Studio dashboard"
-                    : mode === "stakeholder"
-                      ? "View fellow portfolio and ventures"
-                      : "Continue your Co-Build journey"}
+                    : "Continue your Co-Build journey"}
                 </p>
               </div>
               <button
@@ -287,7 +285,7 @@ function LoginForm() {
                 className={authInputClass}
                 style={{ borderRadius: 2 }}
                 placeholder={
-                  isStaffOrStakeholder ? "you@company.com" : "you@example.com"
+                  isStudio ? "you@company.com" : "you@example.com"
                 }
               />
             </div>
@@ -332,15 +330,13 @@ function LoginForm() {
             >
               {loading
                 ? "Signing in..."
-                : mode === "studio"
+                : isStudio
                   ? "Sign In to Studio →"
-                  : mode === "stakeholder"
-                    ? "Sign In →"
-                    : "Sign In →"}
+                  : "Sign In →"}
             </button>
           </form>
 
-          {!isStaffOrStakeholder && (
+          {!isStudio && (
             <div className="px-10 pb-6 -mt-2">
               <p className="text-center text-xs text-white/30">
                 Don&apos;t have an account?{" "}

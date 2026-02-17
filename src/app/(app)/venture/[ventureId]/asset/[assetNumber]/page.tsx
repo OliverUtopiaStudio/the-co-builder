@@ -20,6 +20,8 @@ import {
   getAssetResources,
   getAdaptiveDescription,
 } from "@/lib/guidance";
+import AssetNavigation from "@/components/navigation/AssetNavigation";
+import { getAssetRequirementsForVenture } from "@/app/actions/ventures";
 
 // Profile-specific contextual tip for framework questions (simplified vs detailed language)
 const QUESTION_CONTEXT_TIPS: Record<string, string> = {
@@ -126,6 +128,8 @@ export default function AssetWorkflowPage() {
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string | null>>({});
   const [experienceProfile, setExperienceProfile] = useState<string | null>(null);
+  const [completedAssets, setCompletedAssets] = useState<Set<number>>(new Set());
+  const [assetRequirements, setAssetRequirements] = useState<Record<number, boolean>>({});
   const saveTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Load existing responses
@@ -161,6 +165,21 @@ export default function AssetWorkflowPage() {
         if (compData) {
           setIsComplete(compData.is_complete);
         }
+
+        // Load all completed assets for navigation
+        const { data: allCompletions } = await supabase
+          .from("asset_completion")
+          .select("asset_number, is_complete")
+          .eq("venture_id", ventureId)
+          .eq("is_complete", true);
+
+        if (allCompletions) {
+          setCompletedAssets(new Set(allCompletions.map((c) => c.asset_number)));
+        }
+
+        // Load asset requirements
+        const requirements = await getAssetRequirementsForVenture(ventureId);
+        setAssetRequirements(requirements);
 
         // Fetch fellow's experience profile (for conditional guidance)
         const { data: ventureData } = await supabase
@@ -457,6 +476,15 @@ export default function AssetWorkflowPage() {
 
   return (
     <div className="space-y-6">
+      {/* Enhanced Navigation */}
+      <AssetNavigation
+        currentAssetNumber={assetNumber}
+        ventureId={ventureId}
+        currentStageNumber={stage.number}
+        completedAssets={completedAssets}
+        assetRequirements={assetRequirements}
+      />
+
       {/* Header */}
       <div>
         <Link
