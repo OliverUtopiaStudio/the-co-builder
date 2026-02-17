@@ -12,47 +12,24 @@ import {
 } from "@/lib/questions";
 import { formatFileSize } from "@/lib/utils";
 import { saveAssetToDrive } from "@/app/actions/google-drive";
+import { EXPERIENCE_PROFILE_LABELS } from "@/lib/onboarding";
+import {
+  getGuidanceTip,
+  getAssetGuidance,
+  getExperienceExample,
+  getAssetResources,
+  getAdaptiveDescription,
+} from "@/lib/guidance";
 
-// ─── Experience-based guidance tips ──────────────────────────────
-// Maps experience_profile to asset-type-appropriate guidance.
-// Grouped by stage range for broad relevance.
-
-const GUIDANCE_TIPS: Record<string, Record<string, string>> = {
-  first_time_builder: {
-    "01": "Start broad, then narrow. First-timers often commit to a solution too early — validate the problem space first.",
-    "02": "Don't build in a vacuum. Even quick conversations with 3-5 potential users will save you months.",
-    "03": "Your MVP doesn't need to be a product — a landing page, mockup, or even a pitch deck can validate demand.",
-    "04": "Think about the business model early, even if it changes. Revenue thinking sharpens your proposition.",
-    "05": "Document everything. As a first-timer, your learning curve IS your competitive advantage if you capture it.",
-    "06": "Don't be afraid to pivot. The best ventures rarely look like the original idea.",
-    "07": "Build in public where you can. Feedback loops accelerate learning dramatically.",
-  },
-  experienced_founder: {
-    "01": "You know the playbook — but watch for confirmation bias. Challenge your own assumptions harder than usual.",
-    "02": "Leverage your network for fast validation, but also seek signal from outside your bubble.",
-    "03": "You can move faster to MVP, but resist the temptation to over-engineer. Ship the simplest thing first.",
-    "04": "Use your experience to build a stronger financial model earlier — investors will expect this from you.",
-    "05": "Your biggest risk is assuming this market works like your last one. Stay curious.",
-    "06": "Apply your fundraising experience, but be open to new funding models specific to this ecosystem.",
-    "07": "Use your operational experience to set realistic milestones — but don't let past patterns limit ambition.",
-  },
-  corporate_innovator: {
-    "01": "Think founder, not project manager. Startups need conviction under uncertainty, not perfect plans.",
-    "02": "Your corporate network is gold for B2B validation — but learn to talk to real end-users too.",
-    "03": "Ship something small and imperfect. Corporate quality bars can slow you down here.",
-    "04": "Translate your enterprise experience into unit economics. The language is different but the logic transfers.",
-    "05": "Your structured thinking is an asset, but practice making decisions with 30% of the data you're used to.",
-    "06": "Corporate partnerships can be your unfair advantage — but don't let them define your entire strategy.",
-    "07": "Build a team culture that's fast and scrappy, not process-heavy. This is the biggest mindset shift.",
-  },
+// Profile-specific contextual tip for framework questions (simplified vs detailed language)
+const QUESTION_CONTEXT_TIPS: Record<string, string> = {
+  first_time_builder:
+    "Take your time with each question — there are no wrong answers at this stage. Add as much detail as feels useful.",
+  experienced_founder:
+    "You know the drill — be concise and specific. Quality over quantity.",
+  corporate_innovator:
+    "Think founder, not memo: be direct and actionable. Avoid corporate jargon.",
 };
-
-function getGuidanceTip(experienceProfile: string | null, stageNumber: string): string | null {
-  if (!experienceProfile) return null;
-  const tips = GUIDANCE_TIPS[experienceProfile];
-  if (!tips) return null;
-  return tips[stageNumber] || null;
-}
 
 // Find asset metadata from data.ts
 function findAsset(assetNumber: number) {
@@ -145,15 +122,17 @@ export default function AssetWorkflowPage() {
   const [driveSaveError, setDriveSaveError] = useState<string | null>(null);
   const [driveSaveSuccess, setDriveSaveSuccess] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [uploadingFiles, setUploadingFiles] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string | null>>({});
   const [experienceProfile, setExperienceProfile] = useState<string | null>(null);
   const saveTimeouts = useRef<Record<string, NodeJS.Timeout>>({});
 
   // Load existing responses
-  useEffect(() => {
-    async function load() {
-      try {
+  const loadResponses = useCallback(async () => {
+    setLoadError(null);
+    setLoading(true);
+    try {
         const supabase = createClient();
 
         // Fetch responses
@@ -203,12 +182,15 @@ export default function AssetWorkflowPage() {
         }
       } catch (err) {
         console.error("Failed to load responses:", err);
+        setLoadError(err instanceof Error ? err.message : "Failed to load asset");
       } finally {
         setLoading(false);
       }
-    }
-    load();
   }, [ventureId, assetNumber]);
+
+  useEffect(() => {
+    loadResponses();
+  }, [loadResponses]);
 
   // Auto-save a response
   const saveValue = useCallback(
@@ -429,6 +411,27 @@ export default function AssetWorkflowPage() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <p className="text-muted">{loadError}</p>
+        <button
+          onClick={loadResponses}
+          className="px-4 py-2 bg-accent text-white text-sm font-medium hover:bg-accent/90 transition-colors"
+          style={{ borderRadius: 2 }}
+        >
+          Retry
+        </button>
+        <Link
+          href={`/venture/${ventureId}`}
+          className="text-sm text-accent hover:underline"
+        >
+          Back to Venture
+        </Link>
+      </div>
+    );
+  }
+
   const { asset, stage } = assetInfo;
   const currentStep = workflow.steps[currentStepIdx];
   const totalSteps = workflow.steps.length;
@@ -491,24 +494,38 @@ export default function AssetWorkflowPage() {
         </div>
       )}
 
-      {/* Experience-based guidance tip */}
-      {(() => {
-        const tip = getGuidanceTip(experienceProfile, stage.number);
-        if (!tip) return null;
-        const profileLabels: Record<string, string> = {
-          first_time_builder: "First-Time Builder",
-          experienced_founder: "Experienced Founder",
-          corporate_innovator: "Corporate Innovator",
-        };
-        return (
-          <div className="bg-blue-50 border border-blue-200 p-4" style={{ borderRadius: 2 }}>
-            <div className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">
-              💡 Guidance for {profileLabels[experienceProfile!] || "you"}
-            </div>
-            <p className="text-sm text-blue-800">{tip}</p>
-          </div>
-        );
-      })()}
+      {/* Experience-based guidance tips */}
+      {experienceProfile && (
+        <>
+          {/* Stage-level guidance */}
+          {(() => {
+            const stageTip = getGuidanceTip(experienceProfile, stage.number);
+            if (!stageTip) return null;
+            return (
+              <div className="bg-blue-50 border border-blue-200 p-4" style={{ borderRadius: 2 }}>
+                <div className="text-xs text-blue-600 font-medium uppercase tracking-wide mb-1">
+                  💡 Stage Guidance for {EXPERIENCE_PROFILE_LABELS[experienceProfile as keyof typeof EXPERIENCE_PROFILE_LABELS]}
+                </div>
+                <p className="text-sm text-blue-800">{stageTip}</p>
+              </div>
+            );
+          })()}
+          
+          {/* Asset-level guidance */}
+          {(() => {
+            const assetTip = getAssetGuidance(experienceProfile, assetNumber);
+            if (!assetTip) return null;
+            return (
+              <div className="bg-purple-50 border border-purple-200 p-4" style={{ borderRadius: 2 }}>
+                <div className="text-xs text-purple-600 font-medium uppercase tracking-wide mb-1">
+                  🎯 Asset-Specific Guidance
+                </div>
+                <p className="text-sm text-purple-800">{assetTip}</p>
+              </div>
+            );
+          })()}
+        </>
+      )}
 
       {/* Step Progress */}
       <div className="bg-surface border border-border p-4" style={{ borderRadius: 2 }}>
@@ -559,22 +576,46 @@ export default function AssetWorkflowPage() {
         {currentStep.description && (
           <p className="text-sm text-muted mb-6">{currentStep.description}</p>
         )}
+        {experienceProfile && QUESTION_CONTEXT_TIPS[experienceProfile] && (
+          <p className="text-xs text-muted italic mb-4 pl-3 border-l-2 border-accent/30">
+            {QUESTION_CONTEXT_TIPS[experienceProfile]}
+          </p>
+        )}
 
         <div className="space-y-6">
-          {currentStep.questions.map((question) => (
-            <QuestionField
-              key={question.id}
-              question={question}
-              value={values[question.id]}
-              onChange={(val) => handleChange(question.id, val)}
-              onBlur={() => handleBlur(question.id, question)}
-              onFileUpload={(file) => handleFileUpload(question.id, file)}
-              isSaving={saving[question.id] || false}
-              isSaved={saved[question.id] || false}
-              isUploading={uploadingFiles[question.id] || false}
-              validationError={validationErrors[question.id] || null}
-            />
-          ))}
+          {currentStep.questions.map((question) => {
+            // Get experience-specific example if available
+            const experienceExample = experienceProfile
+              ? getExperienceExample(assetNumber, question.id, experienceProfile)
+              : null;
+            
+            // Get adaptive description if available
+            const adaptiveDesc = experienceProfile
+              ? getAdaptiveDescription(assetNumber, question.id, experienceProfile)
+              : null;
+            
+            // Build question with experience-specific adaptations
+            const questionAdapted = {
+              ...question,
+              ...(experienceExample ? { placeholder: experienceExample } : {}),
+              ...(adaptiveDesc ? { description: adaptiveDesc } : {}),
+            };
+            
+            return (
+              <QuestionField
+                key={question.id}
+                question={questionAdapted}
+                value={values[question.id]}
+                onChange={(val) => handleChange(question.id, val)}
+                onBlur={() => handleBlur(question.id, question)}
+                onFileUpload={(file) => handleFileUpload(question.id, file)}
+                isSaving={saving[question.id] || false}
+                isSaved={saved[question.id] || false}
+                isUploading={uploadingFiles[question.id] || false}
+                validationError={validationErrors[question.id] || null}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -649,6 +690,35 @@ export default function AssetWorkflowPage() {
           </div>
         )}
       </div>
+
+      {/* Resource Recommendations */}
+      {experienceProfile && (() => {
+        const resources = getAssetResources(experienceProfile, assetNumber);
+        if (resources.length === 0) return null;
+        return (
+          <div className="bg-green-50 border border-green-200 p-4" style={{ borderRadius: 2 }}>
+            <div className="text-xs text-green-600 font-medium uppercase tracking-wide mb-2">
+              📚 Recommended Resources
+            </div>
+            <div className="space-y-2">
+              {resources.map((resource, idx) => (
+                <a
+                  key={idx}
+                  href={resource.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-green-800 hover:text-green-900 hover:underline"
+                >
+                  <span className="font-medium">{resource.label}</span>
+                  {resource.description && (
+                    <span className="text-xs text-green-700 ml-2">— {resource.description}</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Asset Navigation */}
       <div className="border-t border-border pt-6 flex items-center justify-between">
