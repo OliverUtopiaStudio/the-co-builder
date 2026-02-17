@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { frameworkEdits, fellows } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { frameworkEdits, frameworkEditHistory, frameworkNotifications, fellows } from "@/db/schema";
+import { eq, and, desc, isNull, sql, ne, or } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 import { stages } from "@/lib/data";
 
@@ -133,8 +133,10 @@ export async function saveFrameworkEdit(
   const fkey = fieldKey ?? "";
 
   if (value.trim() === "") {
-    await db
-      .delete(frameworkEdits)
+    // Get existing value before deletion for history
+    const existing = await db
+      .select({ id: frameworkEdits.id, value: frameworkEdits.value })
+      .from(frameworkEdits)
       .where(
         and(
           eq(frameworkEdits.assetNumber, assetNumber),
@@ -142,12 +144,32 @@ export async function saveFrameworkEdit(
           eq(frameworkEdits.fieldId, fid),
           eq(frameworkEdits.fieldKey, fkey)
         )
-      );
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      // Create history record for deletion
+      await db.insert(frameworkEditHistory).values({
+        frameworkEditId: existing[0].id,
+        assetNumber,
+        adminId: fellow.id,
+        fieldType,
+        fieldId: fid,
+        fieldKey: fkey,
+        oldValue: existing[0].value,
+        newValue: null,
+        action: "deleted",
+      });
+
+      await db
+        .delete(frameworkEdits)
+        .where(eq(frameworkEdits.id, existing[0].id));
+    }
     return { deleted: true };
   }
 
   const existing = await db
-    .select({ id: frameworkEdits.id })
+    .select({ id: frameworkEdits.id, value: frameworkEdits.value })
     .from(frameworkEdits)
     .where(
       and(
@@ -161,6 +183,20 @@ export async function saveFrameworkEdit(
 
   const now = new Date();
   if (existing.length > 0) {
+    const oldValue = existing[0].value;
+    // Create history record for update
+    await db.insert(frameworkEditHistory).values({
+      frameworkEditId: existing[0].id,
+      assetNumber,
+      adminId: fellow.id,
+      fieldType,
+      fieldId: fid,
+      fieldKey: fkey,
+      oldValue: oldValue,
+      newValue: value,
+      action: "updated",
+    });
+
     await db
       .update(frameworkEdits)
       .set({ value, adminId: fellow.id, updatedAt: now })
@@ -181,7 +217,20 @@ export async function saveFrameworkEdit(
     })
     .returning({ id: frameworkEdits.id });
 
-  return { id: inserted!.id };
+  // Create history record for creation
+  await db.insert(frameworkEditHistory).values({
+    frameworkEditId: inserted.id,
+    assetNumber,
+    adminId: fellow.id,
+    fieldType,
+    fieldId: fid,
+    fieldKey: fkey,
+    oldValue: null,
+    newValue: value,
+    action: "created",
+  });
+
+  return { id: inserted.id };
 }
 
 // ─── Delete single edit by id ─────────────────────────────────────
@@ -310,4 +359,346 @@ export async function importFrameworkEdits(data: {
   }
 
   return { imported, errors };
+}
+
+// ─── Version History ────────────────────────────────────────────────
+
+export interface FrameworkEditHistoryRecord {
+  id: string;
+  frameworkEditId: string | null;
+  assetNumber: number;
+  adminId: string;
+  adminName: string;
+  fieldType: string;
+  fieldId: string;
+  fieldKey: string;
+  oldValue: string | null;
+  newValue: string | null;
+  action: "created" | "updated" | "deleted";
+  createdAt: Date;
+}
+
+export async function getFrameworkEditHistory(
+  assetNumber: number
+): Promise<FrameworkEditHistoryRecord[]> {
+  await requireAdmin();
+
+  const history = await db
+    .select({
+      id: frameworkEditHistory.id,
+      frameworkEditId: frameworkEditHistory.frameworkEditId,
+      assetNumber: frameworkEditHistory.assetNumber,
+      adminId: frameworkEditHistory.adminId,
+      fieldType: frameworkEditHistory.fieldType,
+      fieldId: frameworkEditHistory.fieldId,
+      fieldKey: frameworkEditHistory.fieldKey,
+      oldValue: frameworkEditHistory.oldValue,
+      newValue: frameworkEditHistory.newValue,
+      action: frameworkEditHistory.action,
+      createdAt: frameworkEditHistory.createdAt,
+    })
+    .from(frameworkEditHistory)
+    .where(eq(frameworkEditHistory.assetNumber, assetNumber))
+    .orderBy(desc(frameworkEditHistory.createdAt));
+
+  // Get admin names
+  const adminIds = [...new Set(history.map((h) => h.adminId))];
+  const allFellows = await db
+    .select({ id: fellows.id, fullName: fellows.fullName })
+    .from(fellows);
+  
+  const adminMap = new Map(
+    allFellows
+      .filter((f) => adminIds.includes(f.id))
+      .map((a) => [a.id, a.fullName])
+  );
+
+  return history.map((h) => ({
+    ...h,
+    adminName: adminMap.get(h.adminId) || "Unknown",
+    action: h.action as "created" | "updated" | "deleted",
+  }));
+}
+
+export async function getFrameworkEditHistoryForField(
+  assetNumber: number,
+  fieldType: string,
+  fieldId: string,
+  fieldKey: string
+): Promise<FrameworkEditHistoryRecord[]> {
+  await requireAdmin();
+
+  const history = await db
+    .select({
+      id: frameworkEditHistory.id,
+      frameworkEditId: frameworkEditHistory.frameworkEditId,
+      assetNumber: frameworkEditHistory.assetNumber,
+      adminId: frameworkEditHistory.adminId,
+      fieldType: frameworkEditHistory.fieldType,
+      fieldId: frameworkEditHistory.fieldId,
+      fieldKey: frameworkEditHistory.fieldKey,
+      oldValue: frameworkEditHistory.oldValue,
+      newValue: frameworkEditHistory.newValue,
+      action: frameworkEditHistory.action,
+      createdAt: frameworkEditHistory.createdAt,
+    })
+    .from(frameworkEditHistory)
+    .where(
+      and(
+        eq(frameworkEditHistory.assetNumber, assetNumber),
+        eq(frameworkEditHistory.fieldType, fieldType),
+        eq(frameworkEditHistory.fieldId, fieldId ?? ""),
+        eq(frameworkEditHistory.fieldKey, fieldKey ?? "")
+      )
+    )
+    .orderBy(desc(frameworkEditHistory.createdAt));
+
+  const adminIds = [...new Set(history.map((h) => h.adminId))];
+  const allFellows = await db
+    .select({ id: fellows.id, fullName: fellows.fullName })
+    .from(fellows);
+  
+  const adminMap = new Map(
+    allFellows
+      .filter((f) => adminIds.includes(f.id))
+      .map((a) => [a.id, a.fullName])
+  );
+
+  return history.map((h) => ({
+    ...h,
+    adminName: adminMap.get(h.adminId) || "Unknown",
+    action: h.action as "created" | "updated" | "deleted",
+  }));
+}
+
+export async function rollbackFrameworkEdit(
+  historyId: string
+): Promise<{ success: boolean; error?: string }> {
+  const fellow = await requireAdmin();
+
+  // Get the history record
+  const [historyRecord] = await db
+    .select()
+    .from(frameworkEditHistory)
+    .where(eq(frameworkEditHistory.id, historyId))
+    .limit(1);
+
+  if (!historyRecord) {
+    return { success: false, error: "History record not found" };
+  }
+
+  // Restore the old value (or delete if it was a creation)
+  if (historyRecord.action === "created") {
+    // If it was created, delete the current edit
+    if (historyRecord.frameworkEditId) {
+      await db
+        .delete(frameworkEdits)
+        .where(eq(frameworkEdits.id, historyRecord.frameworkEditId));
+    }
+  } else {
+    // Restore the old value
+    const valueToRestore = historyRecord.oldValue;
+    if (valueToRestore === null) {
+      // Delete if old value was null
+      if (historyRecord.frameworkEditId) {
+        await db
+          .delete(frameworkEdits)
+          .where(eq(frameworkEdits.id, historyRecord.frameworkEditId));
+      }
+    } else {
+      // Update or create the edit with the old value
+      const existing = await db
+        .select({ id: frameworkEdits.id })
+        .from(frameworkEdits)
+        .where(
+          and(
+            eq(frameworkEdits.assetNumber, historyRecord.assetNumber),
+            eq(frameworkEdits.fieldType, historyRecord.fieldType),
+            eq(frameworkEdits.fieldId, historyRecord.fieldId),
+            eq(frameworkEdits.fieldKey, historyRecord.fieldKey)
+          )
+        )
+        .limit(1);
+
+      const now = new Date();
+      if (existing.length > 0) {
+        await db
+          .update(frameworkEdits)
+          .set({ value: valueToRestore, adminId: fellow.id, updatedAt: now })
+          .where(eq(frameworkEdits.id, existing[0].id));
+      } else {
+        await db.insert(frameworkEdits).values({
+          assetNumber: historyRecord.assetNumber,
+          adminId: fellow.id,
+          fieldType: historyRecord.fieldType,
+          fieldId: historyRecord.fieldId,
+          fieldKey: historyRecord.fieldKey,
+          value: valueToRestore,
+          updatedAt: now,
+        });
+      }
+    }
+  }
+
+  // Create a new history record for the rollback
+  await db.insert(frameworkEditHistory).values({
+    frameworkEditId: historyRecord.frameworkEditId,
+    assetNumber: historyRecord.assetNumber,
+    adminId: fellow.id,
+    fieldType: historyRecord.fieldType,
+    fieldId: historyRecord.fieldId,
+    fieldKey: historyRecord.fieldKey,
+    oldValue: historyRecord.newValue,
+    newValue: historyRecord.oldValue,
+    action: "updated",
+  });
+
+  return { success: true };
+}
+
+// ─── Notifications ──────────────────────────────────────────────────
+
+export async function notifyFellowsOfFrameworkUpdate(
+  assetNumber: number,
+  message?: string
+): Promise<{ success: boolean; notified: number; error?: string }> {
+  await requireAdmin();
+
+  const asset = stages
+    .flatMap((s) => s.assets)
+    .find((a) => a.number === assetNumber);
+
+  const defaultMessage = `Framework asset "${asset?.title || `Asset #${assetNumber}`}" has been updated.`;
+  const notificationMessage = message || defaultMessage;
+
+  // Get all fellows (role is 'fellow' by default)
+  // We want to notify all users who are not admins
+  const allFellows = await db
+    .select({ id: fellows.id })
+    .from(fellows)
+    .where(or(eq(fellows.role, "fellow"), isNull(fellows.role)));
+
+  // Create notifications for all fellows
+  if (allFellows.length > 0) {
+    await db.insert(frameworkNotifications).values(
+      allFellows.map((fellow) => ({
+        fellowId: fellow.id,
+        assetNumber,
+        notificationType: "framework_updated",
+        message: notificationMessage,
+        read: false,
+      }))
+    );
+  }
+
+  return { success: true, notified: allFellows.length };
+}
+
+export interface FrameworkNotification {
+  id: string;
+  fellowId: string | null;
+  assetNumber: number;
+  notificationType: string;
+  message: string;
+  read: boolean;
+  createdAt: Date;
+  readAt: Date | null;
+}
+
+export async function getFrameworkNotifications(
+  fellowId?: string
+): Promise<FrameworkNotification[]> {
+  if (fellowId) {
+    // Get notifications for a specific fellow
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Unauthorized");
+
+    const [fellow] = await db
+      .select()
+      .from(fellows)
+      .where(eq(fellows.authUserId, user.id))
+      .limit(1);
+
+    if (!fellow || fellow.id !== fellowId) {
+      throw new Error("Forbidden");
+    }
+
+    const notifications = await db
+      .select()
+      .from(frameworkNotifications)
+      .where(eq(frameworkNotifications.fellowId, fellowId))
+      .orderBy(desc(frameworkNotifications.createdAt));
+
+    return notifications.map((n) => ({
+      id: n.id,
+      fellowId: n.fellowId ?? null,
+      assetNumber: n.assetNumber,
+      notificationType: n.notificationType,
+      message: n.message,
+      read: n.read,
+      createdAt: n.createdAt,
+      readAt: n.readAt ?? null,
+    }));
+  } else {
+    // Admin can get all notifications
+    await requireAdmin();
+    const notifications = await db
+      .select()
+      .from(frameworkNotifications)
+      .orderBy(desc(frameworkNotifications.createdAt));
+
+    return notifications.map((n) => ({
+      id: n.id,
+      fellowId: n.fellowId ?? null,
+      assetNumber: n.assetNumber,
+      notificationType: n.notificationType,
+      message: n.message,
+      read: n.read,
+      createdAt: n.createdAt,
+      readAt: n.readAt ?? null,
+    }));
+  }
+}
+
+export async function markNotificationRead(
+  notificationId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const [fellow] = await db
+    .select()
+    .from(fellows)
+    .where(eq(fellows.authUserId, user.id))
+    .limit(1);
+
+  if (!fellow) throw new Error("Forbidden");
+
+  // Verify the notification belongs to this fellow
+  const [notification] = await db
+    .select()
+    .from(frameworkNotifications)
+    .where(eq(frameworkNotifications.id, notificationId))
+    .limit(1);
+
+  if (!notification) {
+    return { success: false, error: "Notification not found" };
+  }
+
+  if (notification.fellowId !== fellow.id) {
+    return { success: false, error: "Forbidden" };
+  }
+
+  await db
+    .update(frameworkNotifications)
+    .set({ read: true, readAt: new Date() })
+    .where(eq(frameworkNotifications.id, notificationId));
+
+  return { success: true };
 }
