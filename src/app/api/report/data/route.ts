@@ -41,9 +41,7 @@ async function checkInternalAuth(): Promise<boolean> {
 
 export async function GET(request: NextRequest) {
   const isInternal = await checkInternalAuth();
-  if (!isInternal && !validateReportAuth(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // Password gate removed — stakeholder view is public, internal view requires auth
 
   // 1. Fetch config
   const config = await db
