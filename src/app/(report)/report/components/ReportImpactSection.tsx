@@ -10,6 +10,24 @@ type ImpactData = {
   activeVentures: number;
   assetCompletionRate: number;
   lifecycleDistribution: Record<string, number>;
+  ventureDetails?: Array<{
+    id: string;
+    name: string;
+    podAlignmentScore: string | null;
+    isActive: boolean;
+  }>;
+  podBreakdown?: Array<{
+    podId: string;
+    podName: string;
+    podColor: string | null;
+    fellowCount: number;
+    avgQatarImpact: number | null;
+    avgGlobalPotential: number | null;
+  }>;
+  ratingDistribution?: {
+    qatar: number[];
+    global: number[];
+  };
 };
 
 const LIFECYCLE_LABELS: Record<string, string> = {
@@ -79,6 +97,7 @@ function MetricCard({
 
 export default function ReportImpactSection({
   impact,
+  isInternal = false,
 }: {
   impact: ImpactData;
   isInternal?: boolean;
@@ -211,6 +230,180 @@ export default function ReportImpactSection({
           </div>
         </div>
       </div>
+
+      {/* Per-pod breakdown (internal only) */}
+      {isInternal && impact.podBreakdown && impact.podBreakdown.length > 0 && (
+        <div
+          className="bg-surface border border-border p-5"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="label-uppercase text-muted mb-3 text-[10px]">
+            Impact by Pod
+          </div>
+          <div className="space-y-3">
+            {impact.podBreakdown.map((pod) => (
+              <div key={pod.podId} className="flex items-center gap-4">
+                <div
+                  className="w-2 h-8 flex-shrink-0"
+                  style={{
+                    backgroundColor: pod.podColor || "#CC5536",
+                    borderRadius: 1,
+                  }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-foreground">
+                    {pod.podName}
+                  </div>
+                  <div className="text-xs text-muted">
+                    {pod.fellowCount} fellows
+                  </div>
+                </div>
+                <div className="flex gap-4 text-xs text-right">
+                  <div>
+                    <div className="text-muted">Qatar</div>
+                    <div className="font-semibold text-foreground">
+                      {pod.avgQatarImpact != null
+                        ? pod.avgQatarImpact
+                        : "\u2014"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-muted">Global</div>
+                    <div className="font-semibold text-foreground">
+                      {pod.avgGlobalPotential != null
+                        ? pod.avgGlobalPotential
+                        : "\u2014"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Rating distribution histograms (internal only) */}
+      {isInternal && impact.ratingDistribution && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {(["qatar", "global"] as const).map((type) => {
+            const buckets = impact.ratingDistribution![type];
+            const maxBucket = Math.max(...buckets, 1);
+            const labels = ["0-19", "20-39", "40-59", "60-79", "80-100"];
+            return (
+              <div
+                key={type}
+                className="bg-surface border border-border p-5"
+                style={{ borderRadius: 2 }}
+              >
+                <div className="label-uppercase text-muted mb-3 text-[10px]">
+                  {type === "qatar" ? "Qatar Impact" : "Global Potential"}{" "}
+                  Distribution
+                </div>
+                <div
+                  className="flex items-end gap-2"
+                  style={{ height: 80 }}
+                >
+                  {buckets.map((count, i) => (
+                    <div
+                      key={i}
+                      className="flex-1 flex flex-col items-center"
+                    >
+                      <div
+                        className="w-full"
+                        style={{
+                          height: Math.max((count / maxBucket) * 60, 2),
+                          backgroundColor:
+                            count > 0 ? "#CC5536" : "#E3E1E2",
+                          borderRadius: 1,
+                          opacity:
+                            count > 0
+                              ? 0.7 + (count / maxBucket) * 0.3
+                              : 0.3,
+                        }}
+                      />
+                      <div className="text-[9px] text-muted mt-1">
+                        {labels[i]}
+                      </div>
+                      <div className="text-[10px] font-semibold text-foreground">
+                        {count}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Venture alignment table (internal only) */}
+      {isInternal &&
+        impact.ventureDetails &&
+        impact.ventureDetails.length > 0 && (
+          <div
+            className="bg-surface border border-border p-5"
+            style={{ borderRadius: 2 }}
+          >
+            <div className="label-uppercase text-muted mb-3 text-[10px]">
+              Venture Alignment Scores
+            </div>
+            <div className="space-y-1.5">
+              {impact.ventureDetails
+                .sort(
+                  (a, b) =>
+                    Number(b.podAlignmentScore || 0) -
+                    Number(a.podAlignmentScore || 0)
+                )
+                .map((v) => {
+                  const score = v.podAlignmentScore
+                    ? Number(v.podAlignmentScore)
+                    : null;
+                  return (
+                    <div
+                      key={v.id}
+                      className="flex items-center gap-3 text-xs"
+                    >
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                          v.isActive ? "bg-green-500" : "bg-border"
+                        }`}
+                      />
+                      <span className="flex-1 text-foreground truncate">
+                        {v.name}
+                      </span>
+                      {score != null ? (
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-16 h-1.5 bg-background overflow-hidden"
+                            style={{ borderRadius: 1 }}
+                          >
+                            <div
+                              className="h-full"
+                              style={{
+                                width: `${Math.min(score, 100)}%`,
+                                backgroundColor:
+                                  score >= 80
+                                    ? "#2E7D32"
+                                    : score >= 60
+                                      ? "#D97706"
+                                      : "#CC5536",
+                                borderRadius: 1,
+                              }}
+                            />
+                          </div>
+                          <span className="text-muted w-8 text-right">
+                            {score.toFixed(0)}%
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-muted">{"\u2014"}</span>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        )}
     </div>
   );
 }

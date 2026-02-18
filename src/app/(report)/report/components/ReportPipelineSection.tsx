@@ -9,6 +9,15 @@ type PipelineRole = {
   interview: number | null;
   offer: number | null;
   hired: number | null;
+  priority?: string | null;
+  conversionRates?: {
+    leadsToReview: number | null;
+    reviewToScreening: number | null;
+    screeningToInterview: number | null;
+    interviewToOffer: number | null;
+    offerToHired: number | null;
+    overallConversion: number | null;
+  };
 };
 
 const STAGES = [
@@ -22,6 +31,7 @@ const STAGES = [
 
 export default function ReportPipelineSection({
   pipeline,
+  isInternal = false,
 }: {
   pipeline: PipelineRole[];
   isInternal?: boolean;
@@ -72,6 +82,18 @@ export default function ReportPipelineSection({
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">
                     {role.roleTitle}
+                    {isInternal && role.priority && role.priority !== "medium" && (
+                      <span
+                        className={`text-[9px] font-semibold uppercase tracking-[0.5px] px-1.5 py-0.5 ml-2 ${
+                          role.priority === "high" || role.priority === "urgent"
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400"
+                            : "bg-background text-muted"
+                        }`}
+                        style={{ borderRadius: 2 }}
+                      >
+                        {role.priority}
+                      </span>
+                    )}
                   </h3>
                   {role.department && (
                     <div className="text-xs text-muted">{role.department}</div>
@@ -84,6 +106,11 @@ export default function ReportPipelineSection({
                   <div className="text-[10px] text-muted uppercase tracking-wider">
                     Applicants
                   </div>
+                  {isInternal && role.conversionRates?.overallConversion != null && (
+                    <div className="text-[10px] text-accent font-medium mt-0.5">
+                      {role.conversionRates.overallConversion}% overall
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -126,6 +153,25 @@ export default function ReportPipelineSection({
                   );
                 })}
               </div>
+
+              {isInternal && role.conversionRates && (
+                <div className="grid grid-cols-5 gap-2 mt-2 px-1">
+                  {[
+                    { rate: role.conversionRates.leadsToReview, label: "→ Review" },
+                    { rate: role.conversionRates.reviewToScreening, label: "→ Screen" },
+                    { rate: role.conversionRates.screeningToInterview, label: "→ Interview" },
+                    { rate: role.conversionRates.interviewToOffer, label: "→ Offer" },
+                    { rate: role.conversionRates.offerToHired, label: "→ Hired" },
+                  ].map((step, i) => (
+                    <div key={i} className="text-center">
+                      <div className="text-[10px] text-muted">{step.label}</div>
+                      <div className="text-xs font-semibold text-foreground">
+                        {step.rate != null ? `${step.rate}%` : "—"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

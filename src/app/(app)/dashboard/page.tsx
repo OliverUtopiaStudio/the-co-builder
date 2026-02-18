@@ -11,22 +11,7 @@ import VentureDiagnosis from "@/components/diagnosis/VentureDiagnosis";
 import PrimaryActionCard from "@/components/dashboard/PrimaryActionCard";
 import TodaysFocus from "@/components/dashboard/TodaysFocus";
 import StudioActivityFeed from "@/components/dashboard/StudioActivityFeed";
-
-interface Venture {
-  id: string;
-  name: string;
-  description: string | null;
-  industry: string | null;
-  currentStage: string | null;
-  createdAt: string;
-}
-
-interface FellowProfile {
-  fullName: string;
-  email: string;
-  lifecycleStage: string;
-  experienceProfile: string | null;
-}
+import { useFellow, useVentures, type Venture } from "@/lib/hooks/use-fellow-ventures";
 
 interface NextAssetInfo {
   number: number;
@@ -95,137 +80,88 @@ function getAllAssetNumbers(): number[] {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [ventures, setVentures] = useState<Venture[]>([]);
-  const [fellow, setFellow] = useState<FellowProfile | null>(null);
+  const fellowQuery = useFellow();
+  const fellowId = fellowQuery.data?.id ?? null;
+  const venturesQuery = useVentures(fellowId);
+  const fellow = fellowQuery.data ?? null;
+  const ventures = venturesQuery.data ?? [];
+
   const [nextAsset, setNextAsset] = useState<NextAssetInfo | null>(null);
   const [allComplete, setAllComplete] = useState(false);
   const [stipendStatus, setStipendStatus] = useState<StipendStatus | null>(null);
   const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
-  const [loading, setLoading] = useState(true);
 
+  // Redirect to onboarding when lifecycle_stage is "onboarding"
+  useEffect(() => {
+    if (!fellow) return;
+    if (fellow.lifecycleStage === "onboarding") {
+      router.push("/onboarding");
+    }
+  }, [fellow, router]);
+
+  // Load stipend, diagnosis, and next-asset when we have ventures (cached or fresh)
   useEffect(() => {
     let cancelled = false;
-    async function load() {
+    if (ventures.length === 0) {
+      setStipendStatus(null);
+      setDiagnosis(null);
+      return;
+    }
+    const activeVenture = ventures[0];
+    async function loadSecondary() {
       try {
-        const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Fetch fellow profile including lifecycle_stage and experience_profile (for guidance adaptation)
-        const { data: fellowData } = await supabase
-          .from("fellows")
-          .select("id, full_name, email, lifecycle_stage, experience_profile")
-          .eq("auth_user_id", user.id)
-          .single();
-
-        if (!fellowData) return;
-
-        // Redirect to onboarding if lifecycle_stage is "onboarding"
-        if (fellowData.lifecycle_stage === "onboarding") {
-          if (!cancelled) setLoading(false);
-          router.push("/onboarding");
-          return;
-        }
-
-        if (cancelled) return;
-        setFellow({
-          fullName: fellowData.full_name,
-          email: fellowData.email,
-          lifecycleStage: fellowData.lifecycle_stage,
-          experienceProfile: fellowData.experience_profile ?? null,
-        });
-
-        const fellowId = fellowData.id;
-
-        // Fetch ventures and stipend in parallel
-        const [ventureResult, stipendResult] = await Promise.all([
-          supabase
-            .from("ventures")
-            .select("*")
-            .eq("fellow_id", fellowId)
-            .order("created_at", { ascending: false }),
+        const [stipendResult, diagnosisResult] = await Promise.all([
           getMyStipendStatus().catch(() => null),
+          getFellowDiagnosis().catch(() => null),
         ]);
-
-        const ventureData = ventureResult.data;
-        let mapped: Venture[] = [];
-        if (ventureData && !cancelled) {
-          mapped = ventureData.map((v: Record<string, unknown>) => ({
-            id: v.id as string,
-            name: v.name as string,
-            description: v.description as string | null,
-            industry: v.industry as string | null,
-            currentStage: v.current_stage as string | null,
-            createdAt: v.created_at as string,
-          }));
-          setVentures(mapped);
-
-          // Determine "next asset" for the first (most recent) venture
-          if (mapped.length > 0) {
-            const activeVenture = mapped[0];
-
-            const { data: completions } = await supabase
-              .from("asset_completion")
-              .select("asset_number, is_complete")
-              .eq("venture_id", activeVenture.id)
-              .eq("is_complete", true);
-
-            if (cancelled) return;
-
-            const completedNumbers = new Set(
-              (completions || []).map((c: { asset_number: number }) => c.asset_number)
-            );
-
-            const allNumbers = getAllAssetNumbers();
-
-            // Find the first asset number not in the completed set
-            const nextNumber = allNumbers.find((n) => !completedNumbers.has(n));
-
-            if (nextNumber) {
-              const info = getAssetInfo(nextNumber);
-              if (info) {
-                setNextAsset({
-                  ...info,
-                  ventureId: activeVenture.id,
-                  completedCount: completedNumbers.size,
-                  totalCount: allNumbers.length,
-                });
-              }
-            } else {
-              // All assets are complete
-              setAllComplete(true);
-            }
-          }
-        }
-
-        if (stipendResult && !cancelled) {
+        if (cancelled) return;
+        if (stipendResult) {
           setStipendStatus({
             myMilestones: stipendResult.myMilestones as StipendMilestone[],
             totalBudget: stipendResult.totalBudget,
             computeBudget: stipendResult.computeBudget,
           });
-        } else if (!cancelled) {
+        } else {
           setStipendStatus(null);
         }
-
-        // Load diagnosis for enhanced dashboard
-        if (mapped.length > 0 && !cancelled) {
-          try {
-            const diagnosisResult = await getFellowDiagnosis();
-            if (!cancelled) setDiagnosis(diagnosisResult);
-          } catch (err) {
-            if (!cancelled) console.error("Failed to load diagnosis:", err);
-          }
-        }
+        if (diagnosisResult) setDiagnosis(diagnosisResult);
       } catch (err) {
-        if (!cancelled) console.error("Failed to load dashboard:", err);
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) console.error("Failed to load dashboard secondary data:", err);
+      }
+
+      const supabase = createClient();
+      const { data: completions } = await supabase
+        .from("asset_completion")
+        .select("asset_number, is_complete")
+        .eq("venture_id", activeVenture.id)
+        .eq("is_complete", true);
+      if (cancelled) return;
+
+      const completedNumbers = new Set(
+        (completions || []).map((c: { asset_number: number }) => c.asset_number)
+      );
+      const allNumbers = getAllAssetNumbers();
+      const nextNumber = allNumbers.find((n) => !completedNumbers.has(n));
+      if (nextNumber) {
+        const info = getAssetInfo(nextNumber);
+        if (info)
+          setNextAsset({
+            ...info,
+            ventureId: activeVenture.id,
+            completedCount: completedNumbers.size,
+            totalCount: allNumbers.length,
+          });
+      } else {
+        setAllComplete(true);
       }
     }
-    load();
+    loadSecondary();
     return () => { cancelled = true; };
-  }, [router]);
+  }, [ventures]);
+
+  const loading =
+    fellowQuery.isLoading ||
+    (!!fellowId && venturesQuery.isLoading && ventures.length === 0);
 
   if (loading) {
     return (

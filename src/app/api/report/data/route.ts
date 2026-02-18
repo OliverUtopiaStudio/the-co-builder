@@ -171,35 +171,23 @@ export async function GET(request: NextRequest) {
   }
 
   if (visibleKeys.has("fellows")) {
-    const selectFields = isInternal
-      ? {
-          id: fellows.id,
-          fullName: fellows.fullName,
-          avatarUrl: fellows.avatarUrl,
-          bio: fellows.bio,
-          linkedinUrl: fellows.linkedinUrl,
-          domain: fellows.domain,
-          lifecycleStage: fellows.lifecycleStage,
-          podId: fellows.podId,
-          equityPercentage: fellows.equityPercentage,
-          globalPotentialRating: fellows.globalPotentialRating,
-          qatarImpactRating: fellows.qatarImpactRating,
-          experienceProfile: fellows.experienceProfile,
-          background: fellows.background,
-          selectionRationale: fellows.selectionRationale,
-        }
-      : {
-          id: fellows.id,
-          fullName: fellows.fullName,
-          avatarUrl: fellows.avatarUrl,
-          bio: fellows.bio,
-          linkedinUrl: fellows.linkedinUrl,
-          domain: fellows.domain,
-          lifecycleStage: fellows.lifecycleStage,
-        };
-
     const fellowData = await db
-      .select(selectFields)
+      .select({
+        id: fellows.id,
+        fullName: fellows.fullName,
+        avatarUrl: fellows.avatarUrl,
+        bio: fellows.bio,
+        linkedinUrl: fellows.linkedinUrl,
+        domain: fellows.domain,
+        lifecycleStage: fellows.lifecycleStage,
+        podId: fellows.podId,
+        equityPercentage: fellows.equityPercentage,
+        globalPotentialRating: fellows.globalPotentialRating,
+        qatarImpactRating: fellows.qatarImpactRating,
+        experienceProfile: fellows.experienceProfile,
+        background: fellows.background,
+        selectionRationale: fellows.selectionRationale,
+      })
       .from(fellows)
       .where(eq(fellows.role, "fellow"))
       .orderBy(fellows.createdAt);
@@ -224,15 +212,28 @@ export async function GET(request: NextRequest) {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let fellowResult = fellowData.map((f: any) => ({
-      ...f,
-      ventureCount: vCountMap.get(f.id) ?? 0,
-      ...(isInternal && {
-        podName: f.podId ? sharedPodMap.get(f.podId)?.name ?? null : null,
-        podColor: f.podId ? sharedPodMap.get(f.podId)?.color ?? null : null,
-        ventures: venturesByFellow.get(f.id) || [],
-      }),
-    }));
+    let fellowResult = fellowData.map((f: any) => {
+      if (isInternal) {
+        return {
+          ...f,
+          ventureCount: vCountMap.get(f.id) ?? 0,
+          podName: f.podId ? sharedPodMap.get(f.podId)?.name ?? null : null,
+          podColor: f.podId ? sharedPodMap.get(f.podId)?.color ?? null : null,
+          ventures: venturesByFellow.get(f.id) || [],
+        };
+      }
+      // Stakeholder view: only return public fields
+      return {
+        id: f.id,
+        fullName: f.fullName,
+        avatarUrl: f.avatarUrl,
+        bio: f.bio,
+        linkedinUrl: f.linkedinUrl,
+        domain: f.domain,
+        lifecycleStage: f.lifecycleStage,
+        ventureCount: vCountMap.get(f.id) ?? 0,
+      };
+    });
 
     if (!isInternal) {
       const fellowCfg = configMap["fellows"];

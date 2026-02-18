@@ -9,14 +9,7 @@ import { allWorkflows, getTotalRequiredQuestions } from "@/lib/questions";
 import { getAssetRequirementsForVenture } from "@/app/actions/ventures";
 import DriveFiles from "@/components/google-drive/DriveFiles";
 import VentureConnectionsDisplay from "@/components/connections/VentureConnections";
-
-interface VentureData {
-  id: string;
-  name: string;
-  description: string | null;
-  industry: string | null;
-  googleDriveUrl: string | null;
-}
+import { useVenture } from "@/lib/hooks/use-fellow-ventures";
 
 interface ResponseRow {
   asset_number: number;
@@ -30,24 +23,22 @@ interface CompletionRow {
 
 export default function VentureOverviewPage() {
   const { ventureId } = useParams<{ ventureId: string }>();
-  const [venture, setVenture] = useState<VentureData | null>(null);
+  const ventureQuery = useVenture(ventureId ?? null);
+  const venture = ventureQuery.data ?? null;
+
   const [responseCounts, setResponseCounts] = useState<Record<number, number>>({});
   const [completions, setCompletions] = useState<Record<number, boolean>>({});
   const [requirements, setRequirements] = useState<Record<number, boolean>>({});
-  const [loading, setLoading] = useState(true);
+  const [progressLoading, setProgressLoading] = useState(true);
 
+  // Load responses, completions, requirements (venture itself is cached via useVenture)
   useEffect(() => {
-    async function load() {
+    if (!ventureId) return;
+    let cancelled = false;
+    async function loadProgress() {
       try {
         const supabase = createClient();
-
-        // Fetch venture, responses, completions, and requirements in parallel
-        const [ventureRes, respRes, compRes, reqRes] = await Promise.all([
-          supabase
-            .from("ventures")
-            .select("id, name, description, industry, google_drive_url")
-            .eq("id", ventureId)
-            .single(),
+        const [respRes, compRes, reqRes] = await Promise.all([
           supabase
             .from("responses")
             .select("asset_number, question_id")
@@ -59,16 +50,7 @@ export default function VentureOverviewPage() {
           getAssetRequirementsForVenture(ventureId).catch(() => ({})),
         ]);
 
-        const v = ventureRes.data;
-        if (v)
-          setVenture({
-            id: v.id,
-            name: v.name,
-            description: v.description,
-            industry: v.industry,
-            googleDriveUrl: v.google_drive_url,
-          });
-
+        if (cancelled) return;
         const respData = respRes.data;
         if (respData) {
           const counts: Record<number, number> = {};
@@ -77,7 +59,6 @@ export default function VentureOverviewPage() {
           });
           setResponseCounts(counts);
         }
-
         const compData = compRes.data;
         if (compData) {
           const comps: Record<number, boolean> = {};
@@ -86,18 +67,20 @@ export default function VentureOverviewPage() {
           });
           setCompletions(comps);
         }
-
         setRequirements(reqRes as Record<number, boolean>);
       } catch (err) {
-        console.error("Failed to load venture:", err);
+        if (!cancelled) console.error("Failed to load venture progress:", err);
       } finally {
-        setLoading(false);
+        if (!cancelled) setProgressLoading(false);
       }
     }
-    load();
+    loadProgress();
+    return () => { cancelled = true; };
   }, [ventureId]);
 
-  if (loading) {
+  const loadingVenture = ventureQuery.isLoading && !venture;
+
+  if (loadingVenture) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-muted">Loading venture...</div>
@@ -128,7 +111,7 @@ export default function VentureOverviewPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header — shown immediately from cache when navigating back */}
       <div>
         <Link
           href="/dashboard"
@@ -157,7 +140,14 @@ export default function VentureOverviewPage() {
       {/* Google Drive Files */}
       <DriveFiles ventureId={venture.id} googleDriveUrl={venture.googleDriveUrl} />
 
-      {/* Overall Progress */}
+      {/* Overall Progress — may still be loading when venture is from cache */}
+      {progressLoading ? (
+        <div className="bg-surface border border-border p-5 flex items-center gap-3" style={{ borderRadius: 2 }}>
+          <div className="w-5 h-5 border-2 border-accent/30 border-t-accent rounded-full animate-spin" aria-hidden />
+          <span className="text-sm text-muted">Loading progress…</span>
+        </div>
+      ) : (
+        <>
       <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-medium">Overall Progress</span>
@@ -319,6 +309,8 @@ export default function VentureOverviewPage() {
           );
         })}
       </div>
+        </>
+      )}
     </div>
   );
 }

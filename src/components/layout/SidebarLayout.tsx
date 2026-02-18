@@ -102,6 +102,19 @@ export default function SidebarLayout({
     return pathname.startsWith(href);
   }
 
+  // Show back when we're on a nested/detail route (not a top-level nav item)
+  const isNestedRoute =
+    pathname !== config.homeHref &&
+    !config.navItems.some((item) => pathname === item.href);
+
+  function handleBack() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(config.homeHref);
+    }
+  }
+
   // Loading state for role-gated layouts
   if (loading || !authorized) {
     return (
@@ -115,25 +128,41 @@ export default function SidebarLayout({
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
       <header className="lg:hidden sticky top-0 z-50 bg-sidebar-bg border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-sidebar-text"
-        >
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M2 4.5h16M2 10h16M2 15.5h16"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1 min-w-[80px]">
+          {isNestedRoute ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="p-2 text-sidebar-text -ml-1"
+              aria-label="Go back"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+          ) : (
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 text-sidebar-text"
+              aria-label="Open menu"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M2 4.5h16M2 10h16M2 15.5h16"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
         <Link href={config.homeHref} className="flex items-center gap-2">
           <span className="text-sidebar-text font-bold text-xs tracking-[2px]">
             {config.mobileTitle}
           </span>
         </Link>
-        <div className="w-9" />
+        <div className="w-9 min-w-[80px]" />
       </header>
 
       {/* Mobile sidebar overlay */}
@@ -226,6 +255,29 @@ export default function SidebarLayout({
         <div
           className={`${config.maxWidth || "max-w-5xl"} mx-auto px-6 py-8`}
         >
+          {isNestedRoute && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors mb-4 -mt-1"
+              aria-label="Go back"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+          )}
           {children}
         </div>
       </main>
