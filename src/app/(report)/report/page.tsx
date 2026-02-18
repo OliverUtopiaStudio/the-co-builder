@@ -20,6 +20,7 @@ type SectionConfig = {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type ReportData = {
+  isInternal: boolean;
   config: Record<string, SectionConfig>;
   kpis?: any[];
   pods?: any[];
@@ -52,6 +53,7 @@ const SECTION_COMPONENTS: Record<
             ? (config.highlightedIds as string[])
             : undefined
         }
+        isInternal={data.isInternal}
       />
     ) : null,
   fellows: (data, config) =>
@@ -63,14 +65,15 @@ const SECTION_COMPONENTS: Record<
             ? (config.highlightedIds as string[])
             : undefined
         }
+        isInternal={data.isInternal}
       />
     ) : null,
   pipeline: (data) =>
     data.pipeline ? (
-      <ReportPipelineSection pipeline={data.pipeline} />
+      <ReportPipelineSection pipeline={data.pipeline} isInternal={data.isInternal} />
     ) : null,
   impact: (data) =>
-    data.impact ? <ReportImpactSection impact={data.impact} /> : null,
+    data.impact ? <ReportImpactSection impact={data.impact} isInternal={data.isInternal} /> : null,
 };
 
 export default function ReportPage() {
@@ -144,11 +147,36 @@ export default function ReportPage() {
   return (
     <div className="space-y-10">
       <div>
-        <h1 className="text-2xl font-medium mb-2">Stakeholder Report</h1>
-        <p className="text-muted text-sm">
-          The Utopia Studio programme overview
-        </p>
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-2xl font-medium">
+            {data.isInternal ? "Stakeholder Report — Internal View" : "Stakeholder Report"}
+          </h1>
+          {data.isInternal && (
+            <span className="text-[10px] font-semibold tracking-[1px] uppercase px-2 py-0.5 bg-accent/10 text-accent" style={{ borderRadius: 2 }}>Internal</span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <p className="text-muted text-sm">
+            The Utopia Studio programme overview
+          </p>
+          {data.isInternal && (
+            <a href="/studio/report" className="text-xs text-accent hover:underline">Edit Report Config &rarr;</a>
+          )}
+        </div>
       </div>
+
+      {data.isInternal && visibleSections.length > 1 && (
+        <nav className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border -mx-6 px-6 py-2">
+          <div className="flex gap-4 overflow-x-auto">
+            {visibleSections.map((section) => (
+              <a key={section.sectionKey} href={`#section-${section.sectionKey}`}
+                className="text-xs text-muted hover:text-foreground whitespace-nowrap transition-colors">
+                {section.narrativeTitle || DEFAULT_TITLES[section.sectionKey] || section.sectionKey}
+              </a>
+            ))}
+          </div>
+        </nav>
+      )}
 
       {visibleSections.length === 0 && (
         <div
@@ -166,7 +194,7 @@ export default function ReportPage() {
         if (!content) return null;
 
         return (
-          <section key={section.sectionKey}>
+          <section key={section.sectionKey} id={`section-${section.sectionKey}`}>
             <NarrativeBlock
               title={section.narrativeTitle}
               text={section.narrativeText}

@@ -81,6 +81,7 @@ export default function ReportImpactSection({
   impact,
 }: {
   impact: ImpactData;
+  isInternal?: boolean;
 }) {
   const lifecycleEntries = Object.entries(impact.lifecycleDistribution);
   const totalInDist = lifecycleEntries.reduce((s, [, v]) => s + v, 0);

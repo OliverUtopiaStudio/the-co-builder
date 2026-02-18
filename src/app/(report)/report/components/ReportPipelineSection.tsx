@@ -24,6 +24,7 @@ export default function ReportPipelineSection({
   pipeline,
 }: {
   pipeline: PipelineRole[];
+  isInternal?: boolean;
 }) {
   if (pipeline.length === 0) {
     return (

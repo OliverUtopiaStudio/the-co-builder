@@ -26,6 +26,7 @@ export default function ReportFellowsSection({
 }: {
   fellows: PortfolioFellow[];
   highlightedIds?: string[];
+  isInternal?: boolean;
 }) {
   if (fellows.length === 0) {
     return (

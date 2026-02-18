@@ -14,6 +14,7 @@ export default function ReportPodsSection({
 }: {
   pods: Pod[];
   highlightedIds?: string[];
+  isInternal?: boolean;
 }) {
   if (pods.length === 0) {
     return (
