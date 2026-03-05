@@ -1,6 +1,5 @@
-import DashboardPage from "./dashboard/page";
+import { redirect } from "next/navigation";
 
 export default function AppHomePage() {
-  return <DashboardPage />;
+  redirect("/library");
 }
-

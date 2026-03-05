@@ -15,6 +15,9 @@ export interface Asset {
   bullets?: string[];
   feedsInto?: string;
   checklist: ChecklistItem[];
+  // Content library fields
+  tags: string[];
+  isCustomModule: boolean;
 }
 
 export interface Stage {
@@ -68,6 +71,8 @@ export const stages: Stage[] = [
             text: "Drafted the Risk Capital + Invention One-Pager",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 2,
@@ -87,6 +92,8 @@ export const stages: Stage[] = [
           },
           { id: "2-4", text: "Documented category ambition rationale" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
@@ -129,6 +136,8 @@ export const stages: Stage[] = [
           { id: "3-4", text: "Articulated urgency and why-now" },
           { id: "3-5", text: "Documented economic impact with data" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 4,
@@ -169,6 +178,8 @@ export const stages: Stage[] = [
           },
           { id: "4-5", text: "Created visual workflow diagram" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
@@ -209,6 +220,8 @@ export const stages: Stage[] = [
             text: "Validated ICP with at least 3 real conversations",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 6,
@@ -233,6 +246,8 @@ export const stages: Stage[] = [
           { id: "6-4", text: "Created a testing plan for top 3 assumptions" },
           { id: "6-5", text: "Set timeline for assumption validation" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 7,
@@ -252,6 +267,8 @@ export const stages: Stage[] = [
             text: "Identified potential design partners from interviews",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
@@ -286,6 +303,8 @@ export const stages: Stage[] = [
             text: "Documented partner expectations and success criteria",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 9,
@@ -314,6 +333,8 @@ export const stages: Stage[] = [
             text: "Estimated compute and infrastructure requirements",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 10,
@@ -333,6 +354,8 @@ export const stages: Stage[] = [
             text: "Established evaluation cadence and process",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 11,
@@ -362,6 +385,8 @@ export const stages: Stage[] = [
           },
           { id: "11-5", text: "Built auditability framework" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 12,
@@ -389,6 +414,8 @@ export const stages: Stage[] = [
           },
           { id: "12-6", text: "Legal review completed" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 13,
@@ -426,6 +453,8 @@ export const stages: Stage[] = [
             text: "Recorded regulatory/compliance achievements",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
@@ -481,6 +510,8 @@ export const stages: Stage[] = [
           },
           { id: "15-10", text: "PRD approved and signed off" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
@@ -519,6 +550,8 @@ export const stages: Stage[] = [
             text: "Architecture reviewed by engineering leads",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 17,
@@ -533,6 +566,8 @@ export const stages: Stage[] = [
           { id: "17-5", text: "Secured at least 1 signed LOI" },
           { id: "17-6", text: "Legal review of LOI completed" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 18,
@@ -583,6 +618,8 @@ export const stages: Stage[] = [
           { id: "18-7", text: "Standard deploy spec documented" },
           { id: "18-8", text: "Pilot SOW signed by design partner" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 19,
@@ -604,6 +641,8 @@ export const stages: Stage[] = [
           { id: "19-6", text: "Demo prepared for stakeholders" },
           { id: "19-7", text: "Demo delivered to design partners" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
@@ -645,6 +684,8 @@ export const stages: Stage[] = [
             text: "Sales pack tested with 3 non-design-partner prospects",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 21,
@@ -675,6 +716,8 @@ export const stages: Stage[] = [
             text: "Validated pricing with design partner feedback",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 22,
@@ -703,6 +746,8 @@ export const stages: Stage[] = [
             text: "Aligned roadmap with fundraising timeline",
           },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 23,
@@ -727,6 +772,8 @@ export const stages: Stage[] = [
           },
           { id: "23-6", text: "Designed customer support model" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 24,
@@ -749,6 +796,8 @@ export const stages: Stage[] = [
           { id: "24-6", text: "Moat ledger complete with evidence" },
           { id: "24-7", text: "Data room set up and organized" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 25,
@@ -767,6 +816,8 @@ export const stages: Stage[] = [
           { id: "25-5", text: "Hiring plan tied to milestone gates" },
           { id: "25-6", text: "Total runway calculated and validated" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 26,
@@ -793,6 +844,8 @@ export const stages: Stage[] = [
           { id: "26-5", text: "Security policies formalized" },
           { id: "26-6", text: "Legal counsel review completed" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
       {
         number: 27,
@@ -813,10 +866,44 @@ export const stages: Stage[] = [
           },
           { id: "27-6", text: "Exit map reviewed by board/advisors" },
         ],
+        tags: [],
+        isCustomModule: false,
       },
     ],
   },
 ];
+
+// ─── Content Library Flat Exports ──────────────────────────────
+
+/** All 27 core assets flattened from stages, auto-tagged with stage info */
+export const allAssets: Asset[] = stages.flatMap((s) =>
+  s.assets.map((a) => ({
+    ...a,
+    tags: [`stage-${s.number}`, "core", ...a.tags],
+    isCustomModule: false,
+  }))
+);
+
+/** Custom modules — same Asset shape, numbered 100+ to avoid collision */
+export const customModules: Asset[] = [
+  // Add custom modules here. Example:
+  // {
+  //   number: 101,
+  //   title: "Partner Alignment Workshop",
+  //   purpose: "Structured workshop to align co-founders on vision, roles, and equity.",
+  //   checklist: [{ id: "101-1", text: "Completed alignment exercise" }],
+  //   tags: ["custom", "team"],
+  //   isCustomModule: true,
+  // },
+];
+
+/** Combined flat catalog for the content library */
+export const library: Asset[] = [...allAssets, ...customModules];
+
+/** All unique tags across the library (for filter UI) */
+export const allTags: string[] = [
+  ...new Set(library.flatMap((a) => a.tags)),
+].sort();
 
 export const keyTakeaways = [
   "Sequence matters. Each asset builds on the last. Skip steps = fail later.",

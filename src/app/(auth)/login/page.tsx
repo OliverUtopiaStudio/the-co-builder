@@ -2,13 +2,6 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { GlassCard } from "@/components/ui";
-import {
-  authInputClass,
-  authLabelClass,
-  authButtonClass,
-  authErrorStyle,
-} from "@/components/auth/styles";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,76 +38,60 @@ export default function LoginPage() {
     }
   }
 
+  /* Helper: 6 faces for a wireframe cube */
+  const faces = (
+    <>
+      <div className="tess-face tess-front" />
+      <div className="tess-face tess-back" />
+      <div className="tess-face tess-right" />
+      <div className="tess-face tess-left" />
+      <div className="tess-face tess-top" />
+      <div className="tess-face tess-bottom" />
+    </>
+  );
+
   return (
-    <div className="relative min-h-screen overflow-hidden login-bg">
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <div className="login-keyhole">
-          <div className="login-keyhole-stars" />
-          <div className="login-astronaut" />
+    <div className="login-page">
+      {/* Brand */}
+      <div className="login-brand">Co-Build OS</div>
+
+      {/* Tesseract — 4 nested rotating wireframe cubes */}
+      <div className="tesseract-scene">
+        <div className="tess-cube tess-outer">
+          {faces}
+          <div className="tess-cube tess-second">
+            {faces}
+            <div className="tess-cube tess-third">
+              {faces}
+              <div className="tess-cube tess-inner">
+                {faces}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="w-full" style={{ maxWidth: 420 }}>
-          <GlassCard>
-            <div className="px-10 pt-10 pb-8">
-              <div className="text-white/40 font-bold text-xs tracking-[2px] leading-relaxed mb-5">
-                THE
-                <br />
-                UTOPIA
-                <br />
-                STUDIO
-              </div>
-              <h1 className="text-[28px] font-medium text-white leading-tight">
-                Enter Co-Build OS
-              </h1>
-              <p className="text-white/50 text-sm mt-1.5">
-                This workspace is protected by a shared access password.
-              </p>
-            </div>
+      {/* Login form */}
+      <div className="login-form-area">
+        <form onSubmit={handleSubmit} className="login-form-inner">
+          {error && <div className="login-error">{error}</div>}
 
-            <form onSubmit={handleSubmit} className="px-10 pb-8 space-y-5">
-              {error && (
-                <div className="border p-3 text-sm" style={authErrorStyle}>
-                  {error}
-                </div>
-              )}
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="login-input"
+            placeholder="Enter access password"
+          />
 
-              <div>
-                <label htmlFor="password" className={authLabelClass}>
-                  Access password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className={authInputClass}
-                  style={{ borderRadius: 2 }}
-                  placeholder="Enter the shared password"
-                />
-              </div>
+          <button type="submit" disabled={loading} className="login-button">
+            {loading ? "Checking..." : "Enter workspace \u2192"}
+          </button>
+        </form>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className={authButtonClass}
-                style={{ borderRadius: 2 }}
-              >
-                {loading ? "Checking..." : "Enter workspace →"}
-              </button>
-            </form>
-
-            <div className="px-10 pb-6 text-center">
-              <p className="text-xs text-white/25">
-                The Utopia Studio — Internal Use Only
-              </p>
-            </div>
-          </GlassCard>
-        </div>
+        <p className="login-footer">The Utopia Studio</p>
       </div>
     </div>
   );
 }
-

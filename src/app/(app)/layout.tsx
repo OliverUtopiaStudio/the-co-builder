@@ -4,8 +4,8 @@ import SidebarLayout from "@/components/layout/SidebarLayout";
 import type { SidebarConfig } from "@/components/layout/SidebarLayout";
 
 const config: SidebarConfig = {
-  navItems: [{ href: "/", label: "Venture Playlist" }],
-  homeHref: "/",
+  navItems: [{ href: "/library", label: "Content Library" }],
+  homeHref: "/library",
   mobileTitle: "CO-BUILDER",
 };
 
