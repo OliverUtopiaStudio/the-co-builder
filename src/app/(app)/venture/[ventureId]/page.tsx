@@ -21,6 +21,18 @@ interface CompletionRow {
   is_complete: boolean;
 }
 
+type PlaylistItemType = "asset" | "module" | "link";
+
+interface PlaylistItem {
+  id: string;
+  type: PlaylistItemType;
+  position: number;
+  assetNumber: number | null;
+  title: string;
+  description: string | null;
+  url: string | null;
+}
+
 export default function VentureOverviewPage() {
   const { ventureId } = useParams<{ ventureId: string }>();
   const ventureQuery = useVenture(ventureId ?? null);
@@ -30,15 +42,17 @@ export default function VentureOverviewPage() {
   const [completions, setCompletions] = useState<Record<number, boolean>>({});
   const [requirements, setRequirements] = useState<Record<number, boolean>>({});
   const [progressLoading, setProgressLoading] = useState(true);
+  const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
+  const [playlistLoading, setPlaylistLoading] = useState(true);
 
-  // Load responses, completions, requirements (venture itself is cached via useVenture)
+  // Load responses, completions, requirements, playlist (venture itself is cached via useVenture)
   useEffect(() => {
     if (!ventureId) return;
     let cancelled = false;
     async function loadProgress() {
       try {
         const supabase = createClient();
-        const [respRes, compRes, reqRes] = await Promise.all([
+        const [respRes, compRes, reqRes, playlistRes] = await Promise.all([
           supabase
             .from("responses")
             .select("asset_number, question_id")
@@ -48,6 +62,9 @@ export default function VentureOverviewPage() {
             .select("asset_number, is_complete")
             .eq("venture_id", ventureId),
           getAssetRequirementsForVenture(ventureId).catch(() => ({})),
+          fetch(`/api/playlist/${ventureId}`).then((res) =>
+            res.ok ? res.json() : { items: [] }
+          ),
         ]);
 
         if (cancelled) return;
@@ -68,10 +85,23 @@ export default function VentureOverviewPage() {
           setCompletions(comps);
         }
         setRequirements(reqRes as Record<number, boolean>);
+
+        if (playlistRes && Array.isArray(playlistRes.items)) {
+          setPlaylist(
+            (playlistRes.items as PlaylistItem[]).sort(
+              (a, b) => a.position - b.position
+            )
+          );
+        } else {
+          setPlaylist([]);
+        }
       } catch (err) {
         if (!cancelled) console.error("Failed to load venture progress:", err);
       } finally {
-        if (!cancelled) setProgressLoading(false);
+        if (!cancelled) {
+          setProgressLoading(false);
+          setPlaylistLoading(false);
+        }
       }
     }
     loadProgress();
@@ -139,6 +169,102 @@ export default function VentureOverviewPage() {
 
       {/* Google Drive Files */}
       <DriveFiles ventureId={venture.id} googleDriveUrl={venture.googleDriveUrl} />
+
+      {/* Playlist */}
+      <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="label-uppercase mb-1">Playlist</div>
+            <p className="text-muted text-sm">
+              Curated sequence of framework assets, custom modules, and links for this venture.
+            </p>
+          </div>
+        </div>
+        {playlistLoading ? (
+          <div className="text-sm text-muted py-4">Loading playlist…</div>
+        ) : playlist.length === 0 ? (
+          <div className="text-sm text-muted py-4">
+            No playlist has been configured for this venture yet. The full framework is shown below.
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {playlist.map((item) => {
+              const isAsset = item.type === "asset" && item.assetNumber;
+              const href = isAsset
+                ? `/venture/${venture.id}/asset/${item.assetNumber}`
+                : item.url || "#";
+
+              const content = (
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-8 h-8 flex items-center justify-center text-xs font-medium bg-accent/10 text-accent"
+                      style={{ borderRadius: 2 }}
+                    >
+                      {item.position}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {item.title}
+                        </span>
+                        <span
+                          className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 bg-border/60 text-muted"
+                          style={{ borderRadius: 2 }}
+                        >
+                          {item.type === "asset"
+                            ? `Asset #${item.assetNumber}`
+                            : item.type === "module"
+                            ? "Module"
+                            : "Link"}
+                        </span>
+                      </div>
+                      {item.description && (
+                        <p className="text-xs text-muted mt-1 line-clamp-2">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-accent font-medium ml-4">
+                    {item.type === "link" ? "Open →" : "Start →"}
+                  </span>
+                </div>
+              );
+
+              return isAsset ? (
+                <Link
+                  key={item.id}
+                  href={href}
+                  className="block bg-background hover:bg-background/80 border border-border hover:border-accent/40 transition-all px-4 py-3"
+                  style={{ borderRadius: 2 }}
+                >
+                  {content}
+                </Link>
+              ) : item.url ? (
+                <a
+                  key={item.id}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block bg-background hover:bg-background/80 border border-border hover:border-accent/40 transition-all px-4 py-3"
+                  style={{ borderRadius: 2 }}
+                >
+                  {content}
+                </a>
+              ) : (
+                <div
+                  key={item.id}
+                  className="bg-background border border-border px-4 py-3 opacity-70"
+                  style={{ borderRadius: 2 }}
+                >
+                  {content}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Overall Progress — may still be loading when venture is from cache */}
       {progressLoading ? (

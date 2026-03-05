@@ -13,32 +13,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
-// ─── Pods (investment thesis pods) ──────────────────────────────
-export const pods = pgTable("pods", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  tagline: text("tagline"),
-  thesis: text("thesis"),
-  marketGap: text("market_gap"),
-  targetArchetype: text("target_archetype"),
-  color: text("color").default("#CC5536"),
-  clusters: jsonb("clusters").default([]),
-  optimalFellowProfile: text("optimal_fellow_profile"),
-  corporatePartners: jsonb("corporate_partners").default([]),
-  coInvestors: jsonb("co_investors").default([]),
-  sourcingStrategy: text("sourcing_strategy"),
-  displayOrder: integer("display_order").default(0),
-  journeyCheckpoints: jsonb("journey_checkpoints").default([]),
-  currentJourneyStage: text("current_journey_stage"),
-  // Living thesis fields
-  thesisVersion: integer("thesis_version").default(1),
-  thesisHistory: jsonb("thesis_history").default([]), // Array of {version, thesis, marketGap, updatedAt, updatedBy, rationale}
-  alignmentCriteria: jsonb("alignment_criteria").default([]), // Array of {id, criterion, weight, description}
-  evidenceLog: jsonb("evidence_log").default([]), // Array of {id, type: 'validates'|'challenges', source, description, date, impact}
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
 // ─── Fellows (user profiles + lifecycle) ──────────────────────────
 export const fellows = pgTable("fellows", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -60,8 +34,7 @@ export const fellows = pgTable("fellows", {
   background: text("background"),
   selectionRationale: text("selection_rationale"),
   onboardingStatus: jsonb("onboarding_status"),
-  // Studio fields
-  podId: uuid("pod_id").references(() => pods.id, { onDelete: "set null" }),
+  // Legacy studio fields (kept in DB but unused in v2)
   equityPercentage: numeric("equity_percentage", { precision: 5, scale: 2 }).default("0"),
   globalPotentialRating: integer("global_potential_rating"),
   qatarImpactRating: integer("qatar_impact_rating"),
@@ -177,30 +150,25 @@ export const assetRequirements = pgTable(
   ]
 );
 
-// ─── Stipend Milestones ──────────────────────────────────────────
-// Global milestone definitions (fellow_id IS NULL) + per-fellow payment tracking.
-// The studio team defines 2 milestones globally, then marks each fellow's payment released.
-export const stipendMilestones = pgTable(
-  "stipend_milestones",
+// ─── Playlist Items (per-venture curated playlist) ────────────────
+export const playlistItems = pgTable(
+  "playlist_items",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    fellowId: uuid("fellow_id").references(() => fellows.id, { onDelete: "cascade" }),
-    milestoneNumber: integer("milestone_number").notNull(), // 1 or 2
-    title: text("title").notNull(), // e.g. "Stage 01 approved"
+    ventureId: uuid("venture_id")
+      .notNull()
+      .references(() => ventures.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    type: text("type").notNull(), // 'asset' | 'module' | 'link'
+    assetNumber: integer("asset_number"),
+    title: text("title").notNull(),
     description: text("description"),
-    amount: integer("amount").notNull().default(2500), // cents or whole dollars
-    // For global definitions (fellow_id IS NULL):
-    // title + description define what triggers payment
-    // For per-fellow records:
-    // milestoneMet + paymentReleased track actual status
-    milestoneMet: timestamp("milestone_met", { withTimezone: true }),
-    paymentReleased: timestamp("payment_released", { withTimezone: true }),
+    url: text("url"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    index("idx_stipend_fellow").on(table.fellowId),
-    index("idx_stipend_milestone_num").on(table.milestoneNumber),
+    index("idx_playlist_items_venture").on(table.ventureId),
   ]
 );
 
@@ -256,237 +224,5 @@ export const tasks = pgTable(
   ]
 );
 
-// ─── KPI Metrics ─────────────────────────────────────────────────
-export const kpiMetrics = pgTable("kpi_metrics", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  key: text("key").notNull().unique(),
-  label: text("label").notNull(),
-  target: integer("target").notNull().default(0),
-  current: integer("current").notNull().default(0),
-  pipelineNotes: text("pipeline_notes"),
-  displayOrder: integer("display_order").default(0),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-// ─── KPI History (monthly snapshots) ─────────────────────────────
-export const kpiHistory = pgTable(
-  "kpi_history",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    metricKey: text("metric_key")
-      .notNull()
-      .references(() => kpiMetrics.key, { onDelete: "cascade" }),
-    value: integer("value").notNull(),
-    month: timestamp("month", { mode: "date" }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    index("idx_kpi_history_key").on(table.metricKey),
-    uniqueIndex("idx_kpi_history_unique").on(table.metricKey, table.month),
-  ]
-);
-
-// ─── Pod Campaigns (sourcing sprints — fellows + pre-seed deals) ─
-export const podCampaigns = pgTable(
-  "pod_campaigns",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    podId: uuid("pod_id")
-      .notNull()
-      .references(() => pods.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    campaignType: text("campaign_type").notNull().default("mixed"), // fellow | deal | mixed
-    status: text("status").notNull().default("draft"),
-    sprintWeeks: integer("sprint_weeks").notNull().default(4),
-    targetFellows: integer("target_fellows").notNull().default(2),
-    targetDeals: integer("target_deals").default(0),
-    channels: jsonb("channels").default([]),
-    weeklyMilestones: jsonb("weekly_milestones").default([]),
-    actualProgress: jsonb("actual_progress").default([]),
-    currentWeek: integer("current_week").default(0),
-    startDate: timestamp("start_date", { withTimezone: true }),
-    endDate: timestamp("end_date", { withTimezone: true }),
-    fellowsRecruited: integer("fellows_recruited").default(0),
-    dealsSourced: integer("deals_sourced").default(0),
-    notes: text("notes"),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    index("idx_pod_campaigns_pod").on(table.podId),
-    check("pod_campaigns_status_check", sql`${table.status} IN ('draft','active','paused','completed','cancelled')`),
-    check("pod_campaigns_type_check", sql`${table.campaignType} IN ('fellow','deal','mixed')`),
-  ]
-);
-
-// ─── Pod Launches (thesis pod setup playbook) ───────────────────
-export const podLaunches = pgTable(
-  "pod_launches",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    podId: uuid("pod_id")
-      .notNull()
-      .references(() => pods.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    status: text("status").notNull().default("planning"),
-    currentPhase: text("current_phase").notNull().default("pre_work"),
-    phaseStartedAt: timestamp("phase_started_at", { withTimezone: true }),
-    // v1 columns (kept for backward compat)
-    preWork: jsonb("pre_work").default({}),
-    sprint1: jsonb("sprint_1").default({}),
-    sprint2: jsonb("sprint_2").default({}),
-    // v2 columns — hyper-granular operational setup
-    preLaunch: jsonb("pre_launch").default({}),
-    sprints: jsonb("sprints").default([]),
-    operationalRhythm: jsonb("operational_rhythm").default({}),
-    roleKpis: jsonb("role_kpis").default({}),
-    dealTimelines: jsonb("deal_timelines").default([]),
-    implementationTimeline: jsonb("implementation_timeline").default({}),
-    schemaVersion: integer("schema_version").notNull().default(1),
-    // shared columns
-    targetMetrics: jsonb("target_metrics").default({}),
-    startedAt: timestamp("started_at", { withTimezone: true }),
-    operationalAt: timestamp("operational_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    index("idx_pod_launches_pod").on(table.podId),
-    check(
-      "pod_launches_status_check",
-      sql`${table.status} IN ('planning','pre_launch','pre_work','sprint_1','sprint_2','sprint_3','sprint_4','post_sprint','operational','paused','cancelled')`
-    ),
-  ]
-);
-
-// ─── Ashby Pipeline (recruitment tracking) ───────────────────────
-export const ashbyPipeline = pgTable("ashby_pipeline", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  roleTitle: text("role_title").notNull(),
-  department: text("department"),
-  applicants: integer("applicants").default(0),
-  leads: integer("leads").default(0),
-  review: integer("review").default(0),
-  screening: integer("screening").default(0),
-  interview: integer("interview").default(0),
-  offer: integer("offer").default(0),
-  hired: integer("hired").default(0),
-  archived: integer("archived").default(0),
-  status: text("status").default("active"),
-  priority: text("priority").default("medium"),
-  ashbyLive: boolean("ashby_live").default(false),
-  displayOrder: integer("display_order").default(0),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
-// ─── Framework Edits (admin overlay on 27-asset framework) ─────────
-export const frameworkEdits = pgTable(
-  "framework_edits",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    assetNumber: integer("asset_number").notNull(),
-    adminId: uuid("admin_id")
-      .notNull()
-      .references(() => fellows.id, { onDelete: "cascade" }),
-    fieldType: text("field_type").notNull(), // 'title' | 'purpose' | 'coreQuestion' | 'checklist' | 'question'
-    fieldId: text("field_id").notNull().default(""), // checklist item id or question id; '' for title/purpose/coreQuestion
-    fieldKey: text("field_key").notNull().default(""), // for question: 'label' | 'description'; '' otherwise
-    value: text("value").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    index("idx_framework_edits_asset").on(table.assetNumber),
-    index("idx_framework_edits_admin").on(table.adminId),
-    uniqueIndex("idx_framework_edits_unique").on(
-      table.assetNumber,
-      table.fieldType,
-      table.fieldId,
-      table.fieldKey
-    ),
-    check(
-      "framework_edits_asset_range",
-      sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`
-    ),
-    check(
-      "framework_edits_field_type",
-      sql`${table.fieldType} IN ('title','purpose','coreQuestion','checklist','question')`
-    ),
-  ]
-);
-
-// ─── Framework Edit History (version history for rollback) ─────────
-export const frameworkEditHistory = pgTable(
-  "framework_edit_history",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    frameworkEditId: uuid("framework_edit_id").references(() => frameworkEdits.id, { onDelete: "set null" }),
-    assetNumber: integer("asset_number").notNull(),
-    adminId: uuid("admin_id")
-      .notNull()
-      .references(() => fellows.id, { onDelete: "cascade" }),
-    fieldType: text("field_type").notNull(),
-    fieldId: text("field_id").notNull().default(""),
-    fieldKey: text("field_key").notNull().default(""),
-    oldValue: text("old_value"),
-    newValue: text("new_value"),
-    action: text("action").notNull(), // 'created' | 'updated' | 'deleted'
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    index("idx_framework_edit_history_asset").on(table.assetNumber),
-    index("idx_framework_edit_history_edit_id").on(table.frameworkEditId),
-    index("idx_framework_edit_history_admin").on(table.adminId),
-    index("idx_framework_edit_history_created").on(table.createdAt),
-    check(
-      "framework_edit_history_asset_range",
-      sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`
-    ),
-    check(
-      "framework_edit_history_field_type",
-      sql`${table.fieldType} IN ('title','purpose','coreQuestion','checklist','question')`
-    ),
-    check(
-      "framework_edit_history_action",
-      sql`${table.action} IN ('created','updated','deleted')`
-    ),
-  ]
-);
-
-// ─── Framework Notifications (notify fellows of updates) ──────────
-export const frameworkNotifications = pgTable(
-  "framework_notifications",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    fellowId: uuid("fellow_id").references(() => fellows.id, { onDelete: "cascade" }),
-    assetNumber: integer("asset_number").notNull(),
-    notificationType: text("notification_type").notNull().default("framework_updated"),
-    message: text("message").notNull(),
-    read: boolean("read").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-    readAt: timestamp("read_at", { withTimezone: true }),
-  },
-  (table) => [
-    index("idx_framework_notifications_fellow").on(table.fellowId),
-    index("idx_framework_notifications_asset").on(table.assetNumber),
-    index("idx_framework_notifications_read").on(table.read, table.createdAt),
-    check(
-      "framework_notifications_asset_range",
-      sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`
-    ),
-  ]
-);
-
-// ─── Report Config (stakeholder report section settings) ─────────
-export const reportConfig = pgTable("report_config", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  sectionKey: text("section_key").notNull().unique(), // 'kpis' | 'pods' | 'fellows' | 'pipeline' | 'impact'
-  visible: boolean("visible").default(true).notNull(),
-  displayOrder: integer("display_order").default(0),
-  narrativeTitle: text("narrative_title"),
-  narrativeText: text("narrative_text"),
-  highlightedIds: jsonb("highlighted_ids").default([]),
-  highlightMode: text("highlight_mode").default("all"), // 'all' | 'highlighted_only'
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedBy: uuid("updated_by").references(() => fellows.id, { onDelete: "set null" }),
-});
+// Legacy studio/report tables have been physically dropped in migration 017
+// and are intentionally omitted from the v2 schema.

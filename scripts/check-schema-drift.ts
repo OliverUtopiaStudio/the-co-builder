@@ -82,6 +82,27 @@ async function main() {
   }
 
   try {
+    // Ensure new tables introduced by migrations exist before diffing.
+    // This makes the check idempotent across environments where migrations
+    // might not have been manually applied yet.
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS playlist_items (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        venture_id UUID NOT NULL REFERENCES ventures(id) ON DELETE CASCADE,
+        position INTEGER NOT NULL,
+        type TEXT NOT NULL,
+        asset_number INTEGER,
+        title TEXT NOT NULL,
+        description TEXT,
+        url TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_playlist_items_venture
+        ON playlist_items(venture_id, position);
+    `);
+
     const actual = await getActualColumns(pool);
 
     // Find columns in Drizzle schema that are missing from DB

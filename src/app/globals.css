@@ -68,3 +68,127 @@ body {
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
 }
+
+/* Login keyhole space background */
+@keyframes space-flow {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
+
+@keyframes star-flicker {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.login-bg {
+  background: radial-gradient(circle at 15% 15%, #ffb6c1 0, transparent 55%),
+    radial-gradient(circle at 85% 10%, #ffe4b5 0, transparent 55%),
+    radial-gradient(circle at 20% 80%, #7fffd4 0, transparent 55%),
+    radial-gradient(circle at 80% 80%, #9370db 0, transparent 55%),
+    radial-gradient(circle at 50% 50%, #000018 0, #020012 40%, #000 100%);
+  background-color: #02000d;
+  color: #f9fafb;
+}
+
+.login-keyhole {
+  position: relative;
+  width: min(420px, 70vw);
+  height: min(720px, 90vh);
+  filter: drop-shadow(0 0 40px rgba(140, 180, 255, 0.35));
+}
+
+.login-keyhole::before,
+.login-keyhole::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background-image: radial-gradient(circle at 10% 0%, #ffb6c1, transparent 55%),
+    radial-gradient(circle at 90% 10%, #ffe4b5, transparent 55%),
+    radial-gradient(circle at 0% 80%, #7fffd4, transparent 55%),
+    radial-gradient(circle at 100% 80%, #9370db, transparent 55%),
+    radial-gradient(circle at 50% 50%, #1e3a8a 0, #020617 55%, #000 100%);
+  background-size: 260% 260%;
+  background-position: 0% 0%;
+  animation: space-flow 40s linear infinite;
+}
+
+/* Circular top of keyhole */
+.login-keyhole::before {
+  top: 0;
+  width: 68%;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px;
+}
+
+/* Stem of keyhole */
+.login-keyhole::after {
+  top: 48%;
+  width: 30%;
+  height: 52%;
+  border-radius: 40px;
+}
+
+.login-keyhole-stars {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.45) 0, transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.35) 0, transparent 45%),
+    radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.4) 0, transparent 40%),
+    radial-gradient(circle at 70% 85%, rgba(255, 255, 255, 0.5) 0, transparent 45%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  animation: star-flicker 5s ease-in-out infinite alternate;
+}
+
+.login-astronaut {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 88px;
+  background: linear-gradient(to bottom, #0f172a, #020617);
+  border-radius: 20px 20px 8px 8px;
+  box-shadow:
+    0 0 18px rgba(15, 23, 42, 0.9),
+    0 20px 40px rgba(0, 0, 0, 0.9);
+}
+
+.login-astronaut::before {
+  content: "";
+  position: absolute;
+  top: -26px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 25%, #64748b 0, #020617 65%);
+  box-shadow: 0 0 10px rgba(15, 23, 42, 0.9);
+}
+
+.login-astronaut::after {
+  content: "";
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 16px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 50% 0%, rgba(15, 23, 42, 0.9) 0, transparent 70%);
+  opacity: 0.95;
+}
