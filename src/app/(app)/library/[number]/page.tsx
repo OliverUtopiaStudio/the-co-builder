@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { library, stages } from "@/lib/data";
@@ -8,6 +9,10 @@ import {
   getWorkflowForAsset,
   type WorkflowStep,
 } from "@/lib/questions";
+import { LoomEmbed } from "@/components/LoomEmbed";
+import { DriveTemplateLink } from "@/components/DriveTemplateLink";
+import { AssetMediaEditor } from "@/components/AssetMediaEditor";
+import { AdminLoginModal } from "@/components/AdminLoginModal";
 
 function findAssetContext(assetNumber: number) {
   for (const stage of stages) {
@@ -25,6 +30,39 @@ function findAssetContext(assetNumber: number) {
 export default function AssetDetailPage() {
   const { number } = useParams<{ number: string }>();
   const assetNumber = parseInt(number, 10);
+
+  // Admin mode + media state
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [loomUrl, setLoomUrl] = useState<string | null>(null);
+  const [driveTemplateUrl, setDriveTemplateUrl] = useState<string | null>(null);
+  const [mediaLoaded, setMediaLoaded] = useState(false);
+
+  // Fetch media for this asset
+  useEffect(() => {
+    if (isNaN(assetNumber)) return;
+    let cancelled = false;
+    fetch(`/api/asset-media/${assetNumber}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        setLoomUrl(data.loomUrl ?? null);
+        setDriveTemplateUrl(data.driveTemplateUrl ?? null);
+        setMediaLoaded(true);
+      })
+      .catch(() => {
+        if (!cancelled) setMediaLoaded(true);
+      });
+    return () => { cancelled = true; };
+  }, [assetNumber]);
+
+  // Check admin status
+  useEffect(() => {
+    fetch("/api/auth/admin-check")
+      .then((r) => r.json())
+      .then((data) => setIsAdmin(data.isAdmin === true))
+      .catch(() => setIsAdmin(false));
+  }, []);
 
   if (isNaN(assetNumber)) {
     return (
@@ -132,6 +170,35 @@ export default function AssetDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Loom Video */}
+      {mediaLoaded && loomUrl && <LoomEmbed url={loomUrl} />}
+
+      {/* Drive Template */}
+      {mediaLoaded && driveTemplateUrl && (
+        <DriveTemplateLink url={driveTemplateUrl} />
+      )}
+
+      {/* Admin: Media Editor */}
+      {isAdmin && mediaLoaded && (
+        <div
+          className="bg-accent/5 border border-accent/20 p-5"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="label-uppercase text-[10px] mb-3 text-accent">
+            Admin — Edit Media
+          </div>
+          <AssetMediaEditor
+            assetNumber={assetNumber}
+            initialLoomUrl={loomUrl}
+            initialDriveUrl={driveTemplateUrl}
+            onSaved={(newLoom, newDrive) => {
+              setLoomUrl(newLoom);
+              setDriveTemplateUrl(newDrive);
+            }}
+          />
+        </div>
+      )}
 
       {/* Purpose */}
       <div
@@ -330,6 +397,40 @@ export default function AssetDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Admin login toggle */}
+      {!isAdmin && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowAdminLogin(true)}
+            className="text-muted-light hover:text-muted transition-colors"
+            title="Admin login"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      <AdminLoginModal
+        open={showAdminLogin}
+        onClose={() => setShowAdminLogin(false)}
+        onSuccess={() => {
+          setShowAdminLogin(false);
+          setIsAdmin(true);
+        }}
+      />
     </div>
   );
 }

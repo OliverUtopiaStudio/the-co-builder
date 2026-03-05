@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * Frosted glass card used on auth pages over the GenerativeArt background.
+ * Frosted glass card used on auth pages over the LuminousNetwork background.
  * Provides backdrop blur, subtle white border, and deep shadow.
  *
  * Usage:

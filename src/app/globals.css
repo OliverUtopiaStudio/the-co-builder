@@ -70,23 +70,20 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════ */
-/* Login page — Infinite Tesseract v5                     */
-/* Brand: Special Black, Light Grey wireframes, Brick Red */
-/* Pure CSS 3D — no canvas, no WebGL, no libraries        */
+/* Login page — Luminous Network                          */
+/* Three.js WebGL background + glassmorphism form card    */
 /* ═══════════════════════════════════════════════════════ */
 
 .login-page {
-  background: #000;
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 40px;
-  padding: 20px;
-  position: relative;
-  z-index: 1;
-  overflow: hidden;
+  justify-content: flex-end;
+  padding: 20px 20px 15vh;
+  gap: 0;
 }
 
 /* ─── CO-BUILD OS BRANDING ─── */
@@ -101,253 +98,115 @@ body {
   text-transform: uppercase;
   z-index: 10;
   opacity: 0;
-  animation: brand-in 0.8s ease-out 0.5s forwards;
+  animation: brand-in 0.8s ease-out 1.8s forwards;
 }
 
 @keyframes brand-in {
   from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0.8; transform: translateY(0); }
 }
 
-/* ─── TESSERACT SCENE ─── */
-/* The perspective container — all 3D happens inside here */
-.tesseract-scene {
-  width: min(320px, 55vw);
-  height: min(320px, 55vw);
-  perspective: 1000px;
-  perspective-origin: 50% 50%;
-  position: relative;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* ─── SPACER (pushes form to lower third) ─── */
+.login-spacer {
+  flex: 1;
 }
 
-/* ─── CUBE BASE ─── */
-/* Every cube: centered, preserve-3d, transparent faces with borders */
-.tess-cube {
-  position: absolute;
-  transform-style: preserve-3d;
-}
-
-.tess-face {
-  position: absolute;
-  border: 1px solid currentColor;
-  background: transparent;
-  backface-visibility: visible;
-}
-
-/* ─── CUBE SIZES & COLORS ─── */
-
-/* Outer cube — 260px, faint Light Grey */
-.tess-outer {
-  --s: 260px;
-  width: var(--s);
-  height: var(--s);
-  color: rgba(238, 238, 238, 0.1);
-  animation: rot-outer 60s linear infinite;
-}
-
-/* Second cube — 190px */
-.tess-second {
-  --s: 190px;
-  width: var(--s);
-  height: var(--s);
-  left: 50%;
-  top: 50%;
-  margin-left: calc(var(--s) / -2);
-  margin-top: calc(var(--s) / -2);
-  color: rgba(238, 238, 238, 0.18);
-  animation: rot-second 45s linear infinite;
-}
-
-/* Third cube — 130px */
-.tess-third {
-  --s: 130px;
-  width: var(--s);
-  height: var(--s);
-  left: 50%;
-  top: 50%;
-  margin-left: calc(var(--s) / -2);
-  margin-top: calc(var(--s) / -2);
-  color: rgba(189, 183, 185, 0.3);
-  animation: rot-third 35s linear infinite;
-}
-
-/* Inner cube — 80px, Brick Red */
-.tess-inner {
-  --s: 80px;
-  width: var(--s);
-  height: var(--s);
-  left: 50%;
-  top: 50%;
-  margin-left: calc(var(--s) / -2);
-  margin-top: calc(var(--s) / -2);
-  color: rgba(204, 85, 54, 0.75);
-  animation: rot-inner 25s linear infinite;
-}
-
-/* ─── FACE TRANSFORMS ─── */
-/* Each face is positioned using its parent cube's --s variable */
-
-.tess-front  { width: var(--s); height: var(--s); transform: translateZ(calc(var(--s) / 2)); }
-.tess-back   { width: var(--s); height: var(--s); transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
-.tess-right  { width: var(--s); height: var(--s); transform: rotateY(90deg) translateZ(calc(var(--s) / 2)); }
-.tess-left   { width: var(--s); height: var(--s); transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
-.tess-top    { width: var(--s); height: var(--s); transform: rotateX(90deg) translateZ(calc(var(--s) / 2)); }
-.tess-bottom { width: var(--s); height: var(--s); transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
-
-/* ─── ROTATION KEYFRAMES ─── */
-/* Each cube on different axes for emergent complex motion */
-
-@keyframes rot-outer {
-  from { transform: rotateY(0deg); }
-  to   { transform: rotateY(360deg); }
-}
-
-@keyframes rot-second {
-  from { transform: rotateX(0deg); }
-  to   { transform: rotateX(360deg); }
-}
-
-@keyframes rot-third {
-  from { transform: rotateY(0deg) rotateZ(0deg); }
-  to   { transform: rotateY(360deg) rotateZ(360deg); }
-}
-
-@keyframes rot-inner {
-  from { transform: rotateX(0deg) rotateY(0deg); }
-  to   { transform: rotateX(360deg) rotateY(360deg); }
-}
-
-/* ─── VERTEX NODES — Inner cube only ─── */
-/* Small squares at each corner of every face */
-.tess-inner .tess-face::before {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 3px;
-  height: 3px;
-  background: #CC5536;
-  box-shadow:
-    calc(var(--s) + 1px) 0 0 0 #CC5536,
-    0 calc(var(--s) + 1px) 0 0 #CC5536,
-    calc(var(--s) + 1px) calc(var(--s) + 1px) 0 0 #CC5536;
-}
-
-/* ─── ENTRANCE ANIMATION ─── */
-/* Staggered scale-in using the modern `scale` property */
-.tess-outer {
-  scale: 0;
-  animation: rot-outer 60s linear infinite, tess-enter 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-}
-
-.tess-second {
-  scale: 0;
-  animation: rot-second 45s linear infinite, tess-enter 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
-}
-
-.tess-third {
-  scale: 0;
-  animation: rot-third 35s linear infinite, tess-enter 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
-}
-
-.tess-inner {
-  scale: 0;
-  animation: rot-inner 25s linear infinite, tess-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.1s forwards;
-}
-
-@keyframes tess-enter {
-  from { scale: 0; opacity: 0; }
-  to   { scale: 1; opacity: 1; }
-}
-
-/* ─── LOGIN FORM ─── */
-.login-form-area {
+/* ─── GLASSMORPHISM CARD ─── */
+.login-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  padding: 32px 28px 24px;
+  background: rgba(10, 8, 8, 0.55);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(204, 85, 54, 0.06);
+  border-radius: 12px;
   opacity: 0;
-  animation: form-appear 0.8s ease-out 1.6s forwards;
+  animation: card-appear 0.9s ease-out 2.0s forwards;
 }
 
-@keyframes form-appear {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes card-appear {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* ─── FORM ─── */
 .login-form-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  width: min(340px, 80vw);
+  width: min(320px, 75vw);
 }
 
 .login-input {
   width: 100%;
-  padding: 13px 16px;
-  background: transparent;
-  border: 1px solid #635B5E;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: none;
+  border-bottom: 1px solid rgba(238, 238, 238, 0.15);
   color: #EEEEEE;
   font-size: 14px;
   font-weight: 350;
   text-align: center;
-  border-radius: 2px;
+  border-radius: 0;
   transition: border-color 0.3s;
   font-family: inherit;
   letter-spacing: 0.02em;
 }
 
 .login-input::placeholder {
-  color: #8F898B;
+  color: rgba(143, 137, 139, 0.7);
   font-weight: 350;
 }
 
 .login-input:focus {
   outline: none;
-  border-color: #CC5536;
+  border-bottom-color: #CC5536;
 }
 
 .login-button {
   width: 100%;
-  padding: 13px 24px;
+  padding: 14px 24px;
   background: #CC5536;
   color: #fff;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.02em;
   border: none;
-  border-radius: 2px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, box-shadow 0.3s;
   font-family: inherit;
+  box-shadow: 0 0 20px rgba(204, 85, 54, 0.2);
 }
 
 .login-button:hover {
-  opacity: 0.88;
+  opacity: 0.9;
+  box-shadow: 0 0 30px rgba(204, 85, 54, 0.35);
 }
 
 .login-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .login-error {
   width: 100%;
   padding: 10px 14px;
-  background: rgba(204, 85, 54, 0.08);
-  border: 1px solid rgba(204, 85, 54, 0.25);
-  border-radius: 2px;
+  background: rgba(204, 85, 54, 0.1);
+  border: 1px solid rgba(204, 85, 54, 0.2);
+  border-radius: 6px;
   color: #D77A59;
   font-size: 13px;
   text-align: center;
 }
 
 .login-footer {
-  color: #8F898B;
+  color: rgba(143, 137, 139, 0.6);
   font-size: 10px;
   font-weight: 350;
   letter-spacing: 0.25em;
@@ -356,9 +215,6 @@ body {
 
 /* ─── RESPONSIVE ─── */
 @media (max-height: 700px) {
-  .login-page { gap: 24px; }
-  .tesseract-scene {
-    width: min(240px, 50vw);
-    height: min(240px, 50vw);
-  }
+  .login-page { padding-bottom: 8vh; }
+  .login-card { padding: 24px 20px 18px; }
 }

@@ -190,6 +190,20 @@ export const slackChannelVentures = pgTable(
   ]
 );
 
+// ─── Asset Media (Loom videos + Drive templates per lesson) ─────
+export const assetMedia = pgTable(
+  "asset_media",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    assetNumber: integer("asset_number").notNull().unique(),
+    loomUrl: text("loom_url"),
+    driveTemplateUrl: text("drive_template_url"),
+    updatedBy: text("updated_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+);
+
 // ─── Tasks (from Slack) ──────────────────────────────────────────
 export const tasks = pgTable(
   "tasks",

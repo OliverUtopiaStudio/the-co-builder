@@ -2,6 +2,11 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const LuminousNetwork = dynamic(() => import("@/components/LuminousNetwork"), {
+  ssr: false,
+});
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,60 +43,41 @@ export default function LoginPage() {
     }
   }
 
-  /* Helper: 6 faces for a wireframe cube */
-  const faces = (
-    <>
-      <div className="tess-face tess-front" />
-      <div className="tess-face tess-back" />
-      <div className="tess-face tess-right" />
-      <div className="tess-face tess-left" />
-      <div className="tess-face tess-top" />
-      <div className="tess-face tess-bottom" />
-    </>
-  );
-
   return (
-    <div className="login-page">
-      {/* Brand */}
-      <div className="login-brand">Co-Build OS</div>
+    <>
+      {/* Three.js background */}
+      <LuminousNetwork />
 
-      {/* Tesseract — 4 nested rotating wireframe cubes */}
-      <div className="tesseract-scene">
-        <div className="tess-cube tess-outer">
-          {faces}
-          <div className="tess-cube tess-second">
-            {faces}
-            <div className="tess-cube tess-third">
-              {faces}
-              <div className="tess-cube tess-inner">
-                {faces}
-              </div>
-            </div>
-          </div>
+      {/* Content layer */}
+      <div className="login-page">
+        {/* Brand */}
+        <div className="login-brand">Co-Build OS</div>
+
+        {/* Spacer to push form below center (network occupies upper area) */}
+        <div className="login-spacer" />
+
+        {/* Login card */}
+        <div className="login-card">
+          <form onSubmit={handleSubmit} className="login-form-inner">
+            {error && <div className="login-error">{error}</div>}
+
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="login-input"
+              placeholder="Enter access password"
+            />
+
+            <button type="submit" disabled={loading} className="login-button">
+              {loading ? "Checking..." : "Enter workspace \u2192"}
+            </button>
+          </form>
+
+          <p className="login-footer">The Utopia Studio</p>
         </div>
       </div>
-
-      {/* Login form */}
-      <div className="login-form-area">
-        <form onSubmit={handleSubmit} className="login-form-inner">
-          {error && <div className="login-error">{error}</div>}
-
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="login-input"
-            placeholder="Enter access password"
-          />
-
-          <button type="submit" disabled={loading} className="login-button">
-            {loading ? "Checking..." : "Enter workspace \u2192"}
-          </button>
-        </form>
-
-        <p className="login-footer">The Utopia Studio</p>
-      </div>
-    </div>
+    </>
   );
 }
