@@ -1,339 +1,909 @@
 "use client";
 
+/* ─────────────────────────────────────────────────────────────
+   Astrolabes — Living Document
+   Content sourced from Astrolabes_UtopiaStudio_v2.html
+   Styled to match the Co-Build app design system
+   ───────────────────────────────────────────────────────────── */
+
 export default function AstrolabePage() {
   return (
-    <div className="space-y-12 max-w-3xl">
-      {/* Header */}
+    <div className="space-y-14 max-w-3xl pb-16">
+      {/* ── COVER ── */}
       <div>
-        <div className="label-uppercase mb-2">Living Document</div>
-        <h1 className="text-2xl font-medium tracking-tight">Astrolabe</h1>
-        <p className="text-muted text-sm mt-2">
-          Our ethos and build values. Long before GPS, the Gulf had its own
-          navigators. This document is named after the instrument that told you
-          exactly where you stood, so you could decide for yourself where to go.
+        <div className="label-uppercase mb-3">
+          Living Document · The Utopia Studio · Doha · 2026
+        </div>
+        <h1 className="text-2xl font-medium tracking-tight mb-2">
+          Astro<span className="text-accent">labes</span>
+        </h1>
+        <p className="text-muted text-sm leading-relaxed max-w-xl">
+          Long before GPS, the Gulf had its own navigators. This is the
+          instrument that tells you exactly where you stand — so you can decide
+          for yourself where to go.
         </p>
+
+        {/* Intro letter */}
+        <div
+          className="bg-surface border border-border border-l-4 border-l-accent p-6 mt-8 max-w-2xl"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="label-uppercase text-accent mb-4">
+            From · Ollie &amp; Karan · Studio Directors
+          </div>
+          <p className="text-sm text-foreground leading-relaxed mb-3">
+            Hi — we&apos;re <strong>Ollie and Karan</strong>, your Studio
+            Directors.
+          </p>
+          <p className="text-sm text-foreground leading-relaxed mb-3">
+            You&apos;re reading this because you&apos;re either joining us,
+            building with us, or seriously thinking about both. What follows is
+            not an employee handbook. It&apos;s not a mission statement.
+            It&apos;s the clearest version we could write of{" "}
+            <strong>
+              what we actually believe, how we actually work, and what
+              we&apos;re actually building
+            </strong>{" "}
+            — and why it matters that we get it right.
+          </p>
+          <p className="text-sm text-foreground leading-relaxed">
+            We named it after the astrolabe. Gulf navigators used them for
+            centuries before GPS existed. An astrolabe doesn&apos;t tell you
+            where to go. It tells you exactly where you are — so you can make
+            that call yourself. That&apos;s the kind of team we&apos;re
+            building.
+          </p>
+          <p className="text-sm text-muted italic mt-4">
+            — Ollie Graham-Yooll &amp; Karan
+          </p>
+        </div>
       </div>
 
-      {/* Part One — The Platform */}
-      <section className="space-y-6">
-        <h2 className="label-uppercase text-foreground font-medium">
-          Part One · The Platform
-        </h2>
-        <p className="text-sm text-foreground leading-relaxed">
-          Welcome to the Utopia Platform. A venture platform of funds and studios
-          — combining capital, technical and regional intelligence, and AI-native
-          execution to co-build and back founders from idea to Series A across
-          emerging markets.
+      {/* ── MASTER DIAGRAM ── */}
+      <section className="space-y-4">
+        <div className="label-uppercase">The System</div>
+        <p className="text-sm text-muted leading-relaxed max-w-xl">
+          The diagram below shows how the whole platform connects — from a
+          fellow&apos;s domain insight to a company at Series A. Everything we
+          do lives inside this loop.
         </p>
-
-        <div>
-          <h3 className="text-sm font-medium mb-3">One Platform. Three Entities.</h3>
-          <p className="text-sm text-muted leading-relaxed mb-4">
-            Utopia Capital Management is the umbrella. Beneath it, three
-            interconnected entities — two funds and a studio — share team, IP,
-            data, and operating capability. The design is deliberate: capital
-            and company-building run as one system, not as parallel tracks.
-          </p>
-          <p className="text-sm text-muted leading-relaxed">
-            Emerging and frontier markets offer significant untapped growth
-            potential. Venture capital is shifting towards being more dynamic,
-            GTM-speed, and founder-focused. AI is rapidly reshaping how
-            startups are built and scaled. Utopia is built for exactly this
-            moment.
-          </p>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-1">
-          <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
-            <div className="label-uppercase text-accent mb-2">Fund · Middle East</div>
-            <h4 className="font-medium text-sm mb-1">A-typical Ventures</h4>
-            <p className="text-muted text-xs leading-relaxed">
-              Early-stage venture fund investing across the Middle East.
-              A-typical backs founders operating in markets that are often
-              overlooked by conventional capital — where the structural gaps are
-              largest and the timing is right. Works in close collaboration with
-              The Studio to accelerate portfolio growth with shared IP and AI
-              capabilities.
-            </p>
-          </div>
-          <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
-            <div className="label-uppercase text-accent mb-2">Fund · Southeast Asia</div>
-            <h4 className="font-medium text-sm mb-1">The Radical Fund</h4>
-            <p className="text-muted text-xs leading-relaxed">
-              Venture fund investing across Southeast Asia — one of the
-              fastest-growing economic corridors in the world. Radical moves
-              into markets with deep domain density and strong growth
-              fundamentals. Like A-typical, it draws on The Studio&apos;s
-              execution capability to compound value across portfolio companies
-              and geographies.
-            </p>
-          </div>
-          <div className="bg-surface border border-border p-5" style={{ borderRadius: 2 }}>
-            <div className="label-uppercase text-accent mb-2">Venture Studio · Global</div>
-            <h4 className="font-medium text-sm mb-1">The Utopia Studio</h4>
-            <p className="text-muted text-xs leading-relaxed">
-              The execution and innovation engine of the platform. The Studio
-              builds new ventures from domain expertise and optimises existing
-              companies with AI and frontier technologies. It is the bridge
-              between the two funds — sharing team, IP, and data to create
-              exponential value for portfolio companies expanding across
-              regions.
-            </p>
-          </div>
-        </div>
-
-        <p className="text-sm text-muted leading-relaxed italic">
-          The platform&apos;s power is in the integration. A company built in
-          Doha through The Studio can be backed by A-typical, scaled into
-          Southeast Asia through Radical&apos;s network, and optimised by shared
-          AI infrastructure that no single fund could build alone. The benefit
-          is not additive. It compounds.
+        <SystemFlowDiagram />
+        <p className="text-xs text-muted italic border-l-2 border-accent/30 pl-3">
+          Seven stages from hidden problem to strategic exit — Co-build is the
+          engine at the centre, and every cohort makes the next iteration faster
+          and sharper.
         </p>
       </section>
 
-      {/* Part One — How We Work */}
+      <hr className="border-border" />
+
+      {/* ── PART ONE: PLATFORM ── */}
       <section className="space-y-6">
-        <h2 className="label-uppercase text-foreground font-medium">
-          How We Work
-        </h2>
-
         <div>
-          <h3 className="text-sm font-medium mb-3">What We Are Building</h3>
-          <p className="text-sm text-muted leading-relaxed mb-4">
-            The aim is simple to say and hard to earn: the best company builder
-            in the world. Not eventually. As the benchmark we hold ourselves to
-            right now, from day one, in every decision we make.
+          <div className="label-uppercase mb-1">Part One</div>
+          <h2 className="text-lg font-medium tracking-tight">The Platform</h2>
+        </div>
+
+        <p className="text-sm text-foreground leading-relaxed max-w-xl">
+          Utopia Capital Management is the parent. Beneath it: two funds and a
+          studio, sharing team, IP, data, and operating capability. Capital and
+          company-building run as one system — not parallel tracks that
+          occasionally meet at a board meeting.
+        </p>
+        <p className="text-sm text-muted leading-relaxed max-w-xl">
+          The power is not in the individual entities. It&apos;s in the
+          integration. A company built in Doha through the Studio can be backed
+          by A-typical, scaled into Southeast Asia through Radical&apos;s
+          network, and turbocharged by shared AI infrastructure that no single
+          fund could build alone. The benefit is not additive. It compounds.
+        </p>
+
+        <PlatformStackDiagram />
+        <p className="text-xs text-muted italic border-l-2 border-accent/30 pl-3">
+          The Studio is the engine in the middle — what it builds, learns, and
+          systemises becomes the shared advantage of the whole platform.
+        </p>
+      </section>
+
+      <hr className="border-border" />
+
+      {/* ── PART TWO: HOW WE WORK ── */}
+      <section className="space-y-6">
+        <div>
+          <div className="label-uppercase mb-1">Part Two</div>
+          <h2 className="text-lg font-medium tracking-tight">How We Work</h2>
+        </div>
+
+        {/* Moonshot callout */}
+        <div
+          className="border-2 border-accent p-5 relative mt-4"
+          style={{ borderRadius: 2 }}
+        >
+          <span
+            className="absolute -top-2.5 left-5 bg-white px-2 label-uppercase text-accent"
+            style={{ fontSize: 10 }}
+          >
+            The Moonshot Standard
+          </span>
+          <p className="text-sm text-foreground leading-relaxed mb-3">
+            Google X calls it the <strong>10x rule</strong>: if you&apos;re
+            trying to make something 10% better, you&apos;re competing with
+            everyone else in the world who&apos;s already working on that
+            problem. If you&apos;re trying to make it 10 times better,
+            you&apos;ve left almost all of them behind.
           </p>
-          <ul className="space-y-3 text-sm text-muted">
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Build the studio.</strong> The studio is a product. Every role here exists to make that product exceptional. We design the systems, the processes, the tools, and the team culture so that the studio gets faster and sharper with every cohort. We don&apos;t just build companies. We build the machine that builds companies.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Deliver with fellows.</strong> Fellows are domain experts who&apos;ve spent years inside systems that need fixing. Our job is to find them, back them, and co-build alongside them — combining their insight with our process, our capital, and our team&apos;s full force. Every spinout is proof that the studio works.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Operate as part of Utopia Capital.</strong> The studio does not operate in isolation. We are part of the Utopia Capital group — connected to patient, purposeful capital and a wider network of investors, operators, and advisors who share the same long-term thesis. The studio sources and builds. The group backs and scales.</span>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-medium mb-3">What We Believe</h3>
-          <ul className="space-y-3 text-sm text-muted">
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Domain experts are the unfair advantage.</strong> The best companies don&apos;t come from trend-watching. They come from people who&apos;ve spent years inside a broken system, quietly knowing exactly how to fix it.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Build the smallest true thing.</strong> Every new venture wants to be everything at once. We look for the single version of an idea that proves the logic — the one customer, the one workflow, the one decision that unlocks everything else.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Speed is a moral choice.</strong> When we move slowly, someone pays for it. Speed isn&apos;t about rushing — it&apos;s about respecting what&apos;s at stake.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Qatar is the lab. The world is the market.</strong> We operate here because the conditions are rare. Every company we build must answer: Why would someone in Singapore, São Paulo, or Stuttgart pay for this?</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Conviction over consensus.</strong> Good ideas rarely win a room on first hearing. We pressure-test hard, then we commit — and when we commit, we move as one.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">The standard is the best in the world.</strong> Not the best in Doha. Not the best in the region. Every process, every fellow, every company we co-build — it either raises the bar or it doesn&apos;t.</span>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-medium mb-3">How We Work</h3>
-          <ul className="space-y-3 text-sm text-muted">
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">We start with the problem, not the product.</strong> Every pod, every sprint, every pitch begins the same way: who is in pain, and why haven&apos;t they been able to fix it?</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Our gates are a gift.</strong> Each stage gate exists to protect people. Stopping a bad idea at Gate 2 isn&apos;t failure. It&apos;s the whole point.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Fellows are founders-in-training, not clients.</strong> We co-build. That means shared risk, shared accountability, and honest feedback that&apos;s only useful if it&apos;s real.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Every decision has a name on it.</strong> Discussion is open and loud. But when the conversation ends, one person owns the call — and that person is named before anyone leaves the room.</span>
-            </li>
-            <li className="flex gap-2">
-              <span className="text-accent shrink-0">↳</span>
-              <span><strong className="text-foreground">Work lives in the open.</strong> We build in Notion, in demos, in weekly reviews that anyone can read. If something isn&apos;t visible, it doesn&apos;t exist in our operating system.</span>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="text-sm font-medium mb-2">What Best Looks Like</h3>
-          <p className="text-sm text-muted leading-relaxed">
-            &quot;Best in the world&quot; is not a statement of ambition. It&apos;s
-            an operating instruction. It applies at every level: the studio as a
-            factory, the ventures we build inside it, and the individuals doing
-            the work.
+          <p className="text-sm text-foreground leading-relaxed">
+            We apply that logic here.{" "}
+            <strong>
+              The aim is simple to say and hard to earn: the best company
+              builder in the world.
+            </strong>{" "}
+            Not the best in Doha. Not the best in the region. Not &quot;one of
+            the top studios in emerging markets.&quot; The best. From day one. In
+            every decision we make.
           </p>
         </div>
 
+        {/* What We Are Building */}
         <div>
-          <h3 className="text-sm font-medium mb-3">What We Don&apos;t Do</h3>
-          <ul className="space-y-2 text-sm text-muted list-disc list-inside">
-            <li>Build solutions and then hunt for problems to justify them.</li>
-            <li>Protect weak ideas to spare someone&apos;s feelings.</li>
-            <li>Confuse a beautifully designed deck with a company that can survive contact with a real customer.</li>
-            <li>Mistake a full calendar for meaningful progress.</li>
-            <li>Build for Doha while forgetting the world is watching.</li>
-          </ul>
+          <h3 className="text-sm font-medium mb-3">What we are building</h3>
+          <div className="space-y-4">
+            <WorkItem
+              icon="↳"
+              title="Build the studio."
+              body="The studio is a product. Every role exists to make that product exceptional. We design the systems, processes, tools, and team culture so that the studio gets faster and sharper with every cohort. We don't just build companies. We build the machine that builds companies."
+            />
+            <WorkItem
+              icon="↳"
+              title="Deliver with fellows."
+              body="Fellows are domain experts who've spent years inside systems that need fixing. One of our early fellows spent eleven years as a procurement engineer at a major Gulf infrastructure operator. He knew exactly where the data was buried, exactly why previous software attempts had failed, and exactly who would sign the first contract. Our job was to remove every barrier between that knowledge and a working business. That's the model. Find the insider. Back the insider. Build with the insider."
+            />
+            <WorkItem
+              icon="↳"
+              title="Operate as part of Utopia Capital."
+              body="The studio doesn't operate in isolation. We're connected to patient capital and a wider network of investors, operators, and advisors who share the same long-term thesis. The studio sources and builds. The group backs and scales."
+            />
+          </div>
         </div>
 
-        <div className="bg-surface border border-border border-l-4 border-l-accent p-5" style={{ borderRadius: 2 }}>
-          <p className="text-xs label-uppercase text-muted mb-1">The Standard</p>
-          <p className="text-sm font-medium text-foreground">
-            Is this the clearest, fastest, most honest version of what we&apos;re
-            trying to do?
-          </p>
-          <p className="text-sm text-muted mt-2">
-            Fixed stars. Open water. Know where you are — then move.
-          </p>
+        <Divider />
+
+        {/* What We Believe */}
+        <div>
+          <h3 className="text-sm font-medium mb-4">What we believe</h3>
+          <div className="grid gap-px bg-border sm:grid-cols-2">
+            <BeliefCard
+              title="Domain experts are the unfair advantage."
+              body="The best companies don't come from trend-watching. They come from people who've spent years inside a broken system, quietly knowing exactly how to fix it. Our fellows are those people."
+            />
+            <BeliefCard
+              title="Build the smallest true thing."
+              body="A fellow once came to us with a platform for the entire Gulf logistics sector. We spent the first two weeks narrowing it to one workflow, one buyer, one port. That was the company. Everything else was noise."
+            />
+            <BeliefCard
+              title="Speed is a moral choice."
+              body="When we move slowly, someone pays for it. The fellow loses months of momentum. The fund loses compounding time. Doha loses a company that could have been here first. Speed isn't about rushing — it's about respecting what's at stake."
+            />
+            <BeliefCard
+              title="Qatar is the lab. The world is the market."
+              body="We operate here because the conditions are rare. But we never mistake local traction for global validation. Every company we build must answer: why would someone in Singapore, São Paulo, or Stuttgart pay for this?"
+            />
+            <BeliefCard
+              title="Conviction over consensus."
+              body="Good ideas rarely win a room on first hearing. We don't govern by committee. We pressure-test hard, then we commit — and when we commit, we move as one."
+            />
+            <BeliefCard
+              title="The standard is the best in the world."
+              body="Every process we design, every fellow we take on, every company we co-build — it either raises the bar or it doesn't. We choose the former, every time."
+            />
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* How We Actually Work */}
+        <div>
+          <h3 className="text-sm font-medium mb-3">How we actually work</h3>
+          <div className="space-y-0">
+            <NumberedItem
+              num="01"
+              title="We start with the problem, not the product."
+              body="Every pod, every sprint, every pitch begins the same way: who is in pain, and why haven't they been able to fix it? The product is just our best current answer to that question."
+            />
+            <NumberedItem
+              num="02"
+              title="Our gates are a gift."
+              body="Each stage gate exists to protect people — the fellow's time, the studio's capital, the market's trust. Stopping a bad idea at Gate 2 isn't failure. It's the whole point. The gate didn't kill the company. The company was never there."
+            />
+            <NumberedItem
+              num="03"
+              title="Fellows are founders-in-training, not clients."
+              body="We co-build. That means shared risk, shared accountability, and honest feedback. A fellow once showed us a prototype they'd spent six weeks building. We told them it was solving the wrong problem. That conversation cost us a difficult afternoon and saved twelve months of wasted build."
+            />
+            <NumberedItem
+              num="04"
+              title="Every decision has a name on it."
+              body="Discussion here is open and loud. Debate is encouraged. But when the conversation ends, one person owns the call — and that person is named before anyone leaves the room. Ambiguity isn't humility. It's just a delayed argument."
+            />
+            <NumberedItem
+              num="05"
+              title="Work lives in the open."
+              body="We build in Notion, in demos, in weekly reviews that anyone can read. If something isn't visible, it doesn't exist in our operating system. Brilliant thinking trapped in someone's head is worth nothing to the studio."
+            />
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* What We Don't Do */}
+        <div>
+          <h3 className="text-sm font-medium mb-3">What we don&apos;t do</h3>
+          <div className="border-l-4 border-accent pl-5 space-y-0">
+            <DontItem text="Build solutions and then hunt for problems to justify them." />
+            <DontItem text="Protect weak ideas to spare someone's feelings." />
+            <DontItem text="Confuse a beautifully designed deck with a company that can survive contact with a real customer." />
+            <DontItem text="Mistake a full calendar for meaningful progress." />
+            <DontItem text="Build for Doha while forgetting the world is watching." />
+          </div>
         </div>
       </section>
 
-      {/* Part Two — The Thesis */}
+      <hr className="border-border" />
+
+      {/* ── PART THREE: THESIS ── */}
       <section className="space-y-6">
-        <h2 className="label-uppercase text-foreground font-medium">
-          Part Two · The Thesis
-        </h2>
-        <p className="text-sm text-muted leading-relaxed">
+        <div>
+          <div className="label-uppercase mb-1">Part Three</div>
+          <h2 className="text-lg font-medium tracking-tight">
+            The <span className="text-accent">Thesis</span>
+          </h2>
+        </div>
+
+        <p className="text-sm text-foreground leading-relaxed max-w-xl" style={{ fontSize: 15 }}>
           The biggest problems in the world&apos;s most important systems are
           invisible to outsiders. They are obvious to the people who have spent
           years inside them.
         </p>
 
-        <div>
-          <h3 className="text-sm font-medium mb-2">The Belief</h3>
-          <p className="text-sm text-muted leading-relaxed">
+        {/* Dark callout */}
+        <div
+          className="bg-foreground p-6"
+          style={{ borderRadius: 2 }}
+        >
+          <p className="text-sm leading-relaxed italic" style={{ color: "rgba(255,255,255,0.85)" }}>
             Venture returns are not random. They cluster around one condition: a
-            real system gap that incumbents cannot close, met by a team that
-            owns the domain. Technology is not the moat. What is scarce is the
-            operator who spent a decade inside the system — who knows where the
-            data lives, who the real buyer is, and why every previous attempt
-            failed. We are not backing ideas. We are backing market structures
-            that are broken in ways that only insiders can see. Those people are
-            the asset. We go and find them.
+            real system gap that incumbents cannot close, met by a team that owns
+            the domain.{" "}
+            <strong className="text-white not-italic">
+              Technology is not the moat. Technology is available to everyone.
+            </strong>{" "}
+            What is scarce is the operator who spent a decade inside the system —
+            who knows where the data lives, who the real buyer is, and why every
+            previous attempt failed.
           </p>
         </div>
 
+        <p className="text-sm text-muted leading-relaxed max-w-xl">
+          We are not backing ideas. We are backing market structures that are
+          broken in ways that only insiders can see. The most defensible
+          companies are built on hidden context — problems that look like
+          technical failures but are structural ones. The solutions are in the
+          heads of the people who have spent years trying to fix things from the
+          inside.
+        </p>
+
+        <Divider />
+
+        {/* Problem types diagram */}
         <div>
-          <h3 className="text-sm font-medium mb-3">The Problems We Back</h3>
-          <p className="text-sm text-muted leading-relaxed mb-4">
-            We look for systems that are broken in a way the market will not
-            self-correct: invisible enough that incumbents haven&apos;t solved
-            it, structural enough that a startup cannot casually enter, painful
-            enough that someone with a budget will pay to fix it.
+          <h3 className="text-sm font-medium mb-2">The problems we back</h3>
+          <p className="text-sm text-muted leading-relaxed max-w-xl mb-4">
+            The diagram below maps the four problem types we look for — by how
+            visible they are to outsiders, and how structurally entrenched the
+            dysfunction is.
           </p>
-          <ul className="space-y-3 text-sm text-muted">
-            <li><strong className="text-foreground">Hidden data.</strong> Systems with rich operational telemetry that no one aggregates, interprets, or acts on.</li>
-            <li><strong className="text-foreground">High-frequency drift.</strong> Where processes deviate from policy daily, generating cost and risk that accumulates silently.</li>
-            <li><strong className="text-foreground">Structural constraints.</strong> Regulatory requirements, safety standards, or uptime obligations that make change slow and expensive for incumbents.</li>
-            <li><strong className="text-foreground">Knowledge concentration.</strong> Expertise that lives in a handful of people and will retire or move on. The company that captures it first owns the institutional memory of the sector.</li>
-          </ul>
+          <ProblemTypesDiagram />
+          <p className="text-xs text-muted italic border-l-2 border-accent/30 pl-3 mt-3">
+            The top-left quadrant — high structural entrenchment, low outsider
+            visibility — is where we find the most defensible companies.
+          </p>
         </div>
 
-        <div>
-          <h3 className="text-sm font-medium mb-3">The Pods</h3>
-          <ul className="space-y-3 text-sm text-muted">
-            <li><strong className="text-foreground">Infrastructure Intelligence.</strong> Critical infrastructure generates vast operational telemetry that sits in silos. We build AI systems that turn raw telemetry into real-time risk signals and operational decisions.</li>
-            <li><strong className="text-foreground">Decarb Systems.</strong> Scope 3 reporting, carbon pricing, ESG disclosure, and supply chain compliance create enormous operational data problems. We build the systems that turn emissions data into audit-ready records.</li>
-            <li><strong className="text-foreground">Sovereign Compute.</strong> Gulf nations cannot run national AI strategies on infrastructure they do not control. Qatar&apos;s position is a structural advantage no competitor can replicate cheaply.</li>
-            <li><strong className="text-foreground">Programmable Flow Rails.</strong> Cross-border payments, trade finance, and compliance automation run on systems built in the 1970s. We build programmable infrastructure layers that sit on top of or bypass the legacy architecture.</li>
-          </ul>
-        </div>
+        <Divider />
 
+        {/* Pods */}
         <div>
-          <h3 className="text-sm font-medium mb-2">Why Here. Why Now.</h3>
-          <p className="text-sm text-muted leading-relaxed">
-            Qatar is at an inflection point. A national AI strategy, a sovereign
-            wealth platform, a mandate to diversify the economy, and a
-            concentration of some of the world&apos;s most capital-intensive
-            infrastructure in one geography — the window to build the companies
-            that will define this region&apos;s technology stack is open now.
-            The companies we build use Qatar as the proving ground and scale
-            globally from there. The GCC is the wedge. The addressable market is
-            the world&apos;s critical systems.
+          <h3 className="text-sm font-medium mb-2">The pods</h3>
+          <p className="text-sm text-muted leading-relaxed max-w-xl mb-4">
+            Four domains. One thesis. Each pod starts from the same place: a
+            system that is broken in ways only insiders can see.
           </p>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <PodCard
+              num="01"
+              title="Infrastructure Intelligence"
+              body="Critical infrastructure generates vast operational telemetry that sits in silos and is never synthesised. We build AI systems that turn raw telemetry into real-time risk signals and operational decisions."
+            />
+            <PodCard
+              num="02"
+              title="Decarb Systems"
+              body="Scope 3 reporting, carbon pricing, ESG disclosure, and supply chain compliance create enormous operational data problems. We build the systems that turn emissions data into audit-ready records and policy-aligned reporting."
+            />
+            <PodCard
+              num="03"
+              title="Sovereign Compute"
+              body="Gulf nations cannot run national AI strategies on infrastructure they do not control. Qatar's position — gas surplus, power availability, land, and a clear national AI mandate — is a structural advantage no competitor can replicate cheaply."
+            />
+            <PodCard
+              num="04"
+              title="Programmable Flow Rails"
+              body="Cross-border payments, trade finance, and compliance automation run on systems built in the 1970s. We build programmable infrastructure layers that sit on top of or bypass the legacy architecture using regulated digital infrastructure."
+            />
+          </div>
         </div>
       </section>
 
-      {/* Part Three — The Co-Build Framework */}
+      <hr className="border-border" />
+
+      {/* ── PART FOUR: CO-BUILD FRAMEWORK ── */}
       <section className="space-y-6">
-        <h2 className="label-uppercase text-foreground font-medium">
-          Part Three · The Co-Build Framework
-        </h2>
-        <p className="text-sm text-muted leading-relaxed">
-          A discipline for building AI-native companies from domain expertise.
-          Structured enough to produce results consistently. Flexible enough to
-          meet a fellow where they are.
+        <div>
+          <div className="label-uppercase mb-1">Part Four</div>
+          <h2 className="text-lg font-medium tracking-tight">
+            The Co-Build <span className="text-accent">Framework</span>
+          </h2>
+        </div>
+
+        <p className="text-sm text-foreground leading-relaxed max-w-xl">
+          Most ventures built alongside domain experts fail at the same points.
+          The expert knows the problem but doesn&apos;t know how to define the
+          buyer. They build before validating. They price on instinct. They reach
+          investors before the numbers are honest.
+        </p>
+        <p className="text-sm text-muted leading-relaxed max-w-xl">
+          These are not talent failures. They are sequencing failures. The
+          framework exists to fix the sequence.
         </p>
 
-        <div>
-          <h3 className="text-sm font-medium mb-2">Why a Framework</h3>
-          <p className="text-sm text-muted leading-relaxed">
-            Most ventures built alongside domain experts fail at the same
-            points. The expert knows the problem but does not know how to define
-            the buyer. They build before validating. They price on instinct.
-            These are not talent failures. They are sequencing failures. The
-            framework exists to fix the sequence. AI-native building changes the
-            economics — what used to take months can now be scoped in days. The
-            framework compresses the cycle, raises the bar on what qualifies as
-            validated, and encodes the AI-native approach into every asset.
+        {/* 10x framing */}
+        <div
+          className="border-2 border-accent p-5 relative"
+          style={{ borderRadius: 2 }}
+        >
+          <span
+            className="absolute -top-2.5 left-5 bg-white px-2 label-uppercase text-accent"
+            style={{ fontSize: 10 }}
+          >
+            The 10x framing
+          </span>
+          <p className="text-sm text-foreground leading-relaxed">
+            A traditional accelerator tries to make a good founder 10% better —
+            more mentorship, more network, more pitch coaching. We&apos;re
+            attempting something different: taking a domain expert who has never
+            built a company and giving them the architecture, capital, and team
+            to build a{" "}
+            <strong className="text-accent">
+              category-defining business in 90 days
+            </strong>
+            . That&apos;s not an incremental improvement on the accelerator
+            model. It&apos;s a different thesis entirely.
           </p>
         </div>
 
+        {/* Co-build pipeline diagram */}
         <div>
-          <h3 className="text-sm font-medium mb-3">The Three Phases</h3>
-          <ul className="space-y-4 text-sm text-muted">
-            <li>
-              <strong className="text-foreground">Phase 1 — Invent and Discover (Stages 00–04).</strong> Stage 00 is the Invention Gate. Stage 01 produces the Problem Deep Dive and Workflow Map. Stage 02 validates the buyer. Stage 03 establishes the AI and data foundation. Stage 04 is the PRD Culmination. Gate: build/kill decision.
-            </li>
-            <li>
-              <strong className="text-foreground">Phase 2 — Build and Sell (Stage 05).</strong> Build and sales run in parallel. The Architecture Canvas defines what gets built. The LOI Pack and Pilot SOW convert warm conversations into signed commercial commitments. Gate: a signed LOI and a funded pilot.
-            </li>
-            <li>
-              <strong className="text-foreground">Phase 3 — Scale and Spinout (Stages 06–07).</strong> Stage 06 proves the model is repeatable. Stage 07 completes the spinout: investor pack, data room, legal incorporation, board materials. Target: eighteen months from co-build start to Series A readiness.
-            </li>
-          </ul>
+          <p className="text-sm text-muted leading-relaxed max-w-xl mb-4">
+            The diagram below shows the full co-build pipeline — three phases,
+            seven stages, two hard gates. Ventures earn their way forward at
+            each gate. No extensions.
+          </p>
+          <CoBuildPipelineDiagram />
+          <p className="text-xs text-muted italic border-l-2 border-accent/30 pl-3 mt-3">
+            Most ventures fail at sequencing, not talent — the framework fixes
+            the order of operations so the fellow finds out early, with as
+            little capital destroyed as possible.
+          </p>
         </div>
 
+        <Divider />
+
+        {/* What the framework is not */}
         <div>
-          <h3 className="text-sm font-medium mb-2">What the Framework Is Not</h3>
-          <ul className="space-y-2 text-sm text-muted">
-            <li>It is not a reporting tool. The assets exist for the venture, not for the studio.</li>
-            <li>It is not a guarantee of success. It eliminates common failure modes and ensures we find out as early as possible, with as little capital destroyed as possible.</li>
-            <li>It is not fixed. The framework improves with every cohort. It is a living system, not a sacred text.</li>
-          </ul>
-          <p className="text-sm text-muted mt-3">
-            Eight stages. Twenty-seven assets. One spinout. Every venture earns its way forward.
-          </p>
+          <h3 className="text-sm font-medium mb-3">
+            What the framework is not
+          </h3>
+          <div className="border-l-4 border-accent pl-5 space-y-0">
+            <DontItem text="A reporting tool. The assets exist for the venture, not for the studio. If an asset is being produced to satisfy an internal review rather than to advance the venture, that is a waste of the fellow's time." />
+            <DontItem text="A guarantee of success. The framework eliminates common failure modes. It does not eliminate market risk or execution risk. What it guarantees is that we find out as early as possible, with as little capital destroyed as possible." />
+            <DontItem text="Fixed. It improves with every cohort. Any team member who identifies a better approach should say so. It is a living system, not a sacred text." />
+          </div>
+        </div>
+      </section>
+
+      <hr className="border-border" />
+
+      {/* ── CLOSING ── */}
+      <section className="text-center space-y-5 py-8">
+        <div className="label-uppercase">The Standard</div>
+        <h2 className="text-lg font-medium tracking-tight leading-snug max-w-md mx-auto">
+          Fixed stars. Open water.
+          <br />
+          Know where you are —<br />
+          then move.
+        </h2>
+        <p className="text-sm text-muted max-w-sm mx-auto">
+          Is this the clearest, fastest, most honest version of what we&apos;re
+          trying to do?
+        </p>
+        <div className="inline-block">
+          <span
+            className="border border-accent px-6 py-3 label-uppercase text-accent inline-block"
+            style={{ borderRadius: 2 }}
+          >
+            Return to this before anything ships
+          </span>
         </div>
       </section>
 
       {/* Footer */}
-      <div className="pt-8 border-t border-border">
-        <p className="label-uppercase text-muted">
-          Astrolabe · Living Document · Doha
-        </p>
+      <div className="pt-6 border-t border-border flex justify-between items-center">
+        <span className="label-uppercase text-muted">
+          The Utopia Studio · Doha
+        </span>
+        <span className="label-uppercase text-muted">
+          Astrolabes · Living Document · 2026
+        </span>
       </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Sub-components
+   ───────────────────────────────────────────── */
+
+function WorkItem({
+  icon,
+  title,
+  body,
+}: {
+  icon: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="flex gap-3 py-4 border-b border-border first:border-t">
+      <span className="text-accent shrink-0 text-sm">{icon}</span>
+      <div>
+        <div className="text-sm font-medium text-foreground mb-1">{title}</div>
+        <p className="text-sm text-muted leading-relaxed">{body}</p>
+      </div>
+    </div>
+  );
+}
+
+function NumberedItem({
+  num,
+  title,
+  body,
+}: {
+  num: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="flex gap-4 py-4 border-b border-border first:border-t items-start">
+      <span className="text-accent/30 font-medium text-lg shrink-0 w-6 text-right">
+        {num}
+      </span>
+      <div>
+        <div className="text-sm font-medium text-foreground mb-1">{title}</div>
+        <p className="text-sm text-muted leading-relaxed">{body}</p>
+      </div>
+    </div>
+  );
+}
+
+function BeliefCard({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="bg-surface p-5 hover:bg-accent/5 transition-colors">
+      <div className="text-sm font-medium text-foreground mb-2">
+        <span className="text-accent mr-1">↑</span>
+        {title}
+      </div>
+      <p className="text-xs text-muted leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
+function PodCard({
+  num,
+  title,
+  body,
+}: {
+  num: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div
+      className="border border-border p-5 hover:border-accent/50 transition-all group relative overflow-hidden"
+      style={{ borderRadius: 2 }}
+    >
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-accent scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300" />
+      <div className="label-uppercase text-accent mb-2">Pod {num}</div>
+      <div className="text-sm font-medium text-foreground mb-2 leading-snug">
+        {title}
+      </div>
+      <p className="text-xs text-muted leading-relaxed">{body}</p>
+    </div>
+  );
+}
+
+function DontItem({ text }: { text: string }) {
+  return (
+    <div className="text-sm text-muted italic py-3 border-b border-border last:border-b-0">
+      <span className="text-accent not-italic font-mono mr-1">—</span>
+      {text}
+    </div>
+  );
+}
+
+function Divider() {
+  return (
+    <div className="label-uppercase text-border tracking-widest py-2">
+      / &nbsp;/ &nbsp;/ &nbsp;/ &nbsp;/ &nbsp;/
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   SVG Diagrams — colours mapped to app tokens
+   ───────────────────────────────────────────── */
+
+const C = {
+  accent: "#CC5536",
+  accentLight: "#faf0ed",
+  accentMid: "#d97a62",
+  fg: "#1F1E1D",
+  muted: "#8F898B",
+  border: "#E3E1E2",
+  surface: "#FFFFFF",
+  bg: "#F8F7F5",
+};
+
+function SystemFlowDiagram() {
+  return (
+    <div
+      className="bg-surface border border-border p-5 sm:p-8 overflow-x-auto"
+      style={{ borderRadius: 2 }}
+    >
+      <svg
+        viewBox="0 0 860 230"
+        xmlns="http://www.w3.org/2000/svg"
+        fontFamily="'SF Mono', 'Fira Code', monospace"
+        className="w-full min-w-[600px]"
+      >
+        <defs>
+          <marker id="arr" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0, 7 2.5, 0 5" fill={C.fg} />
+          </marker>
+          <marker id="arrAccent" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+            <polygon points="0 0, 7 2.5, 0 5" fill={C.accent} />
+          </marker>
+        </defs>
+
+        {/* Feedback arc */}
+        <path
+          d="M790 71 Q790 18 424 18 Q58 18 58 71"
+          fill="none"
+          stroke={C.accent}
+          strokeWidth="1"
+          strokeDasharray="5,4"
+          opacity={0.3}
+        />
+        <text x="424" y="12" textAnchor="middle" fontSize="7.5" fill={C.accent} opacity={0.5} letterSpacing="0.8">
+          COMPOUNDS WITH EVERY COHORT ↺
+        </text>
+
+        {/* Node 1: Hidden Problems */}
+        <rect x="10" y="71" width="96" height="58" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="58" y="93" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">HIDDEN</text>
+        <text x="58" y="105" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">PROBLEMS</text>
+        <text x="58" y="119" textAnchor="middle" fontSize="7" fill={C.muted}>Structural gaps</text>
+        <text x="58" y="129" textAnchor="middle" fontSize="7" fill={C.muted}>insiders see first</text>
+
+        <line x1="106" y1="100" x2="130" y2="100" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr)" />
+
+        {/* Node 2: PODs */}
+        <rect x="132" y="71" width="96" height="58" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="180" y="97" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">PODs</text>
+        <text x="180" y="111" textAnchor="middle" fontSize="7" fill={C.muted}>Domain thesis</text>
+        <text x="180" y="121" textAnchor="middle" fontSize="7" fill={C.muted}>defined &amp; scoped</text>
+
+        <line x1="228" y1="100" x2="252" y2="100" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr)" />
+
+        {/* Node 3: Source Fellows */}
+        <rect x="254" y="71" width="96" height="58" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="302" y="97" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">SOURCE</text>
+        <text x="302" y="109" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">FELLOWS</text>
+        <text x="302" y="122" textAnchor="middle" fontSize="7" fill={C.muted}>Domain insiders</text>
+        <text x="302" y="132" textAnchor="middle" fontSize="7" fill={C.muted}>recruited to lead</text>
+
+        <line x1="350" y1="100" x2="374" y2="100" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr)" />
+
+        {/* Node 4: Co-build — accent fill */}
+        <rect x="376" y="59" width="96" height="82" fill={C.accent} />
+        <text x="424" y="87" textAnchor="middle" fontSize="8.5" fill="white" fontWeight="bold" letterSpacing="1">CO-BUILD</text>
+        <text x="424" y="101" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.8)">90-day sprint</text>
+        <text x="424" y="112" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.8)">AI-native build</text>
+        <text x="424" y="123" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.8)">Gate: signed LOI</text>
+
+        <line x1="472" y1="100" x2="496" y2="100" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr)" />
+
+        {/* Node 5: Spin-out */}
+        <rect x="498" y="71" width="96" height="58" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="546" y="97" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">SPIN-OUT</text>
+        <text x="546" y="111" textAnchor="middle" fontSize="7" fill={C.muted}>Incorporated</text>
+        <text x="546" y="121" textAnchor="middle" fontSize="7" fill={C.muted}>Investor-ready</text>
+
+        <line x1="594" y1="100" x2="618" y2="100" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr)" />
+
+        {/* Node 6: Support to Series A */}
+        <rect x="620" y="71" width="96" height="58" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="668" y="93" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">SUPPORT TO</text>
+        <text x="668" y="105" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">SERIES A</text>
+        <text x="668" y="119" textAnchor="middle" fontSize="7" fill={C.muted}>Portfolio value</text>
+        <text x="668" y="129" textAnchor="middle" fontSize="7" fill={C.muted}>creation · 18 mo</text>
+
+        <line x1="716" y1="100" x2="740" y2="100" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr)" />
+
+        {/* Node 7: Strategic Exits */}
+        <rect x="742" y="71" width="96" height="58" fill={C.bg} stroke={C.accent} strokeWidth="2" />
+        <text x="790" y="93" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">STRATEGIC</text>
+        <text x="790" y="105" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold" letterSpacing="0.8">EXITS</text>
+        <text x="790" y="119" textAnchor="middle" fontSize="7" fill={C.muted}>5–10× MOIC</text>
+        <text x="790" y="129" textAnchor="middle" fontSize="7" fill={C.muted}>target return</text>
+
+        {/* Step numbers */}
+        <text x="58" y="155" textAnchor="middle" fontSize="7" fill={C.border}>01</text>
+        <text x="180" y="155" textAnchor="middle" fontSize="7" fill={C.border}>02</text>
+        <text x="302" y="155" textAnchor="middle" fontSize="7" fill={C.border}>03</text>
+        <text x="424" y="155" textAnchor="middle" fontSize="7" fill={C.accent} opacity={0.5}>04</text>
+        <text x="546" y="155" textAnchor="middle" fontSize="7" fill={C.border}>05</text>
+        <text x="668" y="155" textAnchor="middle" fontSize="7" fill={C.border}>06</text>
+        <text x="790" y="155" textAnchor="middle" fontSize="7" fill={C.border}>07</text>
+      </svg>
+    </div>
+  );
+}
+
+function PlatformStackDiagram() {
+  return (
+    <div
+      className="bg-surface border border-border p-5 sm:p-8 overflow-x-auto"
+      style={{ borderRadius: 2 }}
+    >
+      <svg
+        viewBox="0 0 780 260"
+        xmlns="http://www.w3.org/2000/svg"
+        fontFamily="'SF Mono', 'Fira Code', monospace"
+        className="w-full min-w-[500px]"
+      >
+        {/* UCM umbrella */}
+        <rect x="150" y="8" width="480" height="44" fill={C.fg} />
+        <text x="390" y="26" textAnchor="middle" fontSize="9" fill="white" letterSpacing="2">UTOPIA CAPITAL MANAGEMENT</text>
+        <text x="390" y="42" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.55)" letterSpacing="1">The umbrella · Shared team · Shared IP · Shared data</text>
+
+        {/* Connectors */}
+        <line x1="240" y1="52" x2="150" y2="88" stroke={C.border} strokeWidth="1" />
+        <line x1="390" y1="52" x2="390" y2="88" stroke={C.border} strokeWidth="1" />
+        <line x1="540" y1="52" x2="630" y2="88" stroke={C.border} strokeWidth="1" />
+
+        {/* ATV */}
+        <rect x="20" y="88" width="250" height="80" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="145" y="112" textAnchor="middle" fontSize="9" fill={C.accent} letterSpacing="1.5" fontWeight="bold">A-TYPICAL VENTURES</text>
+        <text x="145" y="128" textAnchor="middle" fontSize="8" fill={C.muted}>Fund · Middle East</text>
+        <text x="145" y="144" textAnchor="middle" fontSize="8" fill={C.muted}>Early-stage · Overlooked markets</text>
+        <text x="145" y="158" textAnchor="middle" fontSize="8" fill={C.muted}>Structural gaps · Right timing</text>
+
+        {/* Studio — accent fill */}
+        <rect x="270" y="76" width="240" height="104" fill={C.accent} />
+        <text x="390" y="104" textAnchor="middle" fontSize="9" fill="white" letterSpacing="1.5" fontWeight="bold">THE UTOPIA STUDIO</text>
+        <text x="390" y="120" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.8)">Venture Studio · Global</text>
+        <text x="390" y="136" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.8)">Build · Optimise · Bridge</text>
+        <text x="390" y="152" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.8)">Shared AI infrastructure</text>
+        <text x="390" y="166" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.65)">← the execution engine →</text>
+
+        {/* TRF */}
+        <rect x="510" y="88" width="250" height="80" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="635" y="112" textAnchor="middle" fontSize="9" fill={C.accent} letterSpacing="1.5" fontWeight="bold">THE RADICAL FUND</text>
+        <text x="635" y="128" textAnchor="middle" fontSize="8" fill={C.muted}>Fund · Southeast Asia</text>
+        <text x="635" y="144" textAnchor="middle" fontSize="8" fill={C.muted}>Deep domain density</text>
+        <text x="635" y="158" textAnchor="middle" fontSize="8" fill={C.muted}>Fast-growth corridors</text>
+
+        {/* Shared layer */}
+        <rect x="20" y="200" width="740" height="44" fill={C.bg} stroke={C.border} strokeWidth="1" />
+        <text x="390" y="218" textAnchor="middle" fontSize="8" fill={C.muted} letterSpacing="1.2">SHARED OPERATING LAYER</text>
+        <text x="390" y="234" textAnchor="middle" fontSize="8" fill={C.accent} letterSpacing="0.8">Team · IP · Data · AI Tooling · Portfolio Intelligence</text>
+
+        {/* Dashed connectors to shared layer */}
+        <line x1="145" y1="200" x2="145" y2="168" stroke={C.border} strokeWidth="1" strokeDasharray="4,3" />
+        <line x1="390" y1="200" x2="390" y2="180" stroke={C.accent} strokeWidth="1" strokeDasharray="4,3" opacity={0.5} />
+        <line x1="635" y1="200" x2="635" y2="168" stroke={C.border} strokeWidth="1" strokeDasharray="4,3" />
+      </svg>
+    </div>
+  );
+}
+
+function ProblemTypesDiagram() {
+  return (
+    <div
+      className="bg-surface border border-border p-5 sm:p-8 overflow-x-auto"
+      style={{ borderRadius: 2 }}
+    >
+      <svg
+        viewBox="0 0 700 360"
+        xmlns="http://www.w3.org/2000/svg"
+        fontFamily="'SF Mono', 'Fira Code', monospace"
+        className="w-full min-w-[480px]"
+      >
+        {/* Axes */}
+        <line x1="80" y1="290" x2="660" y2="290" stroke={C.fg} strokeWidth="1.5" />
+        <line x1="80" y1="290" x2="80" y2="20" stroke={C.fg} strokeWidth="1.5" />
+
+        <text x="370" y="316" textAnchor="middle" fontSize="9" fill={C.muted} letterSpacing="1">VISIBILITY TO OUTSIDERS →</text>
+        <text x="370" y="330" textAnchor="middle" fontSize="8" fill={C.border} letterSpacing="0.5">Low                                                          High</text>
+        <text x="18" y="160" textAnchor="middle" fontSize="9" fill={C.muted} letterSpacing="1" transform="rotate(-90, 18, 160)">STRUCTURAL ENTRENCHMENT →</text>
+
+        {/* Quadrant fills */}
+        <rect x="80" y="155" width="290" height="135" fill={C.bg} />
+        <rect x="370" y="155" width="290" height="135" fill={C.bg} opacity={0.4} />
+        <rect x="80" y="20" width="290" height="135" fill={C.accentLight} opacity={0.5} />
+        <rect x="370" y="20" width="290" height="135" fill={C.bg} opacity={0.4} />
+
+        <text x="225" y="40" textAnchor="middle" fontSize="8" fill={C.accent} opacity={0.5} letterSpacing="0.8">OUR HUNTING GROUND</text>
+
+        {/* Hidden Data */}
+        <circle cx="160" cy="90" r="28" fill={C.accent} />
+        <text x="160" y="86" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">HIDDEN</text>
+        <text x="160" y="99" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">DATA</text>
+
+        {/* Structural Constraints */}
+        <circle cx="280" cy="60" r="28" fill={C.accent} />
+        <text x="280" y="56" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">STRUCTURAL</text>
+        <text x="280" y="69" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">CONSTRAINTS</text>
+
+        {/* Knowledge Lock-in */}
+        <circle cx="180" cy="230" r="28" fill={C.accentMid} />
+        <text x="180" y="226" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">KNOWLEDGE</text>
+        <text x="180" y="239" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">LOCK-IN</text>
+
+        {/* High-Freq Drift */}
+        <circle cx="480" cy="220" r="24" fill={C.bg} stroke={C.fg} strokeWidth="1.5" />
+        <text x="480" y="216" textAnchor="middle" fontSize="8" fill={C.muted} fontWeight="bold">HIGH-FREQ</text>
+        <text x="480" y="229" textAnchor="middle" fontSize="8" fill={C.muted} fontWeight="bold">DRIFT</text>
+
+        {/* Annotations */}
+        <text x="160" y="128" textAnchor="middle" fontSize="7.5" fill={C.accent}>Telemetry never</text>
+        <text x="160" y="139" textAnchor="middle" fontSize="7.5" fill={C.accent}>converted</text>
+        <text x="280" y="98" textAnchor="middle" fontSize="7.5" fill={C.accent}>Regulation = moat</text>
+        <text x="180" y="268" textAnchor="middle" fontSize="7.5" fill={C.accentMid}>Expertise walks</text>
+        <text x="180" y="279" textAnchor="middle" fontSize="7.5" fill={C.accentMid}>out the door</text>
+        <text x="480" y="253" textAnchor="middle" fontSize="7.5" fill={C.muted}>Compliance says fine.</text>
+        <text x="480" y="264" textAnchor="middle" fontSize="7.5" fill={C.muted}>Reality breaks.</text>
+      </svg>
+    </div>
+  );
+}
+
+function CoBuildPipelineDiagram() {
+  return (
+    <div
+      className="bg-surface border border-border p-5 sm:p-8 overflow-x-auto"
+      style={{ borderRadius: 2 }}
+    >
+      <svg
+        viewBox="0 0 760 300"
+        xmlns="http://www.w3.org/2000/svg"
+        fontFamily="'SF Mono', 'Fira Code', monospace"
+        className="w-full min-w-[540px]"
+      >
+        <defs>
+          <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill={C.fg} />
+          </marker>
+          <marker id="arrW" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="white" />
+          </marker>
+        </defs>
+
+        {/* Phase bands */}
+        <rect x="10" y="10" width="220" height="240" fill={C.bg} />
+        <rect x="240" y="10" width="200" height="240" fill={C.accent} />
+        <rect x="450" y="10" width="300" height="240" fill={C.bg} />
+
+        {/* Phase labels */}
+        <text x="120" y="32" textAnchor="middle" fontSize="8" fill={C.accent} letterSpacing="1.5" fontWeight="bold">PHASE 1</text>
+        <text x="120" y="46" textAnchor="middle" fontSize="8" fill={C.muted} letterSpacing="0.8">Invent &amp; Discover</text>
+        <text x="120" y="58" textAnchor="middle" fontSize="7" fill={C.muted}>Stages 00–04</text>
+
+        <text x="340" y="32" textAnchor="middle" fontSize="8" fill="white" letterSpacing="1.5" fontWeight="bold">PHASE 2</text>
+        <text x="340" y="46" textAnchor="middle" fontSize="8" fill="rgba(255,255,255,0.8)" letterSpacing="0.8">Build &amp; Sell</text>
+        <text x="340" y="58" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.65)">Stage 05</text>
+
+        <text x="600" y="32" textAnchor="middle" fontSize="8" fill={C.accent} letterSpacing="1.5" fontWeight="bold">PHASE 3</text>
+        <text x="600" y="46" textAnchor="middle" fontSize="8" fill={C.muted} letterSpacing="0.8">Scale &amp; Spinout</text>
+        <text x="600" y="58" textAnchor="middle" fontSize="7" fill={C.muted}>Stages 06–07</text>
+
+        {/* Phase 1 boxes */}
+        <rect x="20" y="72" width="92" height="44" fill="white" stroke={C.border} strokeWidth="1" />
+        <text x="66" y="90" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold">S00</text>
+        <text x="66" y="102" textAnchor="middle" fontSize="7" fill={C.muted}>Invention</text>
+        <text x="66" y="112" textAnchor="middle" fontSize="7" fill={C.muted}>Gate</text>
+
+        <rect x="118" y="72" width="102" height="44" fill="white" stroke={C.border} strokeWidth="1" />
+        <text x="169" y="90" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold">S01–S02</text>
+        <text x="169" y="102" textAnchor="middle" fontSize="7" fill={C.muted}>Problem · Buyer</text>
+        <text x="169" y="112" textAnchor="middle" fontSize="7" fill={C.muted}>Validation</text>
+
+        <rect x="20" y="126" width="200" height="44" fill="white" stroke={C.border} strokeWidth="1" />
+        <text x="120" y="144" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold">S03–S04</text>
+        <text x="120" y="156" textAnchor="middle" fontSize="7" fill={C.muted}>AI Foundation · Data Advantage Contract · PRD</text>
+
+        {/* Gate 0 */}
+        <rect x="20" y="182" width="200" height="52" fill={C.fg} />
+        <text x="120" y="202" textAnchor="middle" fontSize="8" fill="white" letterSpacing="1" fontWeight="bold">GATE 0</text>
+        <text x="120" y="216" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.7)">Problem · Edge · Wedge · Gate</text>
+        <text x="120" y="228" textAnchor="middle" fontSize="7" fill={C.accentLight}>Build or kill. No middle ground.</text>
+
+        {/* Phase 2 boxes */}
+        <rect x="250" y="72" width="180" height="44" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+        <text x="340" y="90" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">S05 · Architecture Canvas</text>
+        <text x="340" y="104" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.75)">Build while selling. In parallel.</text>
+
+        <rect x="250" y="126" width="180" height="44" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+        <text x="340" y="144" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">LOI Pack · Pilot SOW</text>
+        <text x="340" y="158" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.75)">Warm conversation → signed deal</text>
+
+        {/* Gate 1 */}
+        <rect x="250" y="182" width="180" height="52" fill="rgba(255,255,255,0.9)" />
+        <text x="340" y="202" textAnchor="middle" fontSize="8" fill={C.accent} letterSpacing="1" fontWeight="bold">GATE 1</text>
+        <text x="340" y="216" textAnchor="middle" fontSize="7" fill={C.muted}>Signed LOI + funded pilot</text>
+        <text x="340" y="228" textAnchor="middle" fontSize="7" fill={C.accent}>No paying customer = no advance.</text>
+
+        {/* Phase 3 boxes */}
+        <rect x="460" y="72" width="140" height="44" fill="white" stroke={C.border} strokeWidth="1" />
+        <text x="530" y="90" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold">S06 · Repeatability</text>
+        <text x="530" y="104" textAnchor="middle" fontSize="7" fill={C.muted}>Sales kit · Unit economics</text>
+
+        <rect x="606" y="72" width="134" height="44" fill="white" stroke={C.border} strokeWidth="1" />
+        <text x="673" y="90" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold">S07 · Spinout</text>
+        <text x="673" y="104" textAnchor="middle" fontSize="7" fill={C.muted}>Investor pack · Data room</text>
+
+        <rect x="460" y="126" width="280" height="44" fill="white" stroke={C.border} strokeWidth="1" />
+        <text x="600" y="144" textAnchor="middle" fontSize="8" fill={C.accent} fontWeight="bold">Legal Incorporation · Board Materials</text>
+        <text x="600" y="158" textAnchor="middle" fontSize="7" fill={C.muted}>Target: 18 months from co-build start to Series A ready</text>
+
+        {/* Spinout */}
+        <rect x="460" y="182" width="280" height="52" fill={C.accent} />
+        <text x="600" y="202" textAnchor="middle" fontSize="8" fill="white" letterSpacing="1" fontWeight="bold">SPINOUT</text>
+        <text x="600" y="216" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.8)">Incorporated · Investor-ready</text>
+        <text x="600" y="228" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.65)">5–10× MOIC target</text>
+
+        {/* Phase arrows */}
+        <line x1="220" y1="155" x2="248" y2="155" stroke={C.fg} strokeWidth="1.5" markerEnd="url(#arr2)" />
+        <line x1="430" y1="155" x2="448" y2="155" stroke="white" strokeWidth="1.5" markerEnd="url(#arrW)" />
+
+        {/* Timing bar */}
+        <rect x="10" y="264" width="210" height="20" fill={C.bg} stroke={C.border} strokeWidth="1" />
+        <text x="115" y="277" textAnchor="middle" fontSize="7.5" fill={C.muted} letterSpacing="0.5">Weeks 1–8</text>
+        <rect x="240" y="264" width="200" height="20" fill={C.accent} />
+        <text x="340" y="277" textAnchor="middle" fontSize="7.5" fill="white" letterSpacing="0.5">Weeks 9–16</text>
+        <rect x="450" y="264" width="300" height="20" fill={C.bg} stroke={C.border} strokeWidth="1" />
+        <text x="600" y="277" textAnchor="middle" fontSize="7.5" fill={C.muted} letterSpacing="0.5">Months 4–18</text>
+      </svg>
     </div>
   );
 }
