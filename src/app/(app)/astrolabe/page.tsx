@@ -566,249 +566,150 @@ function Divider() {
    ───────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────
-   Hero Illustration — Astrolabe navigator
+   Hero — Generative radial burst
+   Pre-computed integer coords (hydration-safe)
    ───────────────────────────────────────────── */
+
+const FX = 380;
+const FY = 345;
+
+interface HDot {
+  x: number;
+  y: number;
+}
+
+function makeGrid(
+  cx: number,
+  cy: number,
+  cols: number,
+  rows: number,
+  sp: number,
+): HDot[] {
+  const out: HDot[] = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++)
+      out.push({
+        x: Math.round(cx + (c - (cols - 1) / 2) * sp),
+        y: Math.round(cy + (r - (rows - 1) / 2) * sp),
+      });
+  return out;
+}
+
+const HERO_DOTS: HDot[] = [
+  // Top row
+  ...makeGrid(90, 52, 7, 3, 13),
+  ...makeGrid(290, 36, 4, 5, 13),
+  ...makeGrid(500, 48, 8, 2, 13),
+  ...makeGrid(700, 58, 5, 4, 13),
+  // Mid row
+  ...makeGrid(48, 178, 3, 7, 13),
+  ...makeGrid(198, 148, 6, 4, 13),
+  ...makeGrid(440, 92, 3, 3, 13),
+  ...makeGrid(578, 142, 6, 4, 13),
+  ...makeGrid(742, 188, 4, 6, 13),
+  // Lower row
+  ...makeGrid(118, 282, 5, 3, 13),
+  ...makeGrid(290, 218, 4, 3, 13),
+  ...makeGrid(648, 262, 6, 2, 13),
+];
+
+// Extra sparse rays for visual density (no endpoint dots)
+const HERO_RAYS: HDot[] = [];
+for (let i = 0; i < 60; i++) {
+  const deg = 130 + (i / 59) * 300;
+  const rad = (deg * Math.PI) / 180;
+  const dist = 300 + (i % 7) * 22;
+  HERO_RAYS.push({
+    x: Math.round(FX + Math.cos(rad) * dist),
+    y: Math.round(FY + Math.sin(rad) * dist),
+  });
+}
 
 function AstrolabeHero() {
   return (
     <div
-      className="bg-foreground overflow-hidden relative -mt-8"
-      style={{ borderRadius: 2 }}
+      className="overflow-hidden relative -mt-8"
+      style={{ borderRadius: 2, backgroundColor: "#000" }}
     >
       <svg
-        viewBox="0 0 800 320"
+        viewBox="0 0 800 400"
         xmlns="http://www.w3.org/2000/svg"
         fontFamily="'SF Mono', 'Fira Code', monospace"
         className="w-full"
         style={{ display: "block" }}
       >
         <defs>
-          {/* Subtle grid pattern */}
-          <pattern id="heroGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" />
-          </pattern>
-          {/* Radial glow behind astrolabe */}
-          <radialGradient id="astroGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#CC5536" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="#CC5536" stopOpacity="0" />
+          <radialGradient id="fGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.3" />
+            <stop offset="25%" stopColor="white" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="white" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* Background grid */}
-        <rect width="800" height="320" fill="url(#heroGrid)" />
-
-        {/* Glow behind astrolabe */}
-        <circle cx="310" cy="168" r="160" fill="url(#astroGlow)" />
-
-        {/* ── HORIZON LINE + WAVES ── */}
-        <path
-          d="M0 238 Q50 234 100 238 Q150 242 200 238 Q250 234 300 238 Q350 242 400 238 Q450 234 500 238 Q550 242 600 238 Q650 234 700 238 Q750 242 800 238"
-          fill="none"
-          stroke="rgba(255,255,255,0.12)"
-          strokeWidth="1"
-        />
-        <path
-          d="M0 248 Q60 244 120 248 Q180 252 240 248 Q300 244 360 248 Q420 252 480 248 Q540 244 600 248 Q660 252 720 248 Q780 244 800 248"
-          fill="none"
-          stroke="rgba(255,255,255,0.06)"
-          strokeWidth="0.8"
-        />
-        <text x="680" y="234" fontSize="8" fill="rgba(255,255,255,0.25)" letterSpacing="2">
-          HORIZON
-        </text>
-
-        {/* ── STAR — top right ── */}
-        <g transform="translate(620, 48)">
-          {/* Star rays */}
-          <line x1="0" y1="-20" x2="0" y2="20" stroke="#CC5536" strokeWidth="1.5" />
-          <line x1="-20" y1="0" x2="20" y2="0" stroke="#CC5536" strokeWidth="1.5" />
-          <line x1="-14" y1="-14" x2="14" y2="14" stroke="#CC5536" strokeWidth="0.8" />
-          <line x1="14" y1="-14" x2="-14" y2="14" stroke="#CC5536" strokeWidth="0.8" />
-          {/* Star core */}
-          <circle cx="0" cy="0" r="4" fill="#CC5536" />
-          <circle cx="0" cy="0" r="8" fill="none" stroke="#CC5536" strokeWidth="0.5" opacity="0.4" />
-        </g>
-        <text x="620" y="82" textAnchor="middle" fontSize="7" fill="rgba(255,255,255,0.3)" letterSpacing="2">
-          POLARIS
-        </text>
-
-        {/* ── SIGHTING LINES ── */}
-        {/* Eye → astrolabe → star (upper sighting) */}
-        <line
-          x1="128" y1="168"
-          x2="620" y2="48"
-          stroke="#CC5536"
-          strokeWidth="0.8"
-          strokeDasharray="6,4"
-          opacity="0.5"
-        />
-        {/* Eye → astrolabe → horizon (lower sighting) */}
-        <line
-          x1="128" y1="168"
-          x2="720" y2="238"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="0.8"
-          strokeDasharray="6,4"
-        />
-
-        {/* Angle arc between sighting lines */}
-        <path
-          d="M 430 140 A 130 130 0 0 1 460 210"
-          fill="none"
-          stroke="#CC5536"
-          strokeWidth="0.8"
-          opacity="0.4"
-        />
-        <text x="470" y="178" fontSize="7" fill="#CC5536" opacity="0.6">
-          θ
-        </text>
-
-        {/* ── ASTROLABE INSTRUMENT ── */}
-        <g transform="translate(310, 168)">
-          {/* Outer ring — mater */}
-          <circle cx="0" cy="0" r="90" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
-          <circle cx="0" cy="0" r="86" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-
-          {/* Degree ticks — outer ring */}
-          {Array.from({ length: 72 }, (_, i) => {
-            const angle = (i * 5 * Math.PI) / 180;
-            const isMajor = i % 6 === 0;
-            const r1 = isMajor ? 82 : 85;
-            const r2 = 90;
-            const cos = Math.round(Math.cos(angle) * 100) / 100;
-            const sin = Math.round(Math.sin(angle) * 100) / 100;
-            return (
-              <line
-                key={`tick-${i}`}
-                x1={cos * r1}
-                y1={sin * r1}
-                x2={cos * r2}
-                y2={sin * r2}
-                stroke={isMajor ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)"}
-                strokeWidth={isMajor ? 1 : 0.5}
-              />
-            );
-          })}
-
-          {/* Cardinal marks */}
-          {[0, 90, 180, 270].map((deg) => {
-            const a = (deg * Math.PI) / 180;
-            const cx = Math.round(Math.cos(a) * 74 * 100) / 100;
-            const cy = Math.round((Math.sin(a) * 74 + 3) * 100) / 100;
-            return (
-              <text
-                key={`card-${deg}`}
-                x={cx}
-                y={cy}
-                textAnchor="middle"
-                fontSize="6.5"
-                fill="rgba(255,255,255,0.2)"
-              >
-                {deg}°
-              </text>
-            );
-          })}
-
-          {/* Inner circles — rete pattern */}
-          <circle cx="0" cy="0" r="64" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-          <circle cx="0" cy="0" r="44" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-          <circle cx="0" cy="0" r="24" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-
-          {/* Cross-hairs */}
-          <line x1="-68" y1="0" x2="68" y2="0" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-          <line x1="0" y1="-68" x2="0" y2="68" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-
-          {/* Ecliptic ring — offset circle (the rete's key feature) */}
-          <circle cx="12" cy="-8" r="52" fill="none" stroke="#CC5536" strokeWidth="0.8" opacity="0.3" />
-
-          {/* Star pointers on the rete */}
-          {[
-            { x: 38, y: -32, label: "★" },
-            { x: -22, y: -48, label: "★" },
-            { x: 52, y: 14, label: "★" },
-            { x: -44, y: 20, label: "★" },
-            { x: 8, y: 56, label: "★" },
-          ].map((s, i) => (
-            <g key={`rstar-${i}`}>
-              <circle cx={s.x} cy={s.y} r="2" fill="#CC5536" opacity="0.6" />
-              <line
-                x1={s.x}
-                y1={s.y}
-                x2={s.x * 0.3}
-                y2={s.y * 0.3}
-                stroke="#CC5536"
-                strokeWidth="0.5"
-                opacity="0.25"
-              />
-            </g>
-          ))}
-
-          {/* Alidade (sighting rule) — the key mechanical element */}
+        {/* Extra rays — faint background lines for density */}
+        {HERO_RAYS.map((r, i) => (
           <line
-            x1="-88"
-            y1="10"
-            x2="88"
-            y2="-10"
-            stroke="rgba(255,255,255,0.35)"
-            strokeWidth="2"
+            key={`r-${i}`}
+            x1={FX}
+            y1={FY}
+            x2={r.x}
+            y2={r.y}
+            stroke="white"
+            strokeWidth={0.3}
+            opacity={0.06}
           />
-          {/* Sighting holes */}
-          <circle cx="-78" cy="9" r="3" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
-          <circle cx="78" cy="-9" r="3" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+        ))}
 
-          {/* Center pin */}
-          <circle cx="0" cy="0" r="3" fill="#CC5536" />
-          <circle cx="0" cy="0" r="6" fill="none" stroke="#CC5536" strokeWidth="0.5" opacity="0.5" />
-
-          {/* Throne (suspension bracket at top) */}
-          <path
-            d="M-12 -90 Q-12 -106 0 -106 Q12 -106 12 -90"
-            fill="none"
-            stroke="rgba(255,255,255,0.25)"
-            strokeWidth="1.5"
+        {/* Lines from focal point to each dot */}
+        {HERO_DOTS.map((d, i) => (
+          <line
+            key={`l-${i}`}
+            x1={FX}
+            y1={FY}
+            x2={d.x}
+            y2={d.y}
+            stroke="white"
+            strokeWidth={0.5}
+            opacity={0.14}
           />
-          <circle cx="0" cy="-110" r="4" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
-        </g>
+        ))}
 
-        {/* ── OBSERVER (minimalist profile) ── */}
-        <g transform="translate(100, 168)">
-          {/* Simple geometric head silhouette */}
-          <path
-            d="M 28 -16 Q 28 -36 12 -38 Q -4 -40 -8 -24 Q -12 -8 -6 0 Q -2 6 4 8 L 4 24 Q 4 28 8 28 L 20 28 Q 24 28 24 24 L 24 12 Q 28 6 28 -16 Z"
-            fill="rgba(255,255,255,0.08)"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="0.8"
+        {/* Dot endpoints */}
+        {HERO_DOTS.map((d, i) => (
+          <circle
+            key={`d-${i}`}
+            cx={d.x}
+            cy={d.y}
+            r={1.5}
+            fill="white"
+            opacity={0.7}
           />
-          {/* Eye position — the sighting point */}
-          <circle cx="20" cy="-14" r="2.5" fill="#CC5536" opacity="0.8" />
-          <circle cx="20" cy="-14" r="5" fill="none" stroke="#CC5536" strokeWidth="0.5" opacity="0.3" />
+        ))}
 
-          {/* Hand holding astrolabe */}
-          <path
-            d="M 24 12 Q 36 8 56 4 Q 64 2 72 0"
-            fill="none"
-            stroke="rgba(255,255,255,0.15)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </g>
+        {/* Focal glow + core */}
+        <circle cx={FX} cy={FY} r={55} fill="url(#fGlow)" />
+        <circle cx={FX} cy={FY} r={2} fill="white" opacity={0.9} />
 
-        {/* ── ANNOTATION LABELS ── */}
-        <text x="160" y="296" fontSize="7" fill="rgba(255,255,255,0.2)" letterSpacing="1.5">
-          OBSERVER
-        </text>
-        <text x="280" y="296" fontSize="7" fill="rgba(255,255,255,0.2)" letterSpacing="1.5">
-          ASTROLABE
-        </text>
-        <text x="530" y="136" fontSize="7" fill="rgba(255,255,255,0.15)" letterSpacing="1">
-          SIGHTING LINE
-        </text>
-
-        {/* ── TITLE overlay — bottom right ── */}
-        <text x="780" y="290" textAnchor="end" fontSize="9" fill="rgba(255,255,255,0.15)" letterSpacing="3">
+        {/* Title — bottom right */}
+        <text
+          x="780"
+          y="372"
+          textAnchor="end"
+          fontSize="9"
+          fill="rgba(255,255,255,0.1)"
+          letterSpacing="3"
+        >
           KNOW WHERE YOU ARE
         </text>
-        <text x="780" y="304" textAnchor="end" fontSize="9" fill="#CC5536" opacity="0.4" letterSpacing="3">
+        <text
+          x="780"
+          y="386"
+          textAnchor="end"
+          fontSize="9"
+          fill="#CC5536"
+          opacity="0.25"
+          letterSpacing="3"
+        >
           THEN MOVE
         </text>
       </svg>
