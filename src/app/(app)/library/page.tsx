@@ -35,7 +35,6 @@ export default function LibraryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="label-uppercase mb-2">Content Library</div>
         <h1 className="text-2xl font-medium">Co-Build Assets & Modules</h1>
         <p className="text-muted text-sm mt-1">
           Browse the full framework — 27 core assets and custom modules.
