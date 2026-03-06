@@ -675,13 +675,15 @@ function AstrolabeHero() {
             const isMajor = i % 6 === 0;
             const r1 = isMajor ? 82 : 85;
             const r2 = 90;
+            const cos = Math.round(Math.cos(angle) * 100) / 100;
+            const sin = Math.round(Math.sin(angle) * 100) / 100;
             return (
               <line
                 key={`tick-${i}`}
-                x1={Math.cos(angle) * r1}
-                y1={Math.sin(angle) * r1}
-                x2={Math.cos(angle) * r2}
-                y2={Math.sin(angle) * r2}
+                x1={cos * r1}
+                y1={sin * r1}
+                x2={cos * r2}
+                y2={sin * r2}
                 stroke={isMajor ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)"}
                 strokeWidth={isMajor ? 1 : 0.5}
               />
@@ -691,11 +693,13 @@ function AstrolabeHero() {
           {/* Cardinal marks */}
           {[0, 90, 180, 270].map((deg) => {
             const a = (deg * Math.PI) / 180;
+            const cx = Math.round(Math.cos(a) * 74 * 100) / 100;
+            const cy = Math.round((Math.sin(a) * 74 + 3) * 100) / 100;
             return (
               <text
                 key={`card-${deg}`}
-                x={Math.cos(a) * 74}
-                y={Math.sin(a) * 74 + 3}
+                x={cx}
+                y={cy}
                 textAnchor="middle"
                 fontSize="6.5"
                 fill="rgba(255,255,255,0.2)"
