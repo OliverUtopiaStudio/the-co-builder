@@ -566,12 +566,15 @@ function Divider() {
    ───────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────
-   Hero — Generative radial burst
+   Hero — Astrolabe marking direction
    Pre-computed integer coords (hydration-safe)
    ───────────────────────────────────────────── */
 
-const FX = 380;
-const FY = 345;
+const AX = 200;
+const AY = 250;
+const ARAD = 75;
+const BEAM_DEG = -24;
+const BEAM_RAD_VAL = (BEAM_DEG * Math.PI) / 180;
 
 interface HDot {
   x: number;
@@ -595,35 +598,91 @@ function makeGrid(
   return out;
 }
 
-const HERO_DOTS: HDot[] = [
-  // Top row
-  ...makeGrid(90, 52, 7, 3, 13),
-  ...makeGrid(290, 36, 4, 5, 13),
-  ...makeGrid(500, 48, 8, 2, 13),
-  ...makeGrid(700, 58, 5, 4, 13),
-  // Mid row
-  ...makeGrid(48, 178, 3, 7, 13),
-  ...makeGrid(198, 148, 6, 4, 13),
-  ...makeGrid(440, 92, 3, 3, 13),
-  ...makeGrid(578, 142, 6, 4, 13),
-  ...makeGrid(742, 188, 4, 6, 13),
-  // Lower row
-  ...makeGrid(118, 282, 5, 3, 13),
-  ...makeGrid(290, 218, 4, 3, 13),
-  ...makeGrid(648, 262, 6, 2, 13),
-];
-
-// Extra sparse rays for visual density (no endpoint dots)
-const HERO_RAYS: HDot[] = [];
-for (let i = 0; i < 60; i++) {
-  const deg = 130 + (i / 59) * 300;
+/* Astrolabe degree ticks */
+interface ATick {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  major: boolean;
+}
+const ASTRO_TICKS: ATick[] = [];
+for (let i = 0; i < 72; i++) {
+  const deg = i * 5;
   const rad = (deg * Math.PI) / 180;
-  const dist = 300 + (i % 7) * 22;
-  HERO_RAYS.push({
-    x: Math.round(FX + Math.cos(rad) * dist),
-    y: Math.round(FY + Math.sin(rad) * dist),
+  const major = deg % 30 === 0;
+  const r1 = major ? ARAD - 8 : ARAD - 4;
+  ASTRO_TICKS.push({
+    x1: Math.round(AX + Math.cos(rad) * r1),
+    y1: Math.round(AY + Math.sin(rad) * r1),
+    x2: Math.round(AX + Math.cos(rad) * ARAD),
+    y2: Math.round(AY + Math.sin(rad) * ARAD),
+    major,
   });
 }
+
+/* Alidade (sighting rule) endpoints */
+const ALIDADE_PTS = {
+  x1: Math.round(AX + Math.cos(BEAM_RAD_VAL + Math.PI) * (ARAD - 2)),
+  y1: Math.round(AY + Math.sin(BEAM_RAD_VAL + Math.PI) * (ARAD - 2)),
+  x2: Math.round(AX + Math.cos(BEAM_RAD_VAL) * (ARAD - 2)),
+  y2: Math.round(AY + Math.sin(BEAM_RAD_VAL) * (ARAD - 2)),
+};
+
+/* Sight line — extends alidade to far edge */
+const SIGHT_END = {
+  x: Math.round(AX + Math.cos(BEAM_RAD_VAL) * 650),
+  y: Math.round(AY + Math.sin(BEAM_RAD_VAL) * 650),
+};
+
+/* Beam lines — concentrated in the sighted direction */
+const BEAM_LINES: HDot[] = [];
+for (let i = 0; i < 120; i++) {
+  const deg = BEAM_DEG - 14 + (i / 119) * 28;
+  const rad = (deg * Math.PI) / 180;
+  const dist = 300 + (i % 9) * 30;
+  BEAM_LINES.push({
+    x: Math.round(AX + Math.cos(rad) * dist),
+    y: Math.round(AY + Math.sin(rad) * dist),
+  });
+}
+
+/* Scatter lines — all other directions, much fainter */
+const SCATTER_LINES: HDot[] = [];
+for (let i = 0; i < 45; i++) {
+  const deg = BEAM_DEG + 20 + (i / 44) * (360 - 48);
+  const rad = (deg * Math.PI) / 180;
+  const dist = 160 + (i % 6) * 35;
+  SCATTER_LINES.push({
+    x: Math.round(AX + Math.cos(rad) * dist),
+    y: Math.round(AY + Math.sin(rad) * dist),
+  });
+}
+
+/* Dot clusters along the beam path */
+const BEAM_DOTS: HDot[] = [
+  ...makeGrid(410, 165, 5, 3, 13),
+  ...makeGrid(540, 115, 4, 4, 13),
+  ...makeGrid(660, 75, 6, 2, 13),
+  ...makeGrid(740, 48, 3, 3, 13),
+];
+
+/* Dot clusters elsewhere (dimmer) */
+const OTHER_DOTS: HDot[] = [
+  ...makeGrid(380, 340, 3, 3, 13),
+  ...makeGrid(100, 75, 4, 2, 13),
+  ...makeGrid(620, 330, 3, 2, 13),
+  ...makeGrid(75, 355, 2, 3, 13),
+];
+
+/* Rete star markers inside astrolabe (all integer coords) */
+const RETE_STARS = [
+  { x: AX + 30, y: AY - 25, lx: AX + 9, ly: AY - 8 },
+  { x: AX - 18, y: AY - 40, lx: AX - 5, ly: AY - 12 },
+  { x: AX + 42, y: AY + 10, lx: AX + 13, ly: AY + 3 },
+  { x: AX - 35, y: AY + 15, lx: AX - 11, ly: AY + 5 },
+  { x: AX + 5, y: AY + 45, lx: AX + 2, ly: AY + 14 },
+];
 
 function AstrolabeHero() {
   return (
@@ -639,45 +698,84 @@ function AstrolabeHero() {
         style={{ display: "block" }}
       >
         <defs>
-          <radialGradient id="fGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="white" stopOpacity="0.3" />
-            <stop offset="25%" stopColor="white" stopOpacity="0.06" />
+          <radialGradient id="aGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="white" stopOpacity="0.12" />
             <stop offset="100%" stopColor="white" stopOpacity="0" />
           </radialGradient>
         </defs>
 
-        {/* Extra rays — faint background lines for density */}
-        {HERO_RAYS.map((r, i) => (
+        {/* ── SCATTER LINES — other directions, very faint ── */}
+        {SCATTER_LINES.map((p, i) => (
           <line
-            key={`r-${i}`}
-            x1={FX}
-            y1={FY}
-            x2={r.x}
-            y2={r.y}
+            key={`sc-${i}`}
+            x1={AX}
+            y1={AY}
+            x2={p.x}
+            y2={p.y}
             stroke="white"
             strokeWidth={0.3}
-            opacity={0.06}
+            opacity={0.04}
           />
         ))}
 
-        {/* Lines from focal point to each dot */}
-        {HERO_DOTS.map((d, i) => (
+        {/* Lines to non-beam dots — dim */}
+        {OTHER_DOTS.map((d, i) => (
           <line
-            key={`l-${i}`}
-            x1={FX}
-            y1={FY}
+            key={`od-${i}`}
+            x1={AX}
+            y1={AY}
             x2={d.x}
             y2={d.y}
+            stroke="white"
+            strokeWidth={0.3}
+            opacity={0.04}
+          />
+        ))}
+
+        {/* ── BEAM — concentrated directional lines ── */}
+        {BEAM_LINES.map((p, i) => (
+          <line
+            key={`bl-${i}`}
+            x1={AX}
+            y1={AY}
+            x2={p.x}
+            y2={p.y}
             stroke="white"
             strokeWidth={0.5}
             opacity={0.14}
           />
         ))}
 
-        {/* Dot endpoints */}
-        {HERO_DOTS.map((d, i) => (
+        {/* Lines to beam-path dots */}
+        {BEAM_DOTS.map((d, i) => (
+          <line
+            key={`bd-${i}`}
+            x1={AX}
+            y1={AY}
+            x2={d.x}
+            y2={d.y}
+            stroke="white"
+            strokeWidth={0.5}
+            opacity={0.12}
+          />
+        ))}
+
+        {/* Primary sight line — dashed accent extending from alidade */}
+        <line
+          x1={AX}
+          y1={AY}
+          x2={SIGHT_END.x}
+          y2={SIGHT_END.y}
+          stroke="#CC5536"
+          strokeWidth={0.8}
+          opacity={0.18}
+          strokeDasharray="8,5"
+        />
+
+        {/* ── DOTS ── */}
+        {BEAM_DOTS.map((d, i) => (
           <circle
-            key={`d-${i}`}
+            key={`bdc-${i}`}
             cx={d.x}
             cy={d.y}
             r={1.5}
@@ -685,15 +783,184 @@ function AstrolabeHero() {
             opacity={0.7}
           />
         ))}
+        {OTHER_DOTS.map((d, i) => (
+          <circle
+            key={`odc-${i}`}
+            cx={d.x}
+            cy={d.y}
+            r={1.2}
+            fill="white"
+            opacity={0.25}
+          />
+        ))}
 
-        {/* Focal glow + core */}
-        <circle cx={FX} cy={FY} r={55} fill="url(#fGlow)" />
-        <circle cx={FX} cy={FY} r={2} fill="white" opacity={0.9} />
+        {/* ── ASTROLABE INSTRUMENT ── */}
+        <circle cx={AX} cy={AY} r={100} fill="url(#aGlow)" />
 
-        {/* Title — bottom right */}
+        {/* Outer ring — mater */}
+        <circle
+          cx={AX}
+          cy={AY}
+          r={ARAD}
+          fill="none"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx={AX}
+          cy={AY}
+          r={ARAD - 2}
+          fill="none"
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="0.5"
+        />
+
+        {/* Degree ticks */}
+        {ASTRO_TICKS.map((t, i) => (
+          <line
+            key={`at-${i}`}
+            x1={t.x1}
+            y1={t.y1}
+            x2={t.x2}
+            y2={t.y2}
+            stroke={
+              t.major
+                ? "rgba(255,255,255,0.25)"
+                : "rgba(255,255,255,0.08)"
+            }
+            strokeWidth={t.major ? 1 : 0.5}
+          />
+        ))}
+
+        {/* Rete circles */}
+        <circle
+          cx={AX}
+          cy={AY}
+          r={52}
+          fill="none"
+          stroke="rgba(255,255,255,0.07)"
+          strokeWidth="0.5"
+        />
+        <circle
+          cx={AX}
+          cy={AY}
+          r={35}
+          fill="none"
+          stroke="rgba(255,255,255,0.05)"
+          strokeWidth="0.5"
+        />
+        <circle
+          cx={AX}
+          cy={AY}
+          r={18}
+          fill="none"
+          stroke="rgba(255,255,255,0.04)"
+          strokeWidth="0.5"
+        />
+
+        {/* Cross-hairs */}
+        <line
+          x1={AX - 56}
+          y1={AY}
+          x2={AX + 56}
+          y2={AY}
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="0.5"
+        />
+        <line
+          x1={AX}
+          y1={AY - 56}
+          x2={AX}
+          y2={AY + 56}
+          stroke="rgba(255,255,255,0.06)"
+          strokeWidth="0.5"
+        />
+
+        {/* Ecliptic ring — offset circle (characteristic rete feature) */}
+        <circle
+          cx={AX + 10}
+          cy={AY - 6}
+          r={42}
+          fill="none"
+          stroke="#CC5536"
+          strokeWidth="0.6"
+          opacity="0.2"
+        />
+
+        {/* Rete star pointers */}
+        {RETE_STARS.map((s, i) => (
+          <g key={`rs-${i}`}>
+            <circle cx={s.x} cy={s.y} r={1.5} fill="#CC5536" opacity="0.5" />
+            <line
+              x1={s.x}
+              y1={s.y}
+              x2={s.lx}
+              y2={s.ly}
+              stroke="#CC5536"
+              strokeWidth="0.4"
+              opacity="0.2"
+            />
+          </g>
+        ))}
+
+        {/* Alidade — the sighting rule, pointing in THE direction */}
+        <line
+          x1={ALIDADE_PTS.x1}
+          y1={ALIDADE_PTS.y1}
+          x2={ALIDADE_PTS.x2}
+          y2={ALIDADE_PTS.y2}
+          stroke="rgba(255,255,255,0.4)"
+          strokeWidth="1.5"
+        />
+        <circle
+          cx={ALIDADE_PTS.x1}
+          cy={ALIDADE_PTS.y1}
+          r={3}
+          fill="none"
+          stroke="rgba(255,255,255,0.25)"
+          strokeWidth="0.8"
+        />
+        <circle
+          cx={ALIDADE_PTS.x2}
+          cy={ALIDADE_PTS.y2}
+          r={3}
+          fill="none"
+          stroke="rgba(255,255,255,0.25)"
+          strokeWidth="0.8"
+        />
+
+        {/* Center pin */}
+        <circle cx={AX} cy={AY} r={2.5} fill="#CC5536" />
+        <circle
+          cx={AX}
+          cy={AY}
+          r={5}
+          fill="none"
+          stroke="#CC5536"
+          strokeWidth="0.5"
+          opacity="0.3"
+        />
+
+        {/* Throne (suspension bracket) */}
+        <path
+          d={`M${AX - 10} ${AY - ARAD} Q${AX - 10} ${AY - ARAD - 14} ${AX} ${AY - ARAD - 14} Q${AX + 10} ${AY - ARAD - 14} ${AX + 10} ${AY - ARAD}`}
+          fill="none"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="1"
+        />
+        <circle
+          cx={AX}
+          cy={AY - ARAD - 18}
+          r={3}
+          fill="none"
+          stroke="rgba(255,255,255,0.15)"
+          strokeWidth="0.8"
+        />
+
+        {/* ── TEXT ── */}
         <text
           x="780"
-          y="372"
+          y="370"
           textAnchor="end"
           fontSize="9"
           fill="rgba(255,255,255,0.1)"
@@ -703,7 +970,7 @@ function AstrolabeHero() {
         </text>
         <text
           x="780"
-          y="386"
+          y="384"
           textAnchor="end"
           fontSize="9"
           fill="#CC5536"
