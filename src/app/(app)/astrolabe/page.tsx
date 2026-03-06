@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 /* ─────────────────────────────────────────────────────────────
    Astrolabes — Living Document
    Content sourced from Astrolabes_UtopiaStudio_v2.html
@@ -60,6 +62,25 @@ export default function AstrolabePage() {
             — Ollie Graham-Yooll &amp; Karan
           </p>
         </div>
+
+        {/* Meet the Team link */}
+        <Link
+          href="/astrolabe/team"
+          className="block bg-surface border border-border p-5 mt-6 max-w-2xl hover:border-accent/40 hover:shadow-sm transition-all group"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium text-sm group-hover:text-accent transition-colors">
+                Meet the Team
+              </h3>
+              <p className="text-muted text-xs mt-0.5">
+                The people across four organisations making it happen
+              </p>
+            </div>
+            <span className="text-accent text-sm font-medium">→</span>
+          </div>
+        </Link>
       </div>
 
       {/* ── MASTER DIAGRAM ── */}
@@ -688,7 +709,7 @@ function AstrolabeHero() {
   return (
     <div
       className="overflow-hidden relative -mt-8"
-      style={{ borderRadius: 2, backgroundColor: "#000" }}
+      style={{ borderRadius: 2, backgroundColor: "var(--bg)" }}
     >
       <svg
         viewBox="0 0 800 400"
@@ -699,8 +720,8 @@ function AstrolabeHero() {
       >
         <defs>
           <radialGradient id="aGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="white" stopOpacity="0.12" />
-            <stop offset="100%" stopColor="white" stopOpacity="0" />
+            <stop offset="0%" stopColor="#1F1E1D" stopOpacity="0.06" />
+            <stop offset="100%" stopColor="#1F1E1D" stopOpacity="0" />
           </radialGradient>
         </defs>
 
@@ -712,9 +733,9 @@ function AstrolabeHero() {
             y1={AY}
             x2={p.x}
             y2={p.y}
-            stroke="white"
+            stroke="#1F1E1D"
             strokeWidth={0.3}
-            opacity={0.04}
+            opacity={0.06}
           />
         ))}
 
@@ -726,9 +747,9 @@ function AstrolabeHero() {
             y1={AY}
             x2={d.x}
             y2={d.y}
-            stroke="white"
+            stroke="#1F1E1D"
             strokeWidth={0.3}
-            opacity={0.04}
+            opacity={0.06}
           />
         ))}
 
@@ -740,9 +761,9 @@ function AstrolabeHero() {
             y1={AY}
             x2={p.x}
             y2={p.y}
-            stroke="white"
+            stroke="#1F1E1D"
             strokeWidth={0.5}
-            opacity={0.14}
+            opacity={0.18}
           />
         ))}
 
@@ -754,9 +775,9 @@ function AstrolabeHero() {
             y1={AY}
             x2={d.x}
             y2={d.y}
-            stroke="white"
+            stroke="#1F1E1D"
             strokeWidth={0.5}
-            opacity={0.12}
+            opacity={0.15}
           />
         ))}
 
@@ -779,8 +800,8 @@ function AstrolabeHero() {
             cx={d.x}
             cy={d.y}
             r={1.5}
-            fill="white"
-            opacity={0.7}
+            fill="#1F1E1D"
+            opacity={0.5}
           />
         ))}
         {OTHER_DOTS.map((d, i) => (
@@ -789,8 +810,8 @@ function AstrolabeHero() {
             cx={d.x}
             cy={d.y}
             r={1.2}
-            fill="white"
-            opacity={0.25}
+            fill="#1F1E1D"
+            opacity={0.18}
           />
         ))}
 
@@ -803,7 +824,7 @@ function AstrolabeHero() {
           cy={AY}
           r={ARAD}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
+          stroke="rgba(31,30,29,0.2)"
           strokeWidth="1.5"
         />
         <circle
@@ -811,7 +832,7 @@ function AstrolabeHero() {
           cy={AY}
           r={ARAD - 2}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
+          stroke="rgba(31,30,29,0.08)"
           strokeWidth="0.5"
         />
 
@@ -825,8 +846,8 @@ function AstrolabeHero() {
             y2={t.y2}
             stroke={
               t.major
-                ? "rgba(255,255,255,0.25)"
-                : "rgba(255,255,255,0.08)"
+                ? "rgba(31,30,29,0.25)"
+                : "rgba(31,30,29,0.1)"
             }
             strokeWidth={t.major ? 1 : 0.5}
           />
@@ -838,7 +859,7 @@ function AstrolabeHero() {
           cy={AY}
           r={52}
           fill="none"
-          stroke="rgba(255,255,255,0.07)"
+          stroke="rgba(31,30,29,0.08)"
           strokeWidth="0.5"
         />
         <circle
@@ -846,7 +867,7 @@ function AstrolabeHero() {
           cy={AY}
           r={35}
           fill="none"
-          stroke="rgba(255,255,255,0.05)"
+          stroke="rgba(31,30,29,0.06)"
           strokeWidth="0.5"
         />
         <circle
@@ -854,7 +875,7 @@ function AstrolabeHero() {
           cy={AY}
           r={18}
           fill="none"
-          stroke="rgba(255,255,255,0.04)"
+          stroke="rgba(31,30,29,0.05)"
           strokeWidth="0.5"
         />
 
@@ -864,7 +885,7 @@ function AstrolabeHero() {
           y1={AY}
           x2={AX + 56}
           y2={AY}
-          stroke="rgba(255,255,255,0.06)"
+          stroke="rgba(31,30,29,0.07)"
           strokeWidth="0.5"
         />
         <line
@@ -872,7 +893,7 @@ function AstrolabeHero() {
           y1={AY - 56}
           x2={AX}
           y2={AY + 56}
-          stroke="rgba(255,255,255,0.06)"
+          stroke="rgba(31,30,29,0.07)"
           strokeWidth="0.5"
         />
 
@@ -909,7 +930,7 @@ function AstrolabeHero() {
           y1={ALIDADE_PTS.y1}
           x2={ALIDADE_PTS.x2}
           y2={ALIDADE_PTS.y2}
-          stroke="rgba(255,255,255,0.4)"
+          stroke="rgba(31,30,29,0.35)"
           strokeWidth="1.5"
         />
         <circle
@@ -917,7 +938,7 @@ function AstrolabeHero() {
           cy={ALIDADE_PTS.y1}
           r={3}
           fill="none"
-          stroke="rgba(255,255,255,0.25)"
+          stroke="rgba(31,30,29,0.2)"
           strokeWidth="0.8"
         />
         <circle
@@ -925,7 +946,7 @@ function AstrolabeHero() {
           cy={ALIDADE_PTS.y2}
           r={3}
           fill="none"
-          stroke="rgba(255,255,255,0.25)"
+          stroke="rgba(31,30,29,0.2)"
           strokeWidth="0.8"
         />
 
@@ -945,7 +966,7 @@ function AstrolabeHero() {
         <path
           d={`M${AX - 10} ${AY - ARAD} Q${AX - 10} ${AY - ARAD - 14} ${AX} ${AY - ARAD - 14} Q${AX + 10} ${AY - ARAD - 14} ${AX + 10} ${AY - ARAD}`}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
+          stroke="rgba(31,30,29,0.2)"
           strokeWidth="1"
         />
         <circle
@@ -953,7 +974,7 @@ function AstrolabeHero() {
           cy={AY - ARAD - 18}
           r={3}
           fill="none"
-          stroke="rgba(255,255,255,0.15)"
+          stroke="rgba(31,30,29,0.15)"
           strokeWidth="0.8"
         />
 
@@ -963,7 +984,7 @@ function AstrolabeHero() {
           y="370"
           textAnchor="end"
           fontSize="9"
-          fill="rgba(255,255,255,0.1)"
+          fill="rgba(31,30,29,0.12)"
           letterSpacing="3"
         >
           KNOW WHERE YOU ARE
