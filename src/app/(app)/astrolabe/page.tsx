@@ -18,13 +18,6 @@ export default function AstrolabePage() {
     setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
-  const openAndScroll = useCallback((id: string) => {
-    setOpenSections((prev) => ({ ...prev, [id]: true }));
-    requestAnimationFrame(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, []);
-
   return (
     <div className="max-w-3xl pb-16">
       {/* ── HERO ILLUSTRATION ── */}
@@ -100,55 +93,6 @@ export default function AstrolabePage() {
         </Link>
       </div>
 
-      {/* ── ON THIS PAGE ── */}
-      <nav
-        aria-label="On this page"
-        className="sticky top-4 z-10 bg-[var(--bg)]/95 backdrop-blur-sm border border-border py-4 px-5 -mx-1"
-        style={{ borderRadius: 2 }}
-      >
-        <div className="label-uppercase text-muted mb-3">On this page</div>
-        <ul className="space-y-1.5 text-sm">
-          {[
-            { id: "system", label: "The System" },
-            { id: "part-one", label: "Part One · The Platform" },
-            { id: "part-two", label: "Part Two · How We Work" },
-            { id: "part-three", label: "Part Three · The Thesis" },
-            { id: "part-four", label: "Part Four · Co-Build Framework" },
-            { id: "closing", label: "The Standard · Revisit" },
-          ].map(({ id, label }) => (
-            <li key={id}>
-              {id === "closing" ? (
-                <a
-                  href="#closing"
-                  className="block py-1 hover:text-accent transition-colors"
-                >
-                  {label}
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => openAndScroll(id)}
-                  className="text-left w-full py-1 hover:text-accent transition-colors flex items-center gap-2 group"
-                >
-                  <span
-                    className={`shrink-0 w-4 h-4 border flex items-center justify-center transition-colors ${
-                      openSections[id] ? "border-accent bg-accent/10" : "border-border"
-                    }`}
-                    style={{ borderRadius: 2 }}
-                  >
-                    {openSections[id] ? (
-                      <span className="text-accent text-[10px]">−</span>
-                    ) : (
-                      <span className="text-muted text-[10px]">+</span>
-                    )}
-                  </span>
-                  {label}
-                </button>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
 
       <div className="space-y-4 mt-8">
       {/* ── MASTER DIAGRAM ── */}
