@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:check": "npx tsx scripts/check-schema-drift.ts",
+    "db:seed-fellows": "npx tsx scripts/seed-fellows.ts",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
