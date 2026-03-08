@@ -18,9 +18,9 @@ export default async function AppLayout({
             { href: "/astrolabe", label: "Astrolabe" },
             { href: `/fellows/${fellowId}`, label: "My Venture" },
           ],
-          homeHref: "/dashboard",
-          mobileTitle: "CO-BUILDER",
-          sidebarSubtitle: "The Co-Builder",
+          homeHref: "/astrolabe",
+          mobileTitle: "CO-BUILDER OS",
+          sidebarSubtitle: "Co-builder OS",
           sidebarBadge: "Fellow",
         }
       : {
@@ -29,10 +29,11 @@ export default async function AppLayout({
             { href: "/fellows", label: "Fellows" },
             { href: "/library", label: "Content Library" },
             { href: "/dashboard", label: "Dashboard" },
+            { href: "/wiki", label: "Wiki" },
           ],
-          homeHref: "/library",
-          mobileTitle: "CO-BUILDER",
-          sidebarSubtitle: "The Co-Builder",
+          homeHref: "/astrolabe",
+          mobileTitle: "CO-BUILDER OS",
+          sidebarSubtitle: "Co-builder OS",
           sidebarBadge: "Studio",
         };
 

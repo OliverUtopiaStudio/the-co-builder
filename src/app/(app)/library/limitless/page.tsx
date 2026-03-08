@@ -6,6 +6,12 @@ import { limitlessTopics } from "@/lib/limitless";
 export default function BecomingLimitlessPage() {
   return (
     <div className="space-y-6">
+      <Link
+        href="/library"
+        className="text-sm text-muted hover:text-accent transition-colors inline-flex items-center gap-1"
+      >
+        ← Back to Content Library
+      </Link>
       <div>
         <h1 className="text-2xl font-medium">Becoming Limitless</h1>
         <p className="text-muted text-sm mt-1">

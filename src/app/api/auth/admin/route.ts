@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const ADMIN_COOKIE_NAME = "co_build_admin_auth";
+const AUTH_COOKIE_NAME = "co_build_site_auth";
 
 export async function POST(request: NextRequest) {
   let password: string | undefined;
@@ -33,6 +34,15 @@ export async function POST(request: NextRequest) {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: 60 * 60 * 24 * 7, // 7 days
+  });
+
+  // Admin users also get site-level auth (so the middleware session check passes)
+  response.cookies.set(AUTH_COOKIE_NAME, "1", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
   });
 
   return response;

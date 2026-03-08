@@ -62,18 +62,16 @@ export default function LandingHero({
 
       {/* Bottom — login buttons + signup link */}
       <div style={stagger(400)}>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3">
           <button
             onClick={() => onSelectMode("fellow")}
-            className="px-5 py-2.5 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-all"
-            style={{ borderRadius: 2 }}
+            className="min-h-[48px] px-5 py-2.5 bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-all touch-manipulation rounded-sm"
           >
             Sign in
           </button>
           <button
             onClick={() => onSelectMode("studio")}
-            className="px-5 py-2.5 bg-white/8 border border-white/12 text-white/70 text-sm font-medium hover:text-white hover:border-white/25 transition-all"
-            style={{ borderRadius: 2 }}
+            className="min-h-[48px] px-5 py-2.5 bg-white/8 border border-white/12 text-white/70 text-sm font-medium hover:text-white hover:border-white/25 transition-all touch-manipulation rounded-sm"
           >
             Studio
           </button>

@@ -33,9 +33,9 @@ export default function ProgressHeader({
       : null;
 
   return (
-    <div className="mb-8">
-      <h1 className="text-2xl font-medium">Welcome back, {fellowName}</h1>
-      <p className="text-muted text-sm mt-1">
+    <div className="mb-6 sm:mb-8">
+      <h1 className="text-xl font-medium sm:text-2xl">Welcome back, {fellowName}</h1>
+      <p className="text-muted text-sm mt-1 break-words">
         {ventureName}
         {diagnosis?.currentStage != null && (
           <>
@@ -46,10 +46,10 @@ export default function ProgressHeader({
           </>
         )}
       </p>
-      <div className="mt-4 flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full sm:w-auto">
           <div
-            className="h-2 flex-1 min-w-[120px] max-w-[240px] bg-border/50 overflow-hidden"
+            className="h-2 flex-1 min-w-[80px] sm:min-w-[120px] max-w-[200px] sm:max-w-[240px] bg-border/50 overflow-hidden"
             style={{ borderRadius: 2 }}
           >
             <div
@@ -57,12 +57,12 @@ export default function ProgressHeader({
               style={{ width: `${pct}%`, borderRadius: 2 }}
             />
           </div>
-          <span className="text-sm text-muted shrink-0">
-            {completed}/{total} assets · {pct}%
+          <span className="text-xs sm:text-sm text-muted shrink-0">
+            {completed}/{total} · {pct}%
           </span>
         </div>
         {weeks != null && weeks > 0 && (
-          <span className="text-sm text-muted">
+          <span className="text-xs sm:text-sm text-muted">
             Est. {weeks} {weeks === 1 ? "week" : "weeks"} to spinout
           </span>
         )}

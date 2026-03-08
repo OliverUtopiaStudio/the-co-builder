@@ -71,7 +71,7 @@ export default function LoginPage() {
         setLoading(false);
         return;
       }
-      router.push(searchParams.get("redirect") || "/dashboard");
+      router.push(searchParams.get("redirect") || "/astrolabe");
       router.refresh();
       return;
     } catch {
@@ -86,26 +86,18 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const [authRes, siteRes] = await Promise.all([
-        fetch("/api/auth/admin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password }),
-        }),
-        fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password }),
-        }),
-      ]);
+      const authRes = await fetch("/api/auth/admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
       if (!authRes.ok) {
         const data = await authRes.json().catch(() => ({}));
         setError(data?.error ?? "Invalid password.");
         setLoading(false);
         return;
       }
-      await siteRes;
-      router.push(searchParams.get("redirect") || "/fellows");
+      router.push(searchParams.get("redirect") || "/astrolabe");
       router.refresh();
     } catch {
       setError("Something went wrong. Please try again.");
@@ -119,7 +111,7 @@ export default function LoginPage() {
       <>
         <LuminousNetwork />
         <div className="login-page">
-          <div className="login-brand">THE CO-BUILDER</div>
+          <div className="login-brand">CO-BUILDER OS</div>
           <div className="login-spacer" />
           <div className="login-card">
             <form onSubmit={handleFellowPassword} className="login-form-inner">
@@ -163,7 +155,7 @@ export default function LoginPage() {
       <>
         <LuminousNetwork />
         <div className="login-page">
-          <div className="login-brand">THE CO-BUILDER</div>
+          <div className="login-brand">CO-BUILDER OS</div>
           <div className="login-spacer" />
           <div className="login-card">
             <form onSubmit={handleFellowSelect} className="login-form-inner">
@@ -204,7 +196,7 @@ export default function LoginPage() {
       <>
         <LuminousNetwork />
         <div className="login-page">
-          <div className="login-brand">THE CO-BUILDER</div>
+          <div className="login-brand">CO-BUILDER OS</div>
           <div className="login-spacer" />
           <div className="login-card">
             <form onSubmit={handleStudioPassword} className="login-form-inner">
@@ -247,7 +239,7 @@ export default function LoginPage() {
     <>
       <LuminousNetwork />
       <div className="login-page">
-        <div className="login-brand">THE CO-BUILDER</div>
+        <div className="login-brand">CO-BUILDER OS</div>
         <div className="login-spacer" />
         <div className="login-card">
           <div className="login-form-inner space-y-3">

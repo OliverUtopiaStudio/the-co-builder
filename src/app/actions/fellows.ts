@@ -196,6 +196,13 @@ export async function getFellowsList() {
 
 export async function getFellowDetail(fellowId: string) {
   const isAdmin = await checkIsAdmin();
+  const cookieStore = await cookies();
+  const currentFellowId = cookieStore.get("co_build_fellow_id")?.value ?? null;
+
+  // Fellows may only view their own detail page; studio may view any
+  if (!isAdmin && currentFellowId !== fellowId) {
+    return null;
+  }
 
   const [fellow] = await db
     .select()
@@ -219,7 +226,7 @@ export async function getFellowDetail(fellowId: string) {
     fellow,
     venture,
     isStudio: isAdmin,
-    isOwnPage: false,
+    isOwnPage: currentFellowId === fellowId,
   };
 }
 

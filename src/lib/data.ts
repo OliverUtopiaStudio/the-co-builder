@@ -886,15 +886,87 @@ export const allAssets: Asset[] = stages.flatMap((s) =>
 
 /** Custom modules — same Asset shape, numbered 100+ to avoid collision */
 export const customModules: Asset[] = [
-  // Add custom modules here. Example:
-  // {
-  //   number: 101,
-  //   title: "Partner Alignment Workshop",
-  //   purpose: "Structured workshop to align co-founders on vision, roles, and equity.",
-  //   checklist: [{ id: "101-1", text: "Completed alignment exercise" }],
-  //   tags: ["custom", "team"],
-  //   isCustomModule: true,
-  // },
+  {
+    number: 101,
+    title: "Website Build",
+    purpose:
+      "Build a clear, credible web presence that communicates your venture and converts visitors.",
+    coreQuestion:
+      "Does your website instantly tell a visitor what you do, why it matters, and what to do next?",
+    checklist: [
+      { id: "101-1", text: "Defined core message and value proposition" },
+      { id: "101-2", text: "Designed simple, scannable layout" },
+      { id: "101-3", text: "Added clear primary CTA (contact, waitlist, demo)" },
+      { id: "101-4", text: "Launched and shared with early contacts" },
+    ],
+    tags: ["customer-path", "skills"],
+    isCustomModule: true,
+  },
+  {
+    number: 102,
+    title: "Pitch Deck Build",
+    purpose:
+      "Create a concise, compelling pitch deck that tells your story and supports fundraising or partnerships.",
+    coreQuestion:
+      "Can an investor or partner understand your problem, solution, traction, and ask in under 10 slides?",
+    checklist: [
+      { id: "102-1", text: "Problem, solution, and why now" },
+      { id: "102-2", text: "Market size and opportunity" },
+      { id: "102-3", text: "Product and traction" },
+      { id: "102-4", text: "Team and ask" },
+      { id: "102-5", text: "Rehearsed and timed" },
+    ],
+    tags: ["customer-path", "skills"],
+    isCustomModule: true,
+  },
+  {
+    number: 103,
+    title: "V1 Commercials",
+    purpose:
+      "Craft short, repeatable commercials that explain what you do and why it matters for sales and marketing.",
+    coreQuestion:
+      "Can you explain your venture in 30 seconds in a way that creates curiosity or commitment?",
+    checklist: [
+      { id: "103-1", text: "30-second and 60-second scripts" },
+      { id: "103-2", text: "Hook, problem, solution, proof, CTA" },
+      { id: "103-3", text: "Tested with real conversations" },
+      { id: "103-4", text: "Recorded and iterated" },
+    ],
+    tags: ["customer-path", "skills"],
+    isCustomModule: true,
+  },
+  {
+    number: 104,
+    title: "Sales and Closing",
+    purpose:
+      "Learn to qualify leads, run discovery, handle objections, and close early customers.",
+    coreQuestion:
+      "Do you have a repeatable process to move a prospect from first touch to signed customer?",
+    checklist: [
+      { id: "104-1", text: "Defined ICP and qualification criteria" },
+      { id: "104-2", text: "Discovery and demo flow" },
+      { id: "104-3", text: "Objection handling and pricing" },
+      { id: "104-4", text: "Close and onboarding" },
+    ],
+    tags: ["customer-path", "skills"],
+    isCustomModule: true,
+  },
+  {
+    number: 105,
+    title: "How to Talk to Investors",
+    purpose:
+      "Prepare for investor conversations: narrative, metrics, and how to ask for and close funding.",
+    coreQuestion:
+      "Can you clearly explain your opportunity, progress, and use of capital in investor language?",
+    checklist: [
+      { id: "105-1", text: "Investment story and use of funds" },
+      { id: "105-2", text: "Key metrics and milestones" },
+      { id: "105-3", text: "Term sheet basics and red lines" },
+      { id: "105-4", text: "Follow-up and closing process" },
+    ],
+    tags: ["customer-path", "skills"],
+    isCustomModule: true,
+  },
 ];
 
 /** Combined flat catalog for the content library */

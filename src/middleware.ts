@@ -33,14 +33,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(redirect, request.url));
   }
 
-  // Fellows with identity: redirect / and /library to dashboard (admins skip)
-  if (fellowId && !isAdmin && (pathname === "/" || pathname === "/library")) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+  // All authenticated users: redirect / to Astrolabe (the default landing page)
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/astrolabe", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/dashboard", "/library/:path*", "/fellows/:path*", "/astrolabe/:path*", "/login"],
+  matcher: ["/", "/dashboard", "/library/:path*", "/fellows/:path*", "/astrolabe/:path*", "/wiki", "/login"],
 };

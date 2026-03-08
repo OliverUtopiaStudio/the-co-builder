@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   const ventureId = venture?.id ?? "";
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <ProgressHeader
         fellowName={fellow.fullName}
         ventureName={venture?.name ?? ""}
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
         <StageJourneyMap pathway={diagnosis?.pathway ?? []} />
       </section>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-3">
         <div>
           <h3 className="label-uppercase text-[10px] mb-3 text-muted">
             Milestones

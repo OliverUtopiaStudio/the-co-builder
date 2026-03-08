@@ -25,7 +25,7 @@ export interface SidebarConfig {
   homeHref: string;
   /** Short label shown in mobile header (e.g. "CO-BUILDER", "ADMIN", "STUDIO") */
   mobileTitle: string;
-  /** Subtitle shown below "The Co-Builder" in sidebar (e.g. "Admin", "Studio OS") */
+  /** Subtitle shown below "Co-builder OS" in sidebar (e.g. "Admin", "Studio OS") */
   sidebarSubtitle?: string;
   /** Accent label shown below subtitle (e.g. "Admin", "Dashboard") */
   sidebarBadge?: string;
@@ -132,13 +132,13 @@ export default function SidebarLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
-      <header className="lg:hidden sticky top-0 z-50 bg-sidebar-bg border-b border-white/10 px-4 py-3 flex items-center justify-between">
+      <header className="lg:hidden sticky top-0 z-50 bg-sidebar-bg border-b border-white/10 px-3 py-3 sm:px-4 flex items-center justify-between safe-area-inset-top">
         <div className="flex items-center gap-1 min-w-[80px]">
           {isNestedRoute ? (
             <button
               type="button"
               onClick={handleBack}
-              className="p-2 text-sidebar-text -ml-1"
+              className="min-h-[44px] min-w-[44px] p-2 -ml-1 flex items-center justify-center text-sidebar-text touch-manipulation"
               aria-label="Go back"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -148,7 +148,7 @@ export default function SidebarLayout({
           ) : (
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 text-sidebar-text"
+              className="min-h-[44px] min-w-[44px] p-2 flex items-center justify-center text-sidebar-text touch-manipulation"
               aria-label="Open menu"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -198,7 +198,7 @@ export default function SidebarLayout({
               STUDIO
             </div>
             <div className="text-sidebar-text text-sm font-medium mt-3">
-              {config.sidebarSubtitle || "The Co-Builder"}
+              {config.sidebarSubtitle || "Co-builder OS"}
             </div>
             {config.sidebarBadge && (
               <div className="inline-block text-[10px] tracking-[1.5px] uppercase font-semibold text-accent mt-1">
@@ -281,7 +281,7 @@ export default function SidebarLayout({
       {/* Main content */}
       <main className="lg:ml-56 min-h-screen">
         <div
-          className={`${config.maxWidth || "max-w-5xl"} mx-auto px-6 py-8`}
+          className={`${config.maxWidth || "max-w-5xl"} mx-auto px-4 py-6 sm:px-6 sm:py-8`}
         >
           {isNestedRoute && (
             <button
@@ -310,10 +310,10 @@ export default function SidebarLayout({
         </div>
       </main>
 
-      {/* Mobile feedback FAB */}
+      {/* Mobile feedback FAB — safe area for home indicator / notches */}
       <button
         onClick={() => setFeedbackOpen(true)}
-        className="lg:hidden fixed bottom-5 left-5 z-40 flex items-center gap-2 px-4 py-2.5 text-sm text-accent border border-accent bg-surface hover:bg-accent/10 transition-colors shadow-lg"
+        className="lg:hidden fixed left-4 bottom-[max(1.25rem,env(safe-area-inset-bottom))] z-40 flex items-center gap-2 px-4 py-2.5 text-sm text-accent border border-accent bg-surface hover:bg-accent/10 transition-colors shadow-lg touch-manipulation min-h-[44px]"
         style={{ borderRadius: 2 }}
         aria-label="Send feedback"
       >

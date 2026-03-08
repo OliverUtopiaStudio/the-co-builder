@@ -83,7 +83,7 @@ export function FeedbackModal({
           <>
             <div className="label-uppercase mb-1">Share Feedback</div>
             <p className="text-xs text-muted mb-4">
-              Help us improve the Co-Builder
+              Help us improve Co-builder OS
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-3">

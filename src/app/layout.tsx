@@ -3,9 +3,16 @@ import "./globals.css";
 import { QueryProvider } from "@/lib/providers/QueryProvider";
 
 export const metadata: Metadata = {
-  title: "The Co-Builder | Utopia Studio",
+  title: "Co-builder OS | Utopia Studio",
   description:
     "27 Assets from Invention to Spinout — AI-Native Venture Building at Utopia Studio",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover" as const,
 };
 
 export default function RootLayout({

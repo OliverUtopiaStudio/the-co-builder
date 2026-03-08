@@ -279,6 +279,203 @@ export const lessons: Record<number, AnimatedLessonData> = {
       },
     ],
   },
+  // ─── Customer path / skills lessons (custom modules 101–105) ───
+  101: {
+    assetNumber: 101,
+    title: "Website Build",
+    totalDuration: "2 min",
+    scenes: [
+      {
+        type: "title",
+        heading: "Website Build",
+        body: "A clear, credible web presence that communicates your venture and converts visitors.",
+        duration: 4,
+      },
+      {
+        type: "callout",
+        label: "CORE QUESTION",
+        heading:
+          "Does your website instantly tell a visitor what you do, why it matters, and what to do next?",
+        body: "Early-stage sites should be simple: one clear message, one primary action. No clutter.",
+        duration: 6,
+      },
+      {
+        type: "steps",
+        label: "YOUR TASK",
+        heading: "Build your v1 site",
+        items: [
+          "Define your core message and value proposition in one sentence.",
+          "Design a simple, scannable layout — hero, problem/solution, proof or social proof, CTA.",
+          "Add one clear primary CTA: contact, waitlist, or demo.",
+          "Launch and share with early contacts; iterate from real feedback.",
+        ],
+        duration: 10,
+      },
+      {
+        type: "action",
+        heading: "Open Module 101 in the Content Library",
+        body: "Use the checklist to ship a site that works for your stage.",
+        duration: 4,
+      },
+    ],
+  },
+  102: {
+    assetNumber: 102,
+    title: "Pitch Deck Build",
+    totalDuration: "2 min",
+    scenes: [
+      {
+        type: "title",
+        heading: "Pitch Deck Build",
+        body: "A concise, compelling deck that tells your story and supports fundraising or partnerships.",
+        duration: 4,
+      },
+      {
+        type: "callout",
+        label: "CORE QUESTION",
+        heading:
+          "Can an investor or partner understand your problem, solution, traction, and ask in under 10 slides?",
+        body: "Every slide should earn its place. Cut anything that doesn't drive the narrative.",
+        duration: 6,
+      },
+      {
+        type: "steps",
+        label: "YOUR TASK",
+        heading: "Build your pitch deck",
+        items: [
+          "Problem, solution, and why now — the opening hook.",
+          "Market size and opportunity — show you're playing in a real space.",
+          "Product and traction — what you've built and what you've proven.",
+          "Team and ask — who you are and what you need.",
+          "Rehearse and time it — 10–12 minutes max for the full story.",
+        ],
+        duration: 10,
+      },
+      {
+        type: "action",
+        heading: "Open Module 102 in the Content Library",
+        body: "Use the checklist to create and refine your deck.",
+        duration: 4,
+      },
+    ],
+  },
+  103: {
+    assetNumber: 103,
+    title: "V1 Commercials",
+    totalDuration: "2 min",
+    scenes: [
+      {
+        type: "title",
+        heading: "V1 Commercials",
+        body: "Short, repeatable scripts that explain what you do and why it matters.",
+        duration: 4,
+      },
+      {
+        type: "callout",
+        label: "CORE QUESTION",
+        heading:
+          "Can you explain your venture in 30 seconds in a way that creates curiosity or commitment?",
+        body: "Commercials are for every conversation — sales, networking, and investor chats.",
+        duration: 6,
+      },
+      {
+        type: "steps",
+        label: "YOUR TASK",
+        heading: "Craft and test your commercials",
+        items: [
+          "Write 30-second and 60-second scripts: hook, problem, solution, proof, CTA.",
+          "Structure: what you do, for whom, and why it matters — then one clear next step.",
+          "Test with real conversations; note where people lean in or glaze over.",
+          "Record yourself and iterate until it feels natural and consistent.",
+        ],
+        duration: 10,
+      },
+      {
+        type: "action",
+        heading: "Open Module 103 in the Content Library",
+        body: "Use the checklist to lock in your v1 commercials.",
+        duration: 4,
+      },
+    ],
+  },
+  104: {
+    assetNumber: 104,
+    title: "Sales and Closing",
+    totalDuration: "2 min",
+    scenes: [
+      {
+        type: "title",
+        heading: "Sales and Closing",
+        body: "Qualify leads, run discovery, handle objections, and close early customers.",
+        duration: 4,
+      },
+      {
+        type: "callout",
+        label: "CORE QUESTION",
+        heading:
+          "Do you have a repeatable process to move a prospect from first touch to signed customer?",
+        body: "Early sales are about learning and pattern-building, not just revenue.",
+        duration: 6,
+      },
+      {
+        type: "steps",
+        label: "YOUR TASK",
+        heading: "Build your sales motion",
+        items: [
+          "Define ICP and qualification criteria — who is in, who is out.",
+          "Design discovery and demo flow — what you ask, what you show, in what order.",
+          "Prepare objection handling and pricing — how you respond and what you charge.",
+          "Close and onboarding — next steps, contract, and first value delivered.",
+        ],
+        duration: 10,
+      },
+      {
+        type: "action",
+        heading: "Open Module 104 in the Content Library",
+        body: "Use the checklist to build a repeatable sales process.",
+        duration: 4,
+      },
+    ],
+  },
+  105: {
+    assetNumber: 105,
+    title: "How to Talk to Investors",
+    totalDuration: "2 min",
+    scenes: [
+      {
+        type: "title",
+        heading: "How to Talk to Investors",
+        body: "Prepare for investor conversations: narrative, metrics, and closing.",
+        duration: 4,
+      },
+      {
+        type: "callout",
+        label: "CORE QUESTION",
+        heading:
+          "Can you clearly explain your opportunity, progress, and use of capital in investor language?",
+        body: "Investors back conviction and clarity. Your job is to make the case obvious.",
+        duration: 6,
+      },
+      {
+        type: "steps",
+        label: "YOUR TASK",
+        heading: "Get investor-ready",
+        items: [
+          "Investment story and use of funds — what you're raising and what it buys.",
+          "Key metrics and milestones — what you track and what you'll prove.",
+          "Term sheet basics and red lines — what you will and won't accept.",
+          "Follow-up and closing process — how you move from meeting to signed round.",
+        ],
+        duration: 10,
+      },
+      {
+        type: "action",
+        heading: "Open Module 105 in the Content Library",
+        body: "Use the checklist to prepare and close investor conversations.",
+        duration: 4,
+      },
+    ],
+  },
 };
 
 /** Get lesson data for a specific asset, or undefined if none exists */
