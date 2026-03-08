@@ -1,17 +1,39 @@
-"use client";
-
-import SidebarLayout from "@/components/layout/SidebarLayout";
+import { getCurrentFellowId } from "@/app/actions/fellows";
+import AppSidebarWrapper from "@/components/layout/AppSidebarWrapper";
 import type { SidebarConfig } from "@/components/layout/SidebarLayout";
 
-const config: SidebarConfig = {
-  navItems: [
-    { href: "/astrolabe", label: "Astrolabe" },
-    { href: "/library", label: "Content Library" },
-  ],
-  homeHref: "/library",
-  mobileTitle: "CO-BUILDER",
-};
+export default async function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { id: fellowId, isStudio } = await getCurrentFellowId();
 
-export default function AppLayout({ children }: { children: React.ReactNode }) {
-  return <SidebarLayout config={config}>{children}</SidebarLayout>;
+  const config: SidebarConfig =
+    fellowId && !isStudio
+      ? {
+          navItems: [
+            { href: "/dashboard", label: "Dashboard" },
+            { href: "/library", label: "Content Library" },
+            { href: `/fellows/${fellowId}`, label: "My Venture" },
+          ],
+          homeHref: "/dashboard",
+          mobileTitle: "CO-BUILDER",
+          sidebarSubtitle: "The Co-Builder",
+          sidebarBadge: "Fellow",
+        }
+      : {
+          navItems: [
+            { href: "/astrolabe", label: "Astrolabe" },
+            { href: "/fellows", label: "Fellows" },
+            { href: "/library", label: "Content Library" },
+            { href: "/dashboard", label: "Dashboard" },
+          ],
+          homeHref: "/library",
+          mobileTitle: "CO-BUILDER",
+          sidebarSubtitle: "The Co-Builder",
+          sidebarBadge: "Studio",
+        };
+
+  return <AppSidebarWrapper config={config}>{children}</AppSidebarWrapper>;
 }

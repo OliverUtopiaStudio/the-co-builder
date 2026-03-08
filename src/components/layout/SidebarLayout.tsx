@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, type ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { FeedbackModal } from "@/components/FeedbackModal";
 
 /* ─── Types ─── */
 
@@ -50,6 +51,7 @@ export default function SidebarLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const gateRequired = config.requireAdmin || config.requireStudio;
   const [authorized, setAuthorized] = useState(!gateRequired);
   const [loading, setLoading] = useState(!!gateRequired);
@@ -90,8 +92,11 @@ export default function SidebarLayout({
   }, [router, config.requireAdmin, config.requireStudio, gateRequired]);
 
   async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // ignore
+    }
     router.push("/login");
     router.refresh();
   }
@@ -230,6 +235,29 @@ export default function SidebarLayout({
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-5 pt-3 border-t border-white/10 space-y-0.5">
+          <button
+            onClick={() => {
+              setSidebarOpen(false);
+              setFeedbackOpen(true);
+            }}
+            className="flex items-center gap-2 px-3 py-2 text-sm text-accent border border-accent hover:bg-accent/10 transition-colors w-full mb-1"
+            style={{ borderRadius: 2 }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            Feedback
+          </button>
           {config.bottomLinks?.map((link) => (
             <Link
               key={link.href}
@@ -281,6 +309,34 @@ export default function SidebarLayout({
           {children}
         </div>
       </main>
+
+      {/* Mobile feedback FAB */}
+      <button
+        onClick={() => setFeedbackOpen(true)}
+        className="lg:hidden fixed bottom-5 left-5 z-40 flex items-center gap-2 px-4 py-2.5 text-sm text-accent border border-accent bg-surface hover:bg-accent/10 transition-colors shadow-lg"
+        style={{ borderRadius: 2 }}
+        aria-label="Send feedback"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        Feedback
+      </button>
+
+      <FeedbackModal
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+      />
     </div>
   );
 }
