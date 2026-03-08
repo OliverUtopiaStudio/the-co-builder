@@ -21,12 +21,12 @@ const SECTIONS = [
     title: "Fellows",
     items: [
       {
-        q: "How do I view a fellow's venture?",
-        a: 'Go to "Fellows" in the sidebar to see all fellows. Click any fellow to open their venture profile — you\'ll see milestones, to-dos, links, and stage diagnosis.',
+        q: "How do I view a fellow's venture or dashboard?",
+        a: 'Go to "Fellows" in the sidebar to see all fellows. Click any fellow to open their dashboard — the same view they see (current stage, next action, milestones, to-dos, key links, and studio services).',
       },
       {
         q: "How do I update a fellow's milestones or to-dos?",
-        a: "Open the fellow's venture page. You can add, edit, reorder, or complete milestones and to-do items directly. Changes are saved automatically.",
+        a: "Open the fellow's page from Fellows. You can add, edit, reorder, or complete milestones and to-do items directly. Changes are saved automatically.",
       },
       {
         q: "How do I manage fellows?",
@@ -44,15 +44,6 @@ const SECTIONS = [
       {
         q: "How do I add or edit Loom videos?",
         a: "As a Studio user, you can paste Loom embed URLs directly on any asset page. If no Loom is set, the system shows an animated lesson as a placeholder.",
-      },
-    ],
-  },
-  {
-    title: "Dashboard",
-    items: [
-      {
-        q: "What does the Dashboard show?",
-        a: "The Dashboard is each fellow's personalised home — showing their current stage, next action, milestones, to-dos, and key links. Studio can preview any fellow's dashboard.",
       },
     ],
   },

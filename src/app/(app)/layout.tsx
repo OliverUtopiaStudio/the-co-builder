@@ -30,7 +30,6 @@ export default async function AppLayout({
             { href: "/marketing", label: "Marketing" },
             { href: "/library", label: "Content Library" },
             { href: "/ai-eval", label: "AI Eval Tools" },
-            { href: "/dashboard", label: "Dashboard" },
             { href: "/wiki", label: "Wiki" },
           ],
           homeHref: "/astrolabe",

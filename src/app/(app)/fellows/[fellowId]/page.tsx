@@ -5,11 +5,18 @@ import {
   getTodoItems,
   getCategorizedLinks,
 } from "@/app/actions/fellows";
+import { getDashboardData } from "@/app/actions/dashboard";
 import VentureOverview from "@/components/fellows/VentureOverview";
 import MilestonePlan from "@/components/fellows/MilestonePlan";
 import TodoList from "@/components/fellows/TodoList";
 import CategorizedLinks from "@/components/fellows/CategorizedLinks";
 import OnboardingChecklist from "@/components/fellows/OnboardingChecklist";
+import ProgressHeader from "@/components/dashboard/ProgressHeader";
+import WorkspaceSection from "@/components/dashboard/WorkspaceSection";
+import NextActionCard from "@/components/dashboard/NextActionCard";
+import TailoredCoBuild from "@/components/dashboard/TailoredCoBuild";
+import KeyAssetsRow from "@/components/dashboard/KeyAssetsRow";
+import StudioServicesMenu from "@/components/dashboard/StudioServicesMenu";
 import type { OnboardingStatus } from "@/lib/onboarding";
 
 export default async function FellowDetailPage({
@@ -26,7 +33,49 @@ export default async function FellowDetailPage({
 
   const { fellow, venture, isStudio } = detail;
 
-  // Fetch venture-specific data in parallel (only if venture exists)
+  // Studio: show the same dashboard view the fellow sees (merged Dashboard into Fellows)
+  if (isStudio) {
+    const data = await getDashboardData(fellowId);
+    if (!data) notFound();
+    const { venture: dataVenture, milestones, todos, links, diagnosis, nextAction, workspace } = data;
+    const ventureId = dataVenture?.id ?? "";
+
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        <ProgressHeader
+          fellowName={fellow.fullName}
+          ventureName={dataVenture?.name ?? ""}
+          diagnosis={diagnosis}
+        />
+        <WorkspaceSection workspace={workspace} />
+        <section>
+          <h2 className="label-uppercase text-[10px] mb-3 text-muted">
+            Your next step
+          </h2>
+          <NextActionCard action={nextAction} />
+        </section>
+        <TailoredCoBuild
+          pathway={diagnosis?.pathway ?? []}
+          milestones={milestones}
+          todos={todos}
+          nextAction={nextAction}
+          ventureId={ventureId}
+          isStudio={isStudio}
+        />
+        <KeyAssetsRow links={links} />
+        <StudioServicesMenu
+          onboardingStatus={(fellow.onboardingStatus as OnboardingStatus | null) ?? null}
+          fellowName={fellow.fullName}
+          fellowId={fellow.id}
+          todos={todos}
+          ventureId={ventureId}
+          isStudio={isStudio}
+        />
+      </div>
+    );
+  }
+
+  // Non-studio viewing another fellow (e.g. shared link): show venture profile
   const [milestoneList, todoList, links] = venture
     ? await Promise.all([
         getMilestones(venture.id),
@@ -37,7 +86,6 @@ export default async function FellowDetailPage({
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
       <div>
         <h2 className="text-xl font-medium">{fellow.fullName}</h2>
         {fellow.domain && (
@@ -45,7 +93,6 @@ export default async function FellowDetailPage({
         )}
       </div>
 
-      {/* Onboarding checklist: read-only for fellows, studio can mark agreement/KYC */}
       <section>
         <h2 className="label-uppercase text-[10px] mb-3 text-muted">
           Onboarding checklist
@@ -58,7 +105,6 @@ export default async function FellowDetailPage({
         />
       </section>
 
-      {/* Section 1: Venture Overview */}
       <VentureOverview
         venture={
           venture
@@ -79,10 +125,8 @@ export default async function FellowDetailPage({
         }}
       />
 
-      {/* Sections 2-4 only render if venture exists */}
       {venture && (
         <>
-          {/* Section 2: Milestone Plan */}
           <MilestonePlan
             milestones={milestoneList.map((m) => ({
               id: m.id,
@@ -96,7 +140,6 @@ export default async function FellowDetailPage({
             isStudio={isStudio}
           />
 
-          {/* Section 3: Active To-Do List */}
           <TodoList
             todos={todoList.map((t) => ({
               id: t.id,
@@ -115,7 +158,6 @@ export default async function FellowDetailPage({
             isStudio={isStudio}
           />
 
-          {/* Section 4: Key Assets (Categorized Links) */}
           <CategorizedLinks
             links={links}
             ventureId={venture.id}
