@@ -12,7 +12,7 @@ import {
 } from "@/lib/questions";
 import { LoomEmbed } from "@/components/LoomEmbed";
 import { AnimatedLesson } from "@/components/AnimatedLesson";
-import { getLessonForAsset } from "@/lib/lessons";
+import { getLessonForAsset, BOOK_REVIEW_CALENDLY_URL } from "@/lib/lessons";
 import { DriveTemplateLink } from "@/components/DriveTemplateLink";
 import { AssetMediaEditor } from "@/components/AssetMediaEditor";
 import { getCurrentFellow } from "@/app/actions/fellows";
@@ -219,6 +219,24 @@ export default function AssetDetailPage() {
         const lesson = getLessonForAsset(assetNumber);
         return lesson ? <AnimatedLesson lesson={lesson} /> : null;
       })()}
+
+      {/* Book output review with Ollie — shown for every asset */}
+      {mediaLoaded && (
+        <div
+          className="flex flex-wrap items-center justify-center gap-2 py-3 px-4 bg-surface border border-border"
+          style={{ borderRadius: 2 }}
+        >
+          <span className="text-xs text-muted">Done with this lesson?</span>
+          <a
+            href={BOOK_REVIEW_CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-accent hover:underline"
+          >
+            Book output review with Ollie →
+          </a>
+        </div>
+      )}
 
       {/* Drive Template */}
       {mediaLoaded && driveTemplateUrl && (
