@@ -4,11 +4,25 @@ import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { library, allTags } from "@/lib/data";
+import { getPersonalisedLibraryData } from "@/app/actions/library";
 
 export default function LibraryPage() {
   const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [personalised, setPersonalised] = useState<{
+    completion: Record<number, boolean>;
+    nextActionAssetNumber: number | null;
+  }>({ completion: {}, nextActionAssetNumber: null });
+
+  useEffect(() => {
+    getPersonalisedLibraryData().then((d) =>
+      setPersonalised({
+        completion: d.completion,
+        nextActionAssetNumber: d.nextActionAssetNumber,
+      })
+    );
+  }, []);
 
   useEffect(() => {
     const tag = searchParams.get("tag");
@@ -101,13 +115,36 @@ export default function LibraryPage() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((asset) => (
+          {filtered.map((asset) => {
+            const isComplete = personalised.completion[asset.number];
+            const isRecommended =
+              personalised.nextActionAssetNumber === asset.number;
+            return (
             <Link
               key={asset.number}
               href={`/library/${asset.number}`}
-              className="block bg-surface border border-border p-5 hover:border-accent/40 hover:shadow-sm transition-all"
+              className={`block bg-surface border p-5 hover:border-accent/40 hover:shadow-sm transition-all relative ${
+                isRecommended ? "border-accent/40" : "border-border"
+              }`}
               style={{ borderRadius: 2 }}
             >
+              {isComplete && (
+                <span
+                  className="absolute top-3 right-3 w-5 h-5 flex items-center justify-center bg-accent text-white text-xs"
+                  style={{ borderRadius: 2 }}
+                  title="Completed"
+                >
+                  ✓
+                </span>
+              )}
+              {isRecommended && !isComplete && (
+                <span
+                  className="absolute top-3 right-3 text-[10px] font-medium px-1.5 py-0.5 bg-accent/20 text-accent"
+                  style={{ borderRadius: 2 }}
+                >
+                  Recommended
+                </span>
+              )}
               <div className="flex flex-col h-full">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
@@ -147,7 +184,8 @@ export default function LibraryPage() {
                 </div>
               </div>
             </Link>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>

@@ -5,14 +5,18 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { library, stages } from "@/lib/data";
 import { getGuidanceTip, getAssetResources } from "@/lib/guidance";
+import type { ExperienceProfileKey } from "@/lib/guidance";
 import {
   getWorkflowForAsset,
   type WorkflowStep,
 } from "@/lib/questions";
 import { LoomEmbed } from "@/components/LoomEmbed";
+import { AnimatedLesson } from "@/components/AnimatedLesson";
+import { getLessonForAsset } from "@/lib/lessons";
 import { DriveTemplateLink } from "@/components/DriveTemplateLink";
 import { AssetMediaEditor } from "@/components/AssetMediaEditor";
-import { AdminLoginModal } from "@/components/AdminLoginModal";
+import { getCurrentFellow } from "@/app/actions/fellows";
+import { getAssetCompletions, markAssetComplete } from "@/app/actions/responses";
 
 function findAssetContext(assetNumber: number) {
   for (const stage of stages) {
@@ -33,10 +37,48 @@ export default function AssetDetailPage() {
 
   // Admin mode + media state
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [loomUrl, setLoomUrl] = useState<string | null>(null);
   const [driveTemplateUrl, setDriveTemplateUrl] = useState<string | null>(null);
   const [mediaLoaded, setMediaLoaded] = useState(false);
+
+  // Fellow context (for Mark Complete + personalised guidance)
+  const [ventureId, setVentureId] = useState<string | null>(null);
+  const [experienceProfile, setExperienceProfile] =
+    useState<ExperienceProfileKey>("first_time_builder");
+  const [isComplete, setIsComplete] = useState(false);
+  const [markingComplete, setMarkingComplete] = useState(false);
+
+  useEffect(() => {
+    getCurrentFellow().then((data) => {
+      if (data?.venture) {
+        setVentureId(data.venture.id);
+        const profile = (data.fellow.experienceProfile as ExperienceProfileKey) || "first_time_builder";
+        setExperienceProfile(
+          ["first_time_builder", "experienced_founder", "corporate_innovator"].includes(profile)
+            ? profile
+            : "first_time_builder"
+        );
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!ventureId || isNaN(assetNumber)) return;
+    getAssetCompletions(ventureId).then((map) =>
+      setIsComplete(map[assetNumber] === true)
+    );
+  }, [ventureId, assetNumber]);
+
+  async function handleMarkComplete(complete: boolean) {
+    if (!ventureId) return;
+    setMarkingComplete(true);
+    try {
+      await markAssetComplete(ventureId, assetNumber, complete);
+      setIsComplete(complete);
+    } finally {
+      setMarkingComplete(false);
+    }
+  }
 
   // Fetch media for this asset
   useEffect(() => {
@@ -98,14 +140,14 @@ export default function AssetDetailPage() {
   // Get workflow questions for reference display
   const workflow = getWorkflowForAsset(assetNumber);
 
-  // Get guidance tips (use first_time_builder as default for read-only view)
+  // Get guidance tips (personalised by fellow experience when logged in)
   const guidanceTip = stage
-    ? getGuidanceTip("first_time_builder", stage.number)
+    ? getGuidanceTip(experienceProfile, stage.number)
     : null;
 
   // Get resources if available
   const resources = stage
-    ? getAssetResources("first_time_builder", assetNumber)
+    ? getAssetResources(experienceProfile, assetNumber)
     : [];
 
   // Find prev/next in the library array
@@ -171,8 +213,12 @@ export default function AssetDetailPage() {
         )}
       </div>
 
-      {/* Loom Video */}
+      {/* Lesson Video — Loom if available, animated fallback otherwise */}
       {mediaLoaded && loomUrl && <LoomEmbed url={loomUrl} />}
+      {mediaLoaded && !loomUrl && (() => {
+        const lesson = getLessonForAsset(assetNumber);
+        return lesson ? <AnimatedLesson lesson={lesson} /> : null;
+      })()}
 
       {/* Drive Template */}
       {mediaLoaded && driveTemplateUrl && (
@@ -252,7 +298,34 @@ export default function AssetDetailPage() {
         </div>
       )}
 
-      {/* Checklist (read-only) */}
+      {/* Mark Complete (fellow only) */}
+      {ventureId && (
+        <div
+          className="bg-surface border border-border p-5"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="label-uppercase mb-2 text-muted">Progress</div>
+          <button
+            type="button"
+            onClick={() => handleMarkComplete(!isComplete)}
+            disabled={markingComplete}
+            className={`px-4 py-2 text-sm font-medium border transition-colors ${
+              isComplete
+                ? "bg-accent/10 border-accent/30 text-accent"
+                : "border-border hover:border-accent/50 text-foreground"
+            }`}
+            style={{ borderRadius: 2 }}
+          >
+            {markingComplete
+              ? "Updating..."
+              : isComplete
+                ? "✓ Marked complete — click to undo"
+                : "Mark complete"}
+          </button>
+        </div>
+      )}
+
+      {/* Checklist (read-only or with completion state) */}
       {asset.checklist.length > 0 && (
         <div
           className="bg-surface border border-border p-5"
@@ -263,9 +336,15 @@ export default function AssetDetailPage() {
             {asset.checklist.map((item) => (
               <li key={item.id} className="flex items-start gap-3 text-sm">
                 <div
-                  className="w-5 h-5 border border-border flex-shrink-0 mt-0.5"
+                  className={`w-5 h-5 border flex-shrink-0 mt-0.5 flex items-center justify-center text-xs ${
+                    isComplete
+                      ? "border-accent bg-accent text-white"
+                      : "border-border"
+                  }`}
                   style={{ borderRadius: 2 }}
-                />
+                >
+                  {isComplete ? "✓" : ""}
+                </div>
                 <span>{item.text}</span>
               </li>
             ))}
@@ -398,39 +477,6 @@ export default function AssetDetailPage() {
         </div>
       </div>
 
-      {/* Admin login toggle */}
-      {!isAdmin && (
-        <div className="flex justify-end">
-          <button
-            onClick={() => setShowAdminLogin(true)}
-            className="text-muted-light hover:text-muted transition-colors"
-            title="Admin login"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </button>
-        </div>
-      )}
-
-      <AdminLoginModal
-        open={showAdminLogin}
-        onClose={() => setShowAdminLogin(false)}
-        onSuccess={() => {
-          setShowAdminLogin(false);
-          setIsAdmin(true);
-        }}
-      />
     </div>
   );
 }
