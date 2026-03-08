@@ -220,24 +220,6 @@ export default function AssetDetailPage() {
         return lesson ? <AnimatedLesson lesson={lesson} /> : null;
       })()}
 
-      {/* Book output review with Ollie — shown for every asset */}
-      {mediaLoaded && (
-        <div
-          className="flex flex-wrap items-center justify-center gap-2 py-3 px-4 bg-surface border border-border"
-          style={{ borderRadius: 2 }}
-        >
-          <span className="text-xs text-muted">Done with this lesson?</span>
-          <a
-            href={BOOK_REVIEW_CALENDLY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm font-medium text-accent hover:underline"
-          >
-            Book output review with Ollie →
-          </a>
-        </div>
-      )}
-
       {/* Drive Template */}
       {mediaLoaded && driveTemplateUrl && (
         <DriveTemplateLink url={driveTemplateUrl} />
@@ -278,6 +260,19 @@ export default function AssetDetailPage() {
         )}
       </div>
 
+      {/* What this unlocks (Product, GTM, investability) */}
+      {(asset.connections || stage?.connections) && (
+        <div
+          className="bg-accent/5 border border-accent/20 p-5"
+          style={{ borderRadius: 2 }}
+        >
+          <div className="label-uppercase mb-2 text-accent">What this unlocks</div>
+          <p className="text-sm leading-relaxed">
+            {asset.connections ?? stage?.connections}
+          </p>
+        </div>
+      )}
+
       {/* Key Inputs / Outputs */}
       {(asset.keyInputs?.length || asset.outputs?.length) && (
         <div className="grid gap-4 md:grid-cols-2">
@@ -313,33 +308,6 @@ export default function AssetDetailPage() {
               </ul>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Mark Complete (fellow only) */}
-      {ventureId && (
-        <div
-          className="bg-surface border border-border p-5"
-          style={{ borderRadius: 2 }}
-        >
-          <div className="label-uppercase mb-2 text-muted">Progress</div>
-          <button
-            type="button"
-            onClick={() => handleMarkComplete(!isComplete)}
-            disabled={markingComplete}
-            className={`px-4 py-2 text-sm font-medium border transition-colors ${
-              isComplete
-                ? "bg-accent/10 border-accent/30 text-accent"
-                : "border-border hover:border-accent/50 text-foreground"
-            }`}
-            style={{ borderRadius: 2 }}
-          >
-            {markingComplete
-              ? "Updating..."
-              : isComplete
-                ? "✓ Marked complete — click to undo"
-                : "Mark complete"}
-          </button>
         </div>
       )}
 
@@ -456,6 +424,49 @@ export default function AssetDetailPage() {
           ))}
         </div>
       )}
+
+      {/* Bottom CTA: Mark complete + Book time with Ollie */}
+      <div
+        className="bg-accent text-white p-6 sm:p-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4"
+        style={{ borderRadius: 4 }}
+      >
+        <div className="text-center sm:text-left sm:flex-1">
+          <h3 className="text-lg font-semibold">Done with this asset?</h3>
+          <p className="text-sm text-white/90 mt-1">
+            Mark it complete and book a review with Ollie to get feedback and plan next steps.
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:flex-shrink-0">
+          {ventureId && (
+            <button
+              type="button"
+              onClick={() => handleMarkComplete(!isComplete)}
+              disabled={markingComplete}
+              className={`px-5 py-3 text-sm font-semibold border-2 transition-colors ${
+                isComplete
+                  ? "bg-white/20 border-white/50 text-white"
+                  : "bg-white text-accent border-white hover:bg-white/95"
+              }`}
+              style={{ borderRadius: 4 }}
+            >
+              {markingComplete
+                ? "Updating..."
+                : isComplete
+                  ? "✓ Complete — click to undo"
+                  : "Mark as complete"}
+            </button>
+          )}
+          <a
+            href={BOOK_REVIEW_CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-3 text-sm font-semibold text-center bg-white text-accent border-2 border-white hover:bg-white/95 transition-colors"
+            style={{ borderRadius: 4 }}
+          >
+            Book time with Ollie →
+          </a>
+        </div>
+      </div>
 
       {/* Previous / Next navigation */}
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-border">

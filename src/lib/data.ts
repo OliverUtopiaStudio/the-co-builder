@@ -14,6 +14,8 @@ export interface Asset {
   table?: { header: string[]; rows: string[][] };
   bullets?: string[];
   feedsInto?: string;
+  /** Plain-language link to Product, GTM, and investability. Shown as "What this unlocks". */
+  connections?: string;
   checklist: ChecklistItem[];
   // Content library fields
   tags: string[];
@@ -26,6 +28,8 @@ export interface Stage {
   title: string;
   subtitle: string;
   description: string;
+  /** Plain-language link to Product, GTM, investability. Shown as "What this unlocks". */
+  connections?: string;
   gateDecision: string;
   assets: Asset[];
 }
@@ -37,7 +41,9 @@ export const stages: Stage[] = [
     title: "The Invention Gate",
     subtitle: "Why this market won't solve itself",
     description:
-      "The Invention Gate is where every Co-Build journey begins. Before you write a single line of code or speak to a single customer, you must answer the most fundamental question: why does this venture need to exist?",
+      "Start here. Answer one thing: why will this problem still be unsolved unless someone like you builds the solution? If the market would fix it anyway, you don't have a venture.",
+    connections:
+      "Product: Your invention one-pager becomes the spine for what you build and what you don't. GTM: Same story explains why customers should care and why you can win. Investability: Investors back teams that can explain why the market won't solve this and why you can.",
     gateDecision:
       "Only proceed to Stage 01 if both assets are complete and pass the world-beating test.",
     assets: [
@@ -45,7 +51,7 @@ export const stages: Stage[] = [
         number: 1,
         title: "Risk Capital + Invention One-Pager",
         purpose:
-          "True risk-capital logic: why the market won't solve this, what must be invented, and why insiders can win globally.",
+          "Write down why the market won't fix this itself, what has to be invented, and why you (insiders) can do it. One page. No jargon.",
         keyInputs: [
           "Domain constraint",
           "Structural market failure",
@@ -58,6 +64,8 @@ export const stages: Stage[] = [
         ],
         coreQuestion:
           "If a smart team with $10M tried to solve this from scratch, why would they fail?",
+        connections:
+          "Product: Tells you what to build and what's out of scope. GTM: The same 'why us' story sells. Investability: This is the thesis investors need in one page.",
         checklist: [
           { id: "1-1", text: "Identified the structural market failure" },
           {
@@ -78,11 +86,13 @@ export const stages: Stage[] = [
         number: 2,
         title: "Category Ambition Gate",
         purpose:
-          'Forces category clarity: "if we win, what global category do we own?" Filters out small tools and pilotware early.',
+          "Decide: if we win, what category do we own? If it's 'a nice small business,' stop. VC needs venture-scale outcomes.",
         coreQuestion:
           "If we execute perfectly for 5 years, will we own a global category worth $1B+?",
         details:
-          'If the answer is "maybe we\'ll be a nice $20M ARR business" — stop here. Venture capital requires venture-scale outcomes.',
+          "A $20M ARR business is fine — but not a venture. Be honest. If the answer is no, pivot or don't raise VC.",
+        connections:
+          "Product: Keeps the roadmap pointed at a category, not a one-off tool. GTM: You sell into a category buyers understand. Investability: Funds need to see a path to category ownership.",
         checklist: [
           { id: "2-1", text: "Defined the global category you aim to own" },
           { id: "2-2", text: "Passed the $1B+ world-beating test" },
@@ -103,7 +113,9 @@ export const stages: Stage[] = [
     title: "Problem Deep Dive",
     subtitle: "Quantifying pain that funds solutions",
     description:
-      "Now that you've passed the Invention Gate, it's time to deeply understand the problem you're solving. This stage forces economic truth.",
+      "You've said why the market won't fix it. Now put numbers to the pain: how often, how much it costs, who pays, and why now. No numbers, no product-market fit.",
+    connections:
+      "Product: Quantified pain becomes PRD metrics and success criteria. GTM: You sell outcomes (cost saved, time saved) not features. Investability: Investors want to see you understand the economics of the problem.",
     gateDecision:
       "Proceed to Stage 02 once you can quantify the pain and map where AI creates value.",
     assets: [
@@ -111,7 +123,7 @@ export const stages: Stage[] = [
         number: 3,
         title: "Problem Deep Dive + Quantification",
         purpose:
-          "Economic truth: pain, cost, frequency, who pays, and how it's measured. This defines target outcomes.",
+          "Write down: how often the pain happens, what it costs each time, who has budget, and why they'd act now. Real numbers beat vague 'big problem' claims.",
         table: {
           header: ["Dimension", "Question"],
           rows: [
@@ -123,6 +135,8 @@ export const stages: Stage[] = [
         },
         feedsInto:
           "Eval targets (#10) → ROI/pricing (#19/#21) → Pilot KPIs (#18) → PRD metrics (#15)",
+        connections:
+          "Product: These numbers become PRD targets and eval success. GTM: You pitch ROI, not tech. Investability: Shows you've done the homework on the problem.",
         checklist: [
           { id: "3-1", text: "Quantified frequency of the pain point" },
           {
@@ -143,7 +157,7 @@ export const stages: Stage[] = [
         number: 4,
         title: "Workflow Map + Data Touchpoints",
         purpose:
-          "Maps decisions and actions + where data is created/owned + where AI intervenes. This is NOT about chatbots.",
+          "Draw the workflow: where do people decide, where is data created, and where can AI help without breaking the process? Not 'add a chatbot' — where does AI actually add value?",
         table: {
           header: ["Step", "Focus"],
           rows: [
@@ -162,6 +176,8 @@ export const stages: Stage[] = [
           ],
         },
         details: "Tools: Miro, Lucidchart, Whimsical, Loom for walkthroughs",
+        connections:
+          "Product: Tells you exactly what to build and where to plug in AI. GTM: You can demo the 'before/after' in the workflow. Investability: Proves you've mapped the real workflow, not a guess.",
         checklist: [
           { id: "4-1", text: "Mapped the end-to-end workflow" },
           {
@@ -189,7 +205,9 @@ export const stages: Stage[] = [
     title: "Customer & Validation",
     subtitle: "ICP, assumptions, and kill switches",
     description:
-      "Now you know the problem. This stage forces you to define exactly who you're solving it for, what you're assuming, and what evidence would kill this venture.",
+      "Who exactly are you building for? What do you believe that might be wrong? And what would prove you're wrong? Answer those before you build.",
+    connections:
+      "Product: ICP and validated assumptions shape the PRD and prioritisation. GTM: You target and message the right people. Investability: Shows you've stress-tested the idea, not just believed it.",
     gateDecision:
       "Proceed to Stage 03 only if your core assumptions survive discovery. If a kill switch triggers — pivot or stop.",
     assets: [
@@ -197,7 +215,9 @@ export const stages: Stage[] = [
         number: 5,
         title: "ICP Definition",
         purpose:
-          "Define your Ideal Customer Profile with precision. Who is the buyer, who is the user, and what does their world look like?",
+          "Who signs the check? Who uses the product every day? Company size, industry, geography, and current tools. Be specific. Then talk to at least three of them.",
+        connections:
+          "Product: Tells you who the product is for and what they need. GTM: Your entire pipeline and messaging start here. Investability: 'We've talked to 10 people who fit' beats 'we think enterprises need this'.",
         checklist: [
           {
             id: "5-1",
@@ -227,9 +247,11 @@ export const stages: Stage[] = [
         number: 6,
         title: "Assumptions + Kill Switches",
         purpose:
-          "Every venture is built on assumptions. This asset forces you to name them explicitly and define what evidence would kill the venture.",
+          "List what you're assuming. For each big assumption, write: what evidence would make us stop? If you can't name it, you're not being honest with yourself.",
         details:
-          "Kill switches prevent zombie ventures. If you can't name the evidence that would make you stop, you'll never stop — even when you should.",
+          "Kill switches stop zombie ventures. No 'we'll figure it out' — write down what would make you pivot or quit.",
+        connections:
+          "Product: Keeps the roadmap tied to testable beliefs. GTM: You don't sell into a segment that's already invalidated. Investability: Investors trust teams that know what could kill the idea.",
         checklist: [
           {
             id: "6-1",
@@ -253,7 +275,9 @@ export const stages: Stage[] = [
         number: 7,
         title: "Discovery Interviews",
         purpose:
-          "Structured customer discovery to validate or invalidate your assumptions. Not sales calls — learning calls.",
+          "Go learn. Run at least 10 conversations with people who fit your ICP. Goal: validate or kill your assumptions. Not to sell — to listen.",
+        connections:
+          "Product: Real quotes and patterns feed the PRD and feature set. GTM: You find design partners and refine messaging. Investability: Discovery discipline is a signal of execution quality.",
         checklist: [
           {
             id: "7-1",
@@ -278,7 +302,9 @@ export const stages: Stage[] = [
     title: "Data Rights & AI Feasibility",
     subtitle: "The moat isn't the model — it's the data contract",
     description:
-      "This is where most AI ventures fail silently. You must prove the AI can work AND secure the data rights that make your moat real.",
+      "Prove the AI can do the job, and get contracts that give you exclusive or privileged data. No contract, no moat. Most AI ventures fail here.",
+    connections:
+      "Product: Eval plan and feasibility define what you build and how you measure it. GTM: Security pack and data contracts unblock enterprise deals. Investability: Data advantage and moat ledger are the defensibility story.",
     gateDecision:
       "Proceed to Stage 04 only when you have signed data advantage contracts and proven AI feasibility.",
     assets: [
@@ -286,7 +312,9 @@ export const stages: Stage[] = [
         number: 8,
         title: "Design Partner Pipeline",
         purpose:
-          "Ensures selling while validating; selects accounts most likely to fund pilots.",
+          "Find 5–10 potential design partners, rank by pain and willingness to pay, and get at least two committed. You're selling and validating at once.",
+        connections:
+          "Product: Design partners shape the product and pilot scope. GTM: This is your first pipeline. Investability: Committed design partners are early traction.",
         checklist: [
           { id: "8-1", text: "Identified 5-10 potential design partners" },
           {
@@ -310,7 +338,9 @@ export const stages: Stage[] = [
         number: 9,
         title: "AI Feasibility Brief",
         purpose:
-          "Decides: rules/ML/LLM-RAG/agents; what's automatable now vs. human-in-loop.",
+          "For each place AI could help: can we do it with rules, ML, LLM/RAG, or agents? What stays human-in-the-loop? Be clear so you don't overpromise.",
+        connections:
+          "Product: Decides the tech stack and where to invest. GTM: You can promise only what's feasible. Investability: Shows you've thought through how the AI actually works.",
         checklist: [
           {
             id: "9-1",
@@ -340,7 +370,9 @@ export const stages: Stage[] = [
         number: 10,
         title: "Eval Plan + Ground Truth",
         purpose:
-          "Defines 'good': gold set, scoring, acceptance thresholds, failure modes.",
+          "Define 'good': a gold set of examples, how you score, and what 'good enough' is. Without this you can't say the product works.",
+        connections:
+          "Product: This is how you know the product is ready to ship. GTM: Eval results become proof for sales. Investability: 'We hit 95% on our eval' beats 'the AI is good'.",
         checklist: [
           { id: "10-1", text: "Created gold standard evaluation dataset" },
           { id: "10-2", text: "Defined scoring methodology and metrics" },
@@ -361,7 +393,9 @@ export const stages: Stage[] = [
         number: 11,
         title: "Security Pack",
         purpose:
-          "The data unblocker. Without this, enterprise deals stall.",
+          "Answer what enterprise buyers ask: inference vs training rights, retention, redaction, access, audit. Without answers, deals stall.",
+        connections:
+          "Product: Security requirements feed into architecture and compliance. GTM: Security pack is table stakes for enterprise. Investability: Shows you're enterprise-ready.",
         bullets: [
           "Inference vs training rights",
           "Retention policies",
@@ -392,7 +426,9 @@ export const stages: Stage[] = [
         number: 12,
         title: "Data Advantage Contract",
         purpose:
-          'Makes "data moat" contractual, not assumed. Without this, you have no moat.',
+          "Get it in writing: exclusivity, training rights, feedback loops, retention. If it's not in a contract, you don't have a data moat.",
+        connections:
+          "Product: Contractual data rights enable better models and evals. GTM: You can sell 'our data advantage' with proof. Investability: Data advantage contracts are the moat story.",
         bullets: [
           "Exclusivity terms",
           "Training/fine-tune rights",
@@ -421,7 +457,9 @@ export const stages: Stage[] = [
         number: 13,
         title: "The Moat Ledger",
         purpose:
-          "Tracks compounding loops with evidence. The moat isn't theoretical — it's documented.",
+          "One doc that tracks your moat with evidence: data rights, eval lift, workflow lock-in, regulatory. Update it as you prove each layer.",
+        connections:
+          "Product: Keeps the team focused on what makes the product defensible. GTM: You can articulate why you'll win. Investability: The moat ledger is the defensibility slide.",
         table: {
           header: ["Moat Layer", "What to Track"],
           rows: [
@@ -464,7 +502,9 @@ export const stages: Stage[] = [
     title: "The PRD Culmination",
     subtitle: "Everything converges into what we build",
     description:
-      "This is the fulcrum of the entire framework. Everything before this stage feeds into the PRD. Everything after flows from it.",
+      "Everything so far feeds one document: what we're building, how we'll know it works, and what we're not building. One source of truth before you write code.",
+    connections:
+      "Product: The PRD is the build contract. GTM: Pilot scope and success criteria come from here. Investability: Shows you can scope and ship.",
     gateDecision:
       "The PRD is your contract with reality. Only proceed to Build once all stakeholders have signed off.",
     assets: [
@@ -472,9 +512,11 @@ export const stages: Stage[] = [
         number: 15,
         title: "PRD v1 + Not-to-Build",
         purpose:
-          "Dual PRD: workflow requirements + intelligence requirements. Explicit exclusions.",
+          "Write down: what the product must do (workflow + AI), how you'll measure success, and what you're explicitly not building in v1. The not-to-build list stops scope creep.",
         details:
           "Equally important: what features we explicitly won't build in v1. This prevents scope creep and keeps focus on the wedge.",
+        connections:
+          "Product: This is what engineering builds. GTM: Pilot SOW and demos align to the PRD. Investability: A clear PRD signals execution discipline.",
         table: {
           header: ["Requirement Type", "Details"],
           rows: [
@@ -521,14 +563,16 @@ export const stages: Stage[] = [
     title: "Build & Sell",
     subtitle: "Architecture, LOI, pilot, prototype",
     description:
-      "Now you build — but you sell simultaneously. The build and sell tracks run in parallel, not in sequence.",
+      "Build and sell at the same time. Architecture, prototype, and pilot run in parallel. You need a signed LOI, a live pilot, and a prototype that hits eval before you scale.",
+    connections:
+      "Product: Architecture and prototype are the product. GTM: LOI and pilot are the first revenue and proof. Investability: Signed LOI + pilot + eval results are the traction story.",
     gateDecision:
       "Proceed to Scale only with a signed LOI, live pilot, and prototype that meets eval thresholds.",
     assets: [
       {
         number: 16,
         title: "Enterprise Architecture Canvas",
-        purpose: "Technical architecture for enterprise-grade AI product.",
+        purpose: "Sketch how the system works: model gateway, RAG, eval, telemetry, policy. So the product is buildable and supportable.",
         bullets: [
           "Model gateway",
           "RAG store",
@@ -550,6 +594,8 @@ export const stages: Stage[] = [
             text: "Architecture reviewed by engineering leads",
           },
         ],
+        connections:
+          "Product: This is the system you're building. GTM: Enterprise buyers expect a clear architecture. Investability: Shows technical depth.",
         tags: [],
         isCustomModule: false,
       },
@@ -557,7 +603,7 @@ export const stages: Stage[] = [
         number: 17,
         title: "Design Partner Offer + LOI",
         purpose:
-          "Secures paid pilot with AI + data + productization clauses.",
+          "Get a signed LOI: paid pilot, AI usage and data terms, and how it becomes a product. No handshake — get it on paper.",
         checklist: [
           { id: "17-1", text: "Drafted design partner offer document" },
           { id: "17-2", text: "Included AI usage and data terms" },
@@ -566,6 +612,8 @@ export const stages: Stage[] = [
           { id: "17-5", text: "Secured at least 1 signed LOI" },
           { id: "17-6", text: "Legal review of LOI completed" },
         ],
+        connections:
+          "Product: LOI defines pilot scope and success. GTM: This is your first customer. Investability: Signed LOI is proof of demand.",
         tags: [],
         isCustomModule: false,
       },
@@ -573,7 +621,7 @@ export const stages: Stage[] = [
         number: 18,
         title: "Pilot SOW + KPI Dashboard",
         purpose:
-          "The pilot SOW is where ventures die or scale.",
+          "Pilot scope, KPIs, and a dashboard to track them. If every pilot is custom, you can't scale. Standardise what you can.",
         table: {
           header: ["KPI Type", "What to Measure"],
           rows: [
@@ -618,6 +666,8 @@ export const stages: Stage[] = [
           { id: "18-7", text: "Standard deploy spec documented" },
           { id: "18-8", text: "Pilot SOW signed by design partner" },
         ],
+        connections:
+          "Product: Pilot KPIs become product success metrics. GTM: You sell the same pilot package again. Investability: Repeatable pilot = scalable GTM.",
         tags: [],
         isCustomModule: false,
       },
@@ -625,7 +675,7 @@ export const stages: Stage[] = [
         number: 19,
         title: "Prototype Sprint + Demo",
         purpose:
-          "Shows workflow value + eval proof + safety controls + latency/cost.",
+          "Ship a prototype that shows the workflow, hits eval thresholds, and demonstrates safety and cost. Then demo it to design partners.",
         checklist: [
           { id: "19-1", text: "Completed prototype sprint" },
           {
@@ -641,6 +691,8 @@ export const stages: Stage[] = [
           { id: "19-6", text: "Demo prepared for stakeholders" },
           { id: "19-7", text: "Demo delivered to design partners" },
         ],
+        connections:
+          "Product: The prototype is v1. GTM: Demo is the core sales asset. Investability: Working demo + eval results = proof.",
         tags: [],
         isCustomModule: false,
       },
@@ -652,14 +704,18 @@ export const stages: Stage[] = [
     title: "Scale & Spinout",
     subtitle: "Sales pack, pricing, roadmap, and exit",
     description:
-      "You've built it, proved it works. Now scale it into a standalone company.",
+      "You have a working product and a pilot. Now: repeatable sales pack, pricing, roadmap, and the legal and financial setup to run as a standalone company.",
+    connections:
+      "Product: Roadmap and operating model define how the product evolves. GTM: Sales pack and pricing are how you scale revenue. Investability: Investor pack, capital plan, and exit map are the fundraise and exit story.",
     gateDecision:
       "Congratulations — you've completed all 27 assets of the Co-Build Framework. Your venture is ready for spinout.",
     assets: [
       {
         number: 20,
         title: "Sales Pack (Trust Pack)",
-        purpose: "Repeatable selling kit for scaling beyond design partners.",
+        purpose: "One repeatable kit: narrative, deck, demo, eval report, security answers, rollout plan. So anyone can sell, not just you.",
+        connections:
+          "Product: Demo and eval report are product proof. GTM: This is how you scale beyond design partners. Investability: Repeatable sales process is scale evidence.",
         bullets: [
           "Narrative + deck",
           "Demo + eval report",
@@ -690,7 +746,9 @@ export const stages: Stage[] = [
       {
         number: 21,
         title: "Pricing + Unit Economics",
-        purpose: "Compute-aware pricing model.",
+        purpose: "Price to outcomes, not seats. Model compute and human-in-loop cost, margin at scale, and sensitivity. So you don't leave money on the table or go broke.",
+        connections:
+          "Product: Unit economics shape what you build and how. GTM: You can price and defend it. Investability: Unit economics are the business model slide.",
         bullets: [
           "Price to outcomes, not seats",
           "Compute + HITL cost/task",
@@ -722,7 +780,9 @@ export const stages: Stage[] = [
       {
         number: 22,
         title: "Roadmap (6/12/18 months) + Gates",
-        purpose: "AI-native roadmap with clear gates.",
+        purpose: "Plan 6, 12, 18 months with clear milestones and gates. Eval lift, data flywheel, deployment, margin, compliance. Align to fundraising if you're raising.",
+        connections:
+          "Product: Roadmap is what you build and when. GTM: You can commit to customers. Investability: Roadmap shows you know how to use capital.",
         bullets: [
           "Eval lift",
           "Data flywheel milestones",
@@ -772,13 +832,15 @@ export const stages: Stage[] = [
           },
           { id: "23-6", text: "Designed customer support model" },
         ],
+        connections:
+          "Product: Operating model keeps the product reliable. GTM: Support and ops scale with customers. Investability: Shows you can operate at scale.",
         tags: [],
         isCustomModule: false,
       },
       {
         number: 24,
         title: "Investor Pack + Data Room",
-        purpose: "Everything investors need for due diligence.",
+        purpose: "One place with everything for due diligence: eval reports, unit economics, security pack, data terms, LOIs, moat ledger. Organised and up to date.",
         bullets: [
           "Eval reports",
           "Unit economics",
@@ -796,15 +858,19 @@ export const stages: Stage[] = [
           { id: "24-6", text: "Moat ledger complete with evidence" },
           { id: "24-7", text: "Data room set up and organized" },
         ],
+        connections:
+          "Product: Eval and moat evidence live here. GTM: LOIs and traction are in the pack. Investability: This is the data room — speed of DD matters.",
         tags: [],
         isCustomModule: false,
       },
       {
         number: 25,
         title: "Capital Plan + Runway",
-        purpose: "Detailed financial plan tied to milestones.",
+        purpose: "Plan spend: compute, labelling, security, integration, hiring. Tie each chunk to milestones. So you know how long the runway is and what it's for.",
         details:
           "Covers: Compute, labeling ops, security, integration costs; hiring tied to gates.",
+        connections:
+          "Product: Budget shapes what you can build. GTM: Runway to next milestone. Investability: Capital plan is the use-of-funds story.",
         checklist: [
           { id: "25-1", text: "Projected compute costs for 18 months" },
           { id: "25-2", text: "Budgeted labeling and ops costs" },
@@ -822,7 +888,7 @@ export const stages: Stage[] = [
       {
         number: 26,
         title: "Spinout Legal Pack",
-        purpose: "Legal foundation for the standalone entity.",
+        purpose: "Legal basics for the new company: DPAs, AI usage terms, training rights, IP, security policies. So you can sign customers and raise cleanly.",
         bullets: [
           "DPAs",
           "AI usage terms",
@@ -844,13 +910,15 @@ export const stages: Stage[] = [
           { id: "26-5", text: "Security policies formalized" },
           { id: "26-6", text: "Legal counsel review completed" },
         ],
+        connections:
+          "Product: Terms define how the product is used. GTM: You can sign enterprise contracts. Investability: Clean legal = fewer DD surprises.",
         tags: [],
         isCustomModule: false,
       },
       {
         number: 27,
         title: "Exit Map",
-        purpose: "Acquirer logic + proof of defensibility.",
+        purpose: "Who might acquire you and why? Data rights, eval edge, workflow lock-in. Document the logic and the proof so it's not hand-wavy.",
         bullets: ["Data rights", "Eval superiority", "Workflow control"],
         checklist: [
           { id: "27-1", text: "Identified top 5 potential acquirers" },
@@ -866,6 +934,8 @@ export const stages: Stage[] = [
           },
           { id: "27-6", text: "Exit map reviewed by board/advisors" },
         ],
+        connections:
+          "Product: Defensibility comes from data, eval, workflow. GTM: Strategic buyers care about the same. Investability: Exit map is the outcome story for investors.",
         tags: [],
         isCustomModule: false,
       },
@@ -890,9 +960,11 @@ export const customModules: Asset[] = [
     number: 101,
     title: "Website Build",
     purpose:
-      "Build a clear, credible web presence that communicates your venture and converts visitors.",
+      "One clear page: what you do, why it matters, and one action (contact, waitlist, demo). So visitors get it in seconds.",
     coreQuestion:
       "Does your website instantly tell a visitor what you do, why it matters, and what to do next?",
+    connections:
+      "Product: The site is often the first version of the product story. GTM: It's where pipeline starts. Investability: A credible site signals you're real.",
     checklist: [
       { id: "101-1", text: "Defined core message and value proposition" },
       { id: "101-2", text: "Designed simple, scannable layout" },
@@ -906,9 +978,11 @@ export const customModules: Asset[] = [
     number: 102,
     title: "Pitch Deck Build",
     purpose:
-      "Create a concise, compelling pitch deck that tells your story and supports fundraising or partnerships.",
+      "Ten slides or fewer: problem, solution, why now, market, product, traction, team, ask. So an investor or partner gets it in one read.",
     coreQuestion:
       "Can an investor or partner understand your problem, solution, traction, and ask in under 10 slides?",
+    connections:
+      "Product: Deck forces clarity on what you're building. GTM: Same story works for partners and early customers. Investability: The deck is the first thing investors see.",
     checklist: [
       { id: "102-1", text: "Problem, solution, and why now" },
       { id: "102-2", text: "Market size and opportunity" },
@@ -923,9 +997,11 @@ export const customModules: Asset[] = [
     number: 103,
     title: "V1 Commercials",
     purpose:
-      "Craft short, repeatable commercials that explain what you do and why it matters for sales and marketing.",
+      "30- and 60-second versions: hook, problem, solution, proof, ask. So you can repeat the same story in every conversation.",
     coreQuestion:
       "Can you explain your venture in 30 seconds in a way that creates curiosity or commitment?",
+    connections:
+      "Product: Commercials force you to name the one thing that matters. GTM: You use these in every sales and marketing touch. Investability: A crisp pitch in the room wins meetings.",
     checklist: [
       { id: "103-1", text: "30-second and 60-second scripts" },
       { id: "103-2", text: "Hook, problem, solution, proof, CTA" },
@@ -939,9 +1015,11 @@ export const customModules: Asset[] = [
     number: 104,
     title: "Sales and Closing",
     purpose:
-      "Learn to qualify leads, run discovery, handle objections, and close early customers.",
+      "One process: qualify, discover, demo, handle objections, close, onboard. So you can repeat it instead of winging it.",
     coreQuestion:
       "Do you have a repeatable process to move a prospect from first touch to signed customer?",
+    connections:
+      "Product: Discovery tells you what to build next. GTM: This is how you get design partners and early revenue. Investability: Repeatable sales = scalable business.",
     checklist: [
       { id: "104-1", text: "Defined ICP and qualification criteria" },
       { id: "104-2", text: "Discovery and demo flow" },
@@ -955,9 +1033,11 @@ export const customModules: Asset[] = [
     number: 105,
     title: "How to Talk to Investors",
     purpose:
-      "Prepare for investor conversations: narrative, metrics, and how to ask for and close funding.",
+      "Know your story, your numbers, and your ask. Practice so you can explain opportunity, progress, and use of capital in their language.",
     coreQuestion:
       "Can you clearly explain your opportunity, progress, and use of capital in investor language?",
+    connections:
+      "Product: Investors want to see a clear product and roadmap. GTM: Traction and pipeline are proof. Investability: This is the conversation that closes the round.",
     checklist: [
       { id: "105-1", text: "Investment story and use of funds" },
       { id: "105-2", text: "Key metrics and milestones" },
@@ -971,9 +1051,11 @@ export const customModules: Asset[] = [
     number: 106,
     title: "Content Build",
     purpose:
-      "End-to-end path: setup (Claude, git, design, Vercel, domain), iterate from customer learning, and apply funnel fundamentals so the site drives Demos and sign ups.",
+      "Set up the stack, then iterate copy and structure from what customers need to hear. One primary action (demo or sign up), and measure funnel: visits → clicks → completions.",
     coreQuestion:
       "Does your site get the right visitors to one clear action (demo or sign up) by teaching them what they need to understand first?",
+    connections:
+      "Product: The site is the first product experience. GTM: Content and funnel drive pipeline. Investability: Measured funnel shows you understand growth.",
     checklist: [
       { id: "106-1", text: "Setup: Claude space, git, design, Vercel deploy, domain" },
       { id: "106-2", text: "Iterate copy and structure from what customers need to understand" },

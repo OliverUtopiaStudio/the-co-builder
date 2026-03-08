@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getLimitlessTopicBySlug, limitlessTopics } from "@/lib/limitless";
+import { BOOK_REVIEW_CALENDLY_URL } from "@/lib/lessons";
 
 export default function LimitlessTopicPage() {
   const params = useParams<{ slug: string }>();
@@ -97,6 +98,30 @@ export default function LimitlessTopicPage() {
           and will appear here.
         </p>
       )}
+
+      {/* Bottom CTA: Book time with Ollie */}
+      <div
+        className="bg-accent text-white p-6 sm:p-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4"
+        style={{ borderRadius: 4 }}
+      >
+        <div className="text-center sm:text-left sm:flex-1">
+          <h3 className="text-lg font-semibold">Want to go deeper?</h3>
+          <p className="text-sm text-white/90 mt-1">
+            Book time with Ollie to discuss this topic and plan your next steps.
+          </p>
+        </div>
+        <div className="flex justify-center sm:flex-shrink-0">
+          <a
+            href={BOOK_REVIEW_CALENDLY_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-3 text-sm font-semibold text-center bg-white text-accent border-2 border-white hover:bg-white/95 transition-colors"
+            style={{ borderRadius: 4 }}
+          >
+            Book time with Ollie →
+          </a>
+        </div>
+      </div>
 
       {/* Prev / Next */}
       <div className="flex items-center justify-between gap-4 pt-4 border-t border-border">
