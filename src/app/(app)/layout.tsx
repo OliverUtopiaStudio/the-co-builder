@@ -15,8 +15,8 @@ export default async function AppLayout({
           navItems: [
             { href: "/dashboard", label: "Dashboard" },
             { href: "/library", label: "Content Library" },
+            { href: "/ai-eval", label: "AI Eval Tools" },
             { href: "/astrolabe", label: "Astrolabe" },
-            { href: `/fellows/${fellowId}`, label: "My Venture" },
           ],
           homeHref: "/astrolabe",
           mobileTitle: "CO-BUILDER OS",
@@ -28,6 +28,7 @@ export default async function AppLayout({
             { href: "/astrolabe", label: "Astrolabe" },
             { href: "/fellows", label: "Fellows" },
             { href: "/library", label: "Content Library" },
+            { href: "/ai-eval", label: "AI Eval Tools" },
             { href: "/dashboard", label: "Dashboard" },
             { href: "/wiki", label: "Wiki" },
           ],

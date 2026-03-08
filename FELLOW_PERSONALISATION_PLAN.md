@@ -255,7 +255,7 @@ getDashboardData(fellowId) {
 For fellows, the sidebar should show:
 - Dashboard (home)
 - Content Library
-- My Venture (links to their fellow detail page)
+- Dashboard (venture overview, next step, milestones, to-dos, key links, booking)
 
 For admin:
 - Keep current nav (Astrolabe, Fellows, Content Library)

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useCallback } from "react";
 
 /* ─────────────────────────────────────────────────────────────
    Astrolabes — Living Document
@@ -8,13 +9,29 @@ import Link from "next/link";
    Styled to match the Co-Build app design system
    ───────────────────────────────────────────────────────────── */
 
+const DEFAULT_OPEN: Record<string, boolean> = { system: true };
+
 export default function AstrolabePage() {
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(DEFAULT_OPEN);
+
+  const toggle = useCallback((id: string) => {
+    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const openAndScroll = useCallback((id: string) => {
+    setOpenSections((prev) => ({ ...prev, [id]: true }));
+    requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, []);
+
   return (
-    <div className="space-y-14 max-w-3xl pb-16">
+    <div className="max-w-3xl pb-16">
       {/* ── HERO ILLUSTRATION ── */}
       <AstrolabeHero />
 
       {/* ── COVER ── */}
+      <div className="space-y-14">
       <div>
         <div className="label-uppercase mb-3">
           Living Document · The Utopia Studio · Doha · 2026
@@ -83,31 +100,90 @@ export default function AstrolabePage() {
         </Link>
       </div>
 
-      {/* ── MASTER DIAGRAM ── */}
-      <section className="space-y-4">
-        <div className="label-uppercase">The System</div>
-        <p className="text-sm text-muted leading-relaxed max-w-xl">
-          The diagram below shows how the whole platform connects — from a
-          fellow&apos;s domain insight to a company at Series A. Everything we
-          do lives inside this loop.
-        </p>
-        <SystemFlowDiagram />
-        <p className="text-xs text-muted italic border-l-2 border-accent/30 pl-3">
-          Seven stages from hidden problem to strategic exit — Co-build is the
-          engine at the centre, and every cohort makes the next iteration faster
-          and sharper.
-        </p>
-      </section>
+      {/* ── ON THIS PAGE ── */}
+      <nav
+        aria-label="On this page"
+        className="sticky top-4 z-10 bg-[var(--bg)]/95 backdrop-blur-sm border border-border py-4 px-5 -mx-1"
+        style={{ borderRadius: 2 }}
+      >
+        <div className="label-uppercase text-muted mb-3">On this page</div>
+        <ul className="space-y-1.5 text-sm">
+          {[
+            { id: "system", label: "The System" },
+            { id: "part-one", label: "Part One · The Platform" },
+            { id: "part-two", label: "Part Two · How We Work" },
+            { id: "part-three", label: "Part Three · The Thesis" },
+            { id: "part-four", label: "Part Four · Co-Build Framework" },
+            { id: "closing", label: "The Standard · Revisit" },
+          ].map(({ id, label }) => (
+            <li key={id}>
+              {id === "closing" ? (
+                <a
+                  href="#closing"
+                  className="block py-1 hover:text-accent transition-colors"
+                >
+                  {label}
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => openAndScroll(id)}
+                  className="text-left w-full py-1 hover:text-accent transition-colors flex items-center gap-2 group"
+                >
+                  <span
+                    className={`shrink-0 w-4 h-4 border flex items-center justify-center transition-colors ${
+                      openSections[id] ? "border-accent bg-accent/10" : "border-border"
+                    }`}
+                    style={{ borderRadius: 2 }}
+                  >
+                    {openSections[id] ? (
+                      <span className="text-accent text-[10px]">−</span>
+                    ) : (
+                      <span className="text-muted text-[10px]">+</span>
+                    )}
+                  </span>
+                  {label}
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
 
-      <hr className="border-border" />
+      <div className="space-y-4 mt-8">
+      {/* ── MASTER DIAGRAM ── */}
+      <CollapsibleSection
+        id="system"
+        label="The System"
+        summary="How the whole platform connects — from domain insight to Series A."
+        open={openSections.system ?? false}
+        onToggle={() => toggle("system")}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-muted leading-relaxed max-w-xl">
+            The diagram below shows how the whole platform connects — from a
+            fellow&apos;s domain insight to a company at Series A. Everything we
+            do lives inside this loop.
+          </p>
+          <SystemFlowDiagram />
+          <p className="text-xs text-muted italic border-l-2 border-accent/30 pl-3">
+            Seven stages from hidden problem to strategic exit — Co-build is the
+            engine at the centre, and every cohort makes the next iteration faster
+            and sharper.
+          </p>
+        </div>
+      </CollapsibleSection>
 
       {/* ── PART ONE: PLATFORM ── */}
-      <section className="space-y-6">
-        <div>
-          <div className="label-uppercase mb-1">Part One</div>
-          <h2 className="text-lg font-medium tracking-tight">The Platform</h2>
-        </div>
-
+      <CollapsibleSection
+        id="part-one"
+        part="Part One"
+        label="The Platform"
+        summary="Utopia Capital, two funds, and the Studio as one system."
+        open={openSections["part-one"] ?? false}
+        onToggle={() => toggle("part-one")}
+      >
+        <div className="space-y-6">
         <p className="text-sm text-foreground leading-relaxed max-w-xl">
           Utopia Capital Management is the parent. Beneath it: two funds and a
           studio, sharing team, IP, data, and operating capability. Capital and
@@ -127,17 +203,19 @@ export default function AstrolabePage() {
           The Studio is the engine in the middle — what it builds, learns, and
           systemises becomes the shared advantage of the whole platform.
         </p>
-      </section>
-
-      <hr className="border-border" />
+        </div>
+      </CollapsibleSection>
 
       {/* ── PART TWO: HOW WE WORK ── */}
-      <section className="space-y-6">
-        <div>
-          <div className="label-uppercase mb-1">Part Two</div>
-          <h2 className="text-lg font-medium tracking-tight">How We Work</h2>
-        </div>
-
+      <CollapsibleSection
+        id="part-two"
+        part="Part Two"
+        label="How We Work"
+        summary="The Moonshot Standard, what we build, believe, and do."
+        open={openSections["part-two"] ?? false}
+        onToggle={() => toggle("part-two")}
+      >
+        <div className="space-y-6">
         {/* Moonshot callout */}
         <div
           className="border-2 border-accent p-5 relative mt-4"
@@ -270,19 +348,19 @@ export default function AstrolabePage() {
             <DontItem text="Build for Doha while forgetting the world is watching." />
           </div>
         </div>
-      </section>
-
-      <hr className="border-border" />
+        </div>
+      </CollapsibleSection>
 
       {/* ── PART THREE: THESIS ── */}
-      <section className="space-y-6">
-        <div>
-          <div className="label-uppercase mb-1">Part Three</div>
-          <h2 className="text-lg font-medium tracking-tight">
-            The <span className="text-accent">Thesis</span>
-          </h2>
-        </div>
-
+      <CollapsibleSection
+        id="part-three"
+        part="Part Three"
+        label="The Thesis"
+        summary="Hidden problems, domain insiders, and the problems we back."
+        open={openSections["part-three"] ?? false}
+        onToggle={() => toggle("part-three")}
+      >
+        <div className="space-y-6">
         <p className="text-sm text-foreground leading-relaxed max-w-xl" style={{ fontSize: 15 }}>
           The biggest problems in the world&apos;s most important systems are
           invisible to outsiders. They are obvious to the people who have spent
@@ -366,19 +444,19 @@ export default function AstrolabePage() {
             />
           </div>
         </div>
-      </section>
-
-      <hr className="border-border" />
+        </div>
+      </CollapsibleSection>
 
       {/* ── PART FOUR: CO-BUILD FRAMEWORK ── */}
-      <section className="space-y-6">
-        <div>
-          <div className="label-uppercase mb-1">Part Four</div>
-          <h2 className="text-lg font-medium tracking-tight">
-            The Co-Build <span className="text-accent">Framework</span>
-          </h2>
-        </div>
-
+      <CollapsibleSection
+        id="part-four"
+        part="Part Four"
+        label="The Co-Build Framework"
+        summary="Three phases, seven stages, two gates — and what the framework is not."
+        open={openSections["part-four"] ?? false}
+        onToggle={() => toggle("part-four")}
+      >
+        <div className="space-y-6">
         <p className="text-sm text-foreground leading-relaxed max-w-xl">
           Most ventures built alongside domain experts fail at the same points.
           The expert knows the problem but doesn&apos;t know how to define the
@@ -443,13 +521,14 @@ export default function AstrolabePage() {
             <DontItem text="Fixed. It improves with every cohort. Any team member who identifies a better approach should say so. It is a living system, not a sacred text." />
           </div>
         </div>
-      </section>
+        </div>
+      </CollapsibleSection>
 
-      <hr className="border-border" />
+      </div>
 
       {/* ── CLOSING ── */}
-      <section className="text-center space-y-5 py-8">
-        <div className="label-uppercase">The Standard</div>
+      <section id="closing" className="text-center space-y-5 py-10 scroll-mt-6">
+        <div className="label-uppercase text-muted">The Standard</div>
         <h2 className="text-lg font-medium tracking-tight leading-snug max-w-md mx-auto">
           Fixed stars. Open water.
           <br />
@@ -460,13 +539,13 @@ export default function AstrolabePage() {
           Is this the clearest, fastest, most honest version of what we&apos;re
           trying to do?
         </p>
-        <div className="inline-block">
-          <span
-            className="border border-accent px-6 py-3 label-uppercase text-accent inline-block"
-            style={{ borderRadius: 2 }}
-          >
+        <div className="inline-block border-2 border-accent bg-accent/5 px-6 py-4" style={{ borderRadius: 2 }}>
+          <span className="label-uppercase text-accent font-medium">
             Return to this before anything ships
           </span>
+          <p className="text-xs text-muted mt-2 max-w-xs">
+            Bookmark this page. Revisit before you ship.
+          </p>
         </div>
       </section>
 
@@ -479,7 +558,85 @@ export default function AstrolabePage() {
           Astrolabes · Living Document · 2026
         </span>
       </div>
+      </div>
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Collapsible section (dropdown)
+   ───────────────────────────────────────────── */
+
+function CollapsibleSection({
+  id,
+  part,
+  label,
+  summary,
+  open,
+  onToggle,
+  children,
+}: {
+  id: string;
+  part?: string;
+  label: string;
+  summary: string;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      className="border border-border overflow-hidden"
+      style={{ borderRadius: 2 }}
+    >
+      <button
+        id={`${id}-heading`}
+        type="button"
+        onClick={onToggle}
+        className="w-full text-left p-5 hover:bg-accent/5 transition-colors flex items-start gap-4 group"
+        aria-expanded={open}
+        aria-controls={`${id}-content`}
+      >
+        <span
+          className="shrink-0 w-7 h-7 border border-border group-hover:border-accent/50 flex items-center justify-center transition-colors mt-0.5"
+          style={{ borderRadius: 2 }}
+        >
+          <span className="text-muted group-hover:text-accent text-sm transition-colors">
+            {open ? "−" : "+"}
+          </span>
+        </span>
+        <div className="min-w-0 flex-1">
+          {part && (
+            <div className="label-uppercase text-muted mb-0.5">{part}</div>
+          )}
+          <h2 className="text-lg font-medium tracking-tight">
+            {label.includes("Thesis") ? (
+              <>The <span className="text-accent">Thesis</span></>
+            ) : (
+              label
+            )}
+          </h2>
+          <p className="text-sm text-muted mt-1 line-clamp-2">{summary}</p>
+        </div>
+        <span className="shrink-0 text-accent text-sm font-medium mt-1">
+          {open ? "Collapse" : "Expand"}
+        </span>
+      </button>
+      <div
+        id={`${id}-content`}
+        role="region"
+        aria-labelledby={`${id}-heading`}
+        className="grid transition-[grid-template-rows] duration-300 ease-out"
+        style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-border p-5 pt-6 bg-surface/50">
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

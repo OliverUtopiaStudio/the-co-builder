@@ -12,9 +12,11 @@ import {
   type CriticalAction,
 } from "@/app/actions/diagnosis";
 
+type FellowDetail = NonNullable<Awaited<ReturnType<typeof getFellowDetail>>>;
+
 export type DashboardData = {
-  fellow: NonNullable<Awaited<ReturnType<typeof getFellowDetail>>>["fellow"];
-  venture: NonNullable<Awaited<ReturnType<typeof getFellowDetail>>>["venture"];
+  fellow: FellowDetail["fellow"];
+  venture: FellowDetail["venture"] | null;
   milestones: Awaited<ReturnType<typeof getMilestones>>;
   todos: Awaited<ReturnType<typeof getTodoItems>>;
   links: Awaited<ReturnType<typeof getCategorizedLinks>>;
@@ -22,11 +24,31 @@ export type DashboardData = {
   nextAction: CriticalAction | null;
 };
 
+const EMPTY_LINKS: Awaited<ReturnType<typeof getCategorizedLinks>> = {
+  product: [],
+  gtm: [],
+  investment: [],
+};
+
 export async function getDashboardData(fellowId: string): Promise<DashboardData | null> {
   const detail = await getFellowDetail(fellowId);
-  if (!detail?.venture) return null;
+  if (!detail) return null;
 
-  const ventureId = detail.venture.id;
+  const venture = detail.venture ?? null;
+
+  if (!venture) {
+    return {
+      fellow: detail.fellow,
+      venture: null,
+      milestones: [],
+      todos: [],
+      links: EMPTY_LINKS,
+      diagnosis: null,
+      nextAction: null,
+    };
+  }
+
+  const ventureId = venture.id;
   const [milestones, todos, links, diagnosis] = await Promise.all([
     getMilestones(ventureId),
     getTodoItems(ventureId),
@@ -36,7 +58,7 @@ export async function getDashboardData(fellowId: string): Promise<DashboardData 
 
   return {
     fellow: detail.fellow,
-    venture: detail.venture,
+    venture,
     milestones,
     todos,
     links,

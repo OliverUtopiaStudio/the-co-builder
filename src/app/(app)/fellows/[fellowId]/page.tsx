@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import {
   getFellowDetail,
   getMilestones,
@@ -18,6 +18,9 @@ export default async function FellowDetailPage({
   const { fellowId } = await params;
   const detail = await getFellowDetail(fellowId);
   if (!detail) notFound();
+
+  // Fellows viewing their own profile go to Dashboard (single merged view)
+  if (detail.isOwnPage) redirect("/dashboard");
 
   const { fellow, venture, isStudio } = detail;
 

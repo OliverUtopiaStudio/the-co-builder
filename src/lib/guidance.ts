@@ -247,6 +247,18 @@ export const ASSET_RESOURCES: Record<
         link: "https://www.ycombinator.com/library",
       },
     ],
+    2: [
+      {
+        label: "Category Creation: Market Domination Strategy",
+        description: "Practical guide to defining and owning a $1B+ category",
+        link: "https://fourweekmba.com/category-creation-the-ultimate-business-strategy-for-market-domination",
+      },
+      {
+        label: "CB Insights: Business Moats & Competitive Advantage",
+        description: "How the world's largest companies build defensible categories",
+        link: "https://www.cbinsights.com/research/report/business-moats-competitive-advantage",
+      },
+    ],
     3: [
       {
         label: "Steve Blank: The Four Steps to the Epiphany",
@@ -257,6 +269,18 @@ export const ASSET_RESOURCES: Record<
         label: "YC: How to Talk to Users",
         description: "Practical guide to user interviews",
         link: "https://www.ycombinator.com/library",
+      },
+    ],
+    4: [
+      {
+        label: "Atlassian: Process Mapping Guide",
+        description: "Step-by-step workflow and decision-point mapping",
+        link: "https://www.atlassian.com/work-management/project-management/process-mapping",
+      },
+      {
+        label: "ProductPlan: Process Mapping for Roadmapping",
+        description: "Map workflows and data touchpoints for product",
+        link: "https://productplan.com/learn/process-mapping-document-roadmapping-process",
       },
     ],
     5: [
@@ -271,6 +295,90 @@ export const ASSET_RESOURCES: Record<
         link: "https://www.ycombinator.com/library",
       },
     ],
+    6: [
+      {
+        label: "MIT Sloan: How to Test Your Assumptions",
+        description: "Systematic assumption testing before you build",
+        link: "https://sloanreview.mit.edu/article/how-to-test-your-assumptions",
+      },
+      {
+        label: "IdeaPlan: When to Pivot vs Persevere",
+        description: "Evidence-based criteria to kill or continue",
+        link: "https://www.ideaplan.io/blog/when-to-pivot-vs-persevere",
+      },
+    ],
+    7: [
+      {
+        label: "CustomerDevLabs: B2B Problem Interview Script",
+        description: "Proven discovery interview script and questions",
+        link: "https://customerdevlabs.com/2014/07/09/b2b-customer-discovery-problem-interview-script",
+      },
+      {
+        label: "Grain: Customer Research Interview Guide",
+        description: "Create an excellent interview guide and document findings",
+        link: "https://grain.com/blog/customer-research-interview-guide",
+      },
+    ],
+    8: [
+      {
+        label: "DoWhatMatter: Design Partner Recruitment Playbook",
+        description: "B2B design partner pipeline and qualification",
+        link: "https://dowhatmatter.com/guides/design-partner-recruitment",
+      },
+      {
+        label: "Unusual: Qualifying Design Partners",
+        description: "How to select accounts most likely to fund pilots",
+        link: "https://www.unusual.vc/articles/qualifying-design-partners",
+      },
+    ],
+    9: [
+      {
+        label: "Evidently AI: LLM Evaluation Metrics & Methods",
+        description: "Decide rules vs ML vs LLM/RAG vs agents; measure feasibility",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "CodeWheel: Production RAG Architecture Guide",
+        description: "Technical architecture for RAG and model gateway",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+    ],
+    10: [
+      {
+        label: "Statsig: Golden Datasets & Evaluation Standards",
+        description: "Create gold sets, scoring, and acceptance thresholds",
+        link: "https://www.statsig.com/perspectives/golden-datasets-evaluation-standards",
+      },
+      {
+        label: "Evidently AI: LLM Evaluation Metrics",
+        description: "Define 'good' and document failure modes",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+    ],
+    11: [
+      {
+        label: "Cohere: Enterprise Data Commitments",
+        description: "Inference vs training rights, retention, compliance",
+        link: "https://cohere.com/enterprise-data-commitments",
+      },
+      {
+        label: "OpenAI: Business Data Privacy & Security",
+        description: "Redaction, access controls, auditability for enterprise",
+        link: "https://openai.com/business-data",
+      },
+    ],
+    12: [
+      {
+        label: "Morgan Lewis: AI Contracting – Data Rights",
+        description: "Exclusivity, training rights, usage boundaries in contracts",
+        link: "https://www.morganlewis.com/blogs/sourcingatmorganlewis/2025/12/key-concepts-in-ai-contracting-data-rights-and-restrictions",
+      },
+      {
+        label: "TheDataGuy: Building Your AI Data Moat",
+        description: "Make the data moat contractual, not assumed",
+        link: "https://thedataguy.pro/blog/2025/05/building-your-ai-data-moat",
+      },
+    ],
     13: [
       {
         label: "YC: Financial Modeling for Startups",
@@ -278,9 +386,237 @@ export const ASSET_RESOURCES: Record<
         link: "https://www.ycombinator.com/library",
       },
       {
+        label: "Elad Gil: Defensibility & Competition",
+        description: "Track compounding loops with evidence; moat isn't theoretical",
+        link: "https://blog.eladgil.com/p/defensibility-and-competition",
+      },
+    ],
+    14: [
+      {
         label: "First Round Review: Unit Economics",
         description: "Understanding unit economics as a founder",
         link: "https://review.firstround.com",
+      },
+      {
+        label: "Stripe Atlas: Financial Planning",
+        description: "Margin at scale and sensitivity analysis",
+        link: "https://stripe.com/atlas",
+      },
+    ],
+    15: [
+      {
+        label: "The Startup Project: PRD Template",
+        description: "Product requirements and not-to-build scope",
+        link: "https://startupproject.org/templates/prd",
+      },
+      {
+        label: "Get Product People: Practical PRD Guide",
+        description: "Workflow + intelligence requirements, exclusions",
+        link: "https://www.getproductpeople.com/blog/product-requirements-document",
+      },
+    ],
+    16: [
+      {
+        label: "CodeWheel: Production RAG Architecture",
+        description: "Model gateway, RAG store, eval harness, telemetry",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+      {
+        label: "AI App Builder: Agents & RAG Reference Architectures",
+        description: "Enterprise-grade AI architecture that ships",
+        link: "https://aiappbuilder.com/insights/ai-agents-rag-reference-architectures-that-ship",
+      },
+    ],
+    17: [
+      {
+        label: "DoWhatMatter: Design Partner Agreement",
+        description: "2-page MOU + short NDA, AI + data + productization clauses",
+        link: "https://dowhatmatter.com/guides/design-partner-agreement",
+      },
+      {
+        label: "Common Paper: How to Work With Design Partners",
+        description: "Securing paid pilot and LOI with clear terms",
+        link: "https://commonpaper.com/blog/design-partner",
+      },
+    ],
+    18: [
+      {
+        label: "Pilot Plan Template for SaaS & B2B",
+        description: "Pilot SOW structure, KPIs, and success criteria",
+        link: "https://federicopresicci.com/resources/pilot-plan-template",
+      },
+      {
+        label: "Userpilot: SaaS KPI Dashboard",
+        description: "Outcome, model, and ops KPIs; config vs custom",
+        link: "https://userpilot.com/blog/saas-kpi-dashboard",
+      },
+    ],
+    19: [
+      {
+        label: "Evidently AI: LLM Evaluation in Production",
+        description: "Eval proof, safety controls, latency/cost benchmarks",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "MeetRep: Enterprise Demos for Complex Products",
+        description: "Demo that shows workflow value and conversion",
+        link: "https://www.meetrep.ai/blog/enterprise-demos-for-complex-products-why-traditional-approaches-are-failing",
+      },
+    ],
+    20: [
+      {
+        label: "Uncharted: Why Trust Closes B2B Enterprise Deals",
+        description: "Narrative, deck, security answers, failure modes",
+        link: "https://www.thisisuncharted.co/p/startups-closing-big-deals",
+      },
+      {
+        label: "Demostack: Demo Technology for Enterprise",
+        description: "Repeatable selling kit and rollout plan",
+        link: "https://www.demostack.com/demo-technology-for-enterprise",
+      },
+    ],
+    21: [
+      {
+        label: "OnStrategy: Compute-Aware AI Pricing Playbook",
+        description: "Price to outcomes, compute + HITL cost/task, margin at scale",
+        link: "https://onstrategy.eu/essay-stop-selling-ai-like-saas-a-compute-aware-pricing-playbook",
+      },
+      {
+        label: "Pilot: AI Pricing Economics (2026)",
+        description: "Sensitivity analysis and unit economics for AI products",
+        link: "https://pilot.com/blog/ai-pricing-economics-2026",
+      },
+    ],
+    22: [
+      {
+        label: "Pertama Partners: 18-Month AI Roadmap Template",
+        description: "Eval lift, data flywheel, deployment, compliance gates",
+        link: "https://www.pertamapartners.com/insights/ai-roadmap-18-month-implementation-plan",
+      },
+      {
+        label: "RoadmapOne: Product Roadmap That Works",
+        description: "6/12/18 month milestones and decision gates",
+        link: "https://blog.roadmap.one/posts/blog16-how-to-build-product-roadmap",
+      },
+    ],
+    23: [
+      {
+        label: "Evidently AI: LLM Monitoring & Evaluation",
+        description: "Model release, eval cadence, incident response",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "CodeWheel: RAG Architecture & Governance",
+        description: "Policy layer, feedback/label ops, red-teaming",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+    ],
+    24: [
+      {
+        label: "Increased: Investor Data Room Checklist",
+        description: "Eval reports, unit economics, security pack, LOIs, moat ledger",
+        link: "https://increased.com/blog/how-to-setup-an-investor-data-room-the-complete-startup-checklist",
+      },
+      {
+        label: "Fast.io: Startup Data Room for Fundraising",
+        description: "Complete checklist for VC-ready data room",
+        link: "https://www.fast.io/resources/startup-data-room",
+      },
+    ],
+    25: [
+      {
+        label: "YC: Startup Financial Models",
+        description: "Compute, labeling ops, security; hiring tied to gates",
+        link: "https://www.ycombinator.com/library",
+      },
+      {
+        label: "Stripe Atlas: Runway & Capital Planning",
+        description: "Detailed financial plan tied to milestones",
+        link: "https://stripe.com/atlas",
+      },
+    ],
+    26: [
+      {
+        label: "PatentPC: Licensing vs Assignment in Spinouts",
+        description: "DPAs, AI usage terms, training rights, IP",
+        link: "https://patentpc.com/blog/licensing-vs-assignment-of-ip-in-joint-ventures-and-spinouts",
+      },
+      {
+        label: "Promise Legal: Founder Agreement & IP Assignment",
+        description: "Security policies, IP assignment, legal foundation",
+        link: "https://blog.promise.legal/startup-central/founder-agreement-template-equity-splits-vesting-and-ip-assignment-explained",
+      },
+    ],
+    27: [
+      {
+        label: "MicroVentures: Assessing Startup Defensibility",
+        description: "Acquirer logic; data rights, eval superiority, workflow control",
+        link: "https://microventures.com/assessing-a-startups-defensibility",
+      },
+      {
+        label: "Elad Gil: Defensibility & Competition",
+        description: "Proof of defensibility for exit and M&A",
+        link: "https://blog.eladgil.com/p/defensibility-and-competition",
+      },
+    ],
+    101: [
+      {
+        label: "Unbounce: Value Proposition Guide",
+        description: "Create and optimize a clear value proposition",
+        link: "https://unbounce.com/copywriting/value-proposition",
+      },
+      {
+        label: "Soatech: Startup Landing Page That Converts",
+        description: "Clear message, layout, and primary CTA",
+        link: "https://soatech.co/blog/startup-landing-page-converts",
+      },
+    ],
+    102: [
+      {
+        label: "Sequoia Pitch Deck Format",
+        description: "Problem, solution, market, traction, team, ask",
+        link: "https://winningpresentations.com/investor-pitch-deck-template",
+      },
+      {
+        label: "Slidebean: Startup Pitch Deck Template",
+        description: "Concise deck for fundraising or partnerships",
+        link: "https://slidebean.com/pitch-deck-template-for-startups",
+      },
+    ],
+    103: [
+      {
+        label: "StartupTools: 30-Second Elevator Pitch",
+        description: "Hook, problem, solution, proof, CTA in 30 seconds",
+        link: "https://www.startuptools.ai/resources/post/master-30-second-elevator-pitch-for-business-success",
+      },
+      {
+        label: "Looming Life: Nail Your Elevator Pitch",
+        description: "Scripts and structure for sales and marketing",
+        link: "https://loominglife.com/30-second-elevator-pitch-guide",
+      },
+    ],
+    104: [
+      {
+        label: "MeetRep: Discovery Call That Converts",
+        description: "Qualify leads, run discovery, set next steps",
+        link: "https://www.meetrep.ai/blog/how-to-run-a-discovery-call-that-actually-converts-7-step-framework",
+      },
+      {
+        label: "Highspot: Objection-Handling Playbook B2B",
+        description: "Handle objections and close early customers",
+        link: "https://www.highspot.com/blog/objection-handling",
+      },
+    ],
+    105: [
+      {
+        label: "Carta: Term Sheets for Startups",
+        description: "Investment story, use of funds, key terms",
+        link: "https://carta.com/learn/startups/fundraising/term-sheets",
+      },
+      {
+        label: "SVB: How to Read a Term Sheet",
+        description: "Metrics, milestones, and closing process",
+        link: "https://www.svb.com/startup-insights/raising-capital/read-startup-term-sheet",
       },
     ],
   },
@@ -297,6 +633,18 @@ export const ASSET_RESOURCES: Record<
         link: "https://a16z.com",
       },
     ],
+    2: [
+      {
+        label: "Category Creation: Market Domination Strategy",
+        description: "Proven playbook for $1B+ category ambition",
+        link: "https://fourweekmba.com/category-creation-the-ultimate-business-strategy-for-market-domination",
+      },
+      {
+        label: "CB Insights: Business Moats",
+        description: "Competitive advantage and category defensibility",
+        link: "https://www.cbinsights.com/research/report/business-moats-competitive-advantage",
+      },
+    ],
     3: [
       {
         label: "First Round Review: Customer Research",
@@ -309,6 +657,114 @@ export const ASSET_RESOURCES: Record<
         link: "https://www.lennysnewsletter.com",
       },
     ],
+    4: [
+      {
+        label: "Atlassian: Process Mapping Guide",
+        description: "Workflow and data touchpoint documentation",
+        link: "https://www.atlassian.com/work-management/project-management/process-mapping",
+      },
+      {
+        label: "ProductPlan: Process Mapping for Roadmapping",
+        description: "Map decisions, data creation, AI intervention points",
+        link: "https://productplan.com/learn/process-mapping-document-roadmapping-process",
+      },
+    ],
+    5: [
+      {
+        label: "Eric Ries: The Lean Startup",
+        description: "MVP and validation discipline",
+        link: "https://theleanstartup.com",
+      },
+      {
+        label: "YC: Minimum Viable Product",
+        description: "Scope and build for validation",
+        link: "https://www.ycombinator.com/library",
+      },
+    ],
+    6: [
+      {
+        label: "MIT Sloan: How to Test Your Assumptions",
+        description: "Severity, probability, cost of resolution",
+        link: "https://sloanreview.mit.edu/article/how-to-test-your-assumptions",
+      },
+      {
+        label: "IdeaPlan: When to Pivot vs Persevere",
+        description: "Pre-commit criteria and decision date",
+        link: "https://www.ideaplan.io/blog/when-to-pivot-vs-persevere",
+      },
+    ],
+    7: [
+      {
+        label: "CustomerDevLabs: B2B Problem Interview Script",
+        description: "Structured discovery for pattern recognition",
+        link: "https://customerdevlabs.com/2014/07/09/b2b-customer-discovery-problem-interview-script",
+      },
+      {
+        label: "Outreach: Sales Discovery Process",
+        description: "Strategies to drive conversions from discovery",
+        link: "https://www.outreach.io/resources/blog/7-strategies-for-more-effective-sales-discovery-calls",
+      },
+    ],
+    8: [
+      {
+        label: "DoWhatMatter: Design Partner Recruitment",
+        description: "Pipeline, qualification, conversion benchmarks",
+        link: "https://dowhatmatter.com/guides/design-partner-recruitment",
+      },
+      {
+        label: "Unusual: Build B2B Sales Motion with Design Partners",
+        description: "Selling while validating; pilot structure",
+        link: "https://www.unusual.vc/articles/build-a-sales-motion-with-design-partners-for-a-b2b-product",
+      },
+    ],
+    9: [
+      {
+        label: "Evidently AI: LLM Evaluation Metrics",
+        description: "Technical feasibility and human-in-loop design",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "AI App Builder: RAG Reference Architectures",
+        description: "Production-grade agent and RAG architecture",
+        link: "https://aiappbuilder.com/insights/ai-agents-rag-reference-architectures-that-ship",
+      },
+    ],
+    10: [
+      {
+        label: "Statsig: Golden Datasets",
+        description: "Gold set, scoring, acceptance thresholds",
+        link: "https://www.statsig.com/perspectives/golden-datasets-evaluation-standards",
+      },
+      {
+        label: "MLflow: Ground Truth Expectations",
+        description: "Evaluation cadence and failure modes",
+        link: "https://mlflow.org/docs/latest/genai/assessments/expectations",
+      },
+    ],
+    11: [
+      {
+        label: "Cohere: Enterprise Data Commitments",
+        description: "Inference vs training, retention, SOC2",
+        link: "https://cohere.com/enterprise-data-commitments",
+      },
+      {
+        label: "OpenAI: Business Data & Security",
+        description: "Enterprise privacy and access controls",
+        link: "https://openai.com/business-data",
+      },
+    ],
+    12: [
+      {
+        label: "Morgan Lewis: AI Contracting Data Rights",
+        description: "Exclusivity, training rights, usage boundaries",
+        link: "https://www.morganlewis.com/blogs/sourcingatmorganlewis/2025/12/key-concepts-in-ai-contracting-data-rights-and-restrictions",
+      },
+      {
+        label: "TheDataGuy: Building Your AI Data Moat",
+        description: "Contractual data advantage",
+        link: "https://thedataguy.pro/blog/2025/05/building-your-ai-data-moat",
+      },
+    ],
     13: [
       {
         label: "a16z: Unit Economics Deep Dive",
@@ -319,6 +775,234 @@ export const ASSET_RESOURCES: Record<
         label: "Stripe Atlas: Financial Planning",
         description: "Financial models for scaling startups",
         link: "https://stripe.com/atlas",
+      },
+    ],
+    14: [
+      {
+        label: "a16z: Unit Economics",
+        description: "Margin at scale, sensitivity analysis",
+        link: "https://a16z.com",
+      },
+      {
+        label: "First Round: Unit Economics",
+        description: "CAC, LTV, payback for experienced founders",
+        link: "https://review.firstround.com",
+      },
+    ],
+    15: [
+      {
+        label: "The Startup Project: PRD Template",
+        description: "Focused PRD and not-to-build discipline",
+        link: "https://startupproject.org/templates/prd",
+      },
+      {
+        label: "PRD Creator: Write a PRD AI Tools Can Follow",
+        description: "Workflow + intelligence requirements",
+        link: "https://www.prdcreator.ai/blog/how-to-write-a-prd",
+      },
+    ],
+    16: [
+      {
+        label: "CodeWheel: Production RAG Architecture",
+        description: "Model gateway, eval harness, policy layer",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+      {
+        label: "Medium: Agent Harness Is the Architecture",
+        description: "Production-grade RAG and agent design",
+        link: "https://medium.com/@epappas/the-agent-harness-is-the-architecture-and-your-model-is-not-the-bottleneck-5ae5fd067bb2",
+      },
+    ],
+    17: [
+      {
+        label: "DoWhatMatter: Design Partner Agreement",
+        description: "MOU, NDA, AI + data + productization",
+        link: "https://dowhatmatter.com/guides/design-partner-agreement",
+      },
+      {
+        label: "Common Paper: Design Partners",
+        description: "LOI and pilot agreement best practices",
+        link: "https://commonpaper.com/blog/design-partner",
+      },
+    ],
+    18: [
+      {
+        label: "Pilot Plan Template for SaaS & B2B",
+        description: "SOW, KPIs, config vs custom, deploy spec",
+        link: "https://federicopresicci.com/resources/pilot-plan-template",
+      },
+      {
+        label: "FitGap: Pilot Results to Rollout",
+        description: "Success metrics and scale decisions",
+        link: "https://us.fitgap.com/stack-guides/turning-pilot-results-into-scalable-rollout-plans-with-clear-success-metrics",
+      },
+    ],
+    19: [
+      {
+        label: "Evidently AI: LLM Evaluation",
+        description: "Eval proof, safety, latency/cost",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "MeetRep: Enterprise Demo Automation",
+        description: "Scale demo and conversion",
+        link: "https://www.meetrep.ai/blog/enterprise-sales-demo-automation-founders-guide-scale",
+      },
+    ],
+    20: [
+      {
+        label: "Uncharted: Trust Closes Enterprise Deals",
+        description: "Narrative, security, failure modes, rollout",
+        link: "https://www.thisisuncharted.co/p/startups-closing-big-deals",
+      },
+      {
+        label: "Demostack: Demo Technology Enterprise",
+        description: "Repeatable selling beyond design partners",
+        link: "https://www.demostack.com/demo-technology-for-enterprise",
+      },
+    ],
+    21: [
+      {
+        label: "OnStrategy: Compute-Aware AI Pricing",
+        description: "Outcome-based pricing, margin at scale",
+        link: "https://onstrategy.eu/essay-stop-selling-ai-like-saas-a-compute-aware-pricing-playbook",
+      },
+      {
+        label: "GetMonetizely: AI Inference Cost & Pricing",
+        description: "Variable compute and sensitivity analysis",
+        link: "https://www.getmonetizely.com/articles/the-ai-inference-cost-problem-how-to-price-when-compute-costs-vary",
+      },
+    ],
+    22: [
+      {
+        label: "Pertama Partners: 18-Month AI Roadmap",
+        description: "Eval lift, data flywheel, compliance gates",
+        link: "https://www.pertamapartners.com/insights/ai-roadmap-18-month-implementation-plan",
+      },
+      {
+        label: "RoadmapOne: Product Roadmap That Works",
+        description: "Gates and milestone alignment",
+        link: "https://blog.roadmap.one/posts/blog16-how-to-build-product-roadmap",
+      },
+    ],
+    23: [
+      {
+        label: "Evidently AI: LLM Monitoring",
+        description: "Model release, eval cadence, incident response",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "CodeWheel: RAG Governance",
+        description: "Policy layer, feedback/label ops",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+    ],
+    24: [
+      {
+        label: "Increased: Investor Data Room Checklist",
+        description: "VC-ready data room structure",
+        link: "https://increased.com/blog/how-to-setup-an-investor-data-room-the-complete-startup-checklist",
+      },
+      {
+        label: "WOWS Global: Data Room 30-Item Checklist",
+        description: "Due diligence and investor readiness",
+        link: "https://wowsglobal.com/resources/blogs-insights/data-room-done-right-a-founder-s-30-item-investor-readiness-checklist",
+      },
+    ],
+    25: [
+      {
+        label: "YC: Financial Models",
+        description: "Compute, ops, security; hiring tied to gates",
+        link: "https://www.ycombinator.com/library",
+      },
+      {
+        label: "Stripe Atlas: Capital & Runway",
+        description: "Runway and milestone-based planning",
+        link: "https://stripe.com/atlas",
+      },
+    ],
+    26: [
+      {
+        label: "PatentPC: Licensing vs Assignment Spinouts",
+        description: "IP, DPAs, AI usage, training rights",
+        link: "https://patentpc.com/blog/licensing-vs-assignment-of-ip-in-joint-ventures-and-spinouts",
+      },
+      {
+        label: "Orrick: University Spin-Outs IP",
+        description: "IP audit and ownership for spinouts",
+        link: "https://www.orrick.com/en/Insights/2024/04/Founder-Series-Top-Tips-for-University-Spin-Outs-Part-2-Intellectual-Property",
+      },
+    ],
+    27: [
+      {
+        label: "MicroVentures: Startup Defensibility",
+        description: "Acquirer logic and proof of defensibility",
+        link: "https://microventures.com/assessing-a-startups-defensibility",
+      },
+      {
+        label: "Elad Gil: Defensibility & Competition",
+        description: "Exit map and M&A readiness",
+        link: "https://blog.eladgil.com/p/defensibility-and-competition",
+      },
+    ],
+    101: [
+      {
+        label: "Unbounce: Value Proposition",
+        description: "Clear value proposition and messaging",
+        link: "https://unbounce.com/copywriting/value-proposition",
+      },
+      {
+        label: "River: High-Converting Landing Pages (2026)",
+        description: "Layout, CTA, and conversion optimization",
+        link: "https://rivereditor.com/guides/how-to-write-high-converting-landing-pages-2026",
+      },
+    ],
+    102: [
+      {
+        label: "Sequoia Pitch Deck Format",
+        description: "10-slide format for fundraising",
+        link: "https://winningpresentations.com/investor-pitch-deck-template",
+      },
+      {
+        label: "Corporate Finance Institute: Pitch Deck Template",
+        description: "Structure and use of funds",
+        link: "https://corporatefinanceinstitute.com/resources/valuation/how-to-build-a-pitch-deck-free-template",
+      },
+    ],
+    103: [
+      {
+        label: "StartupTools: 30-Second Elevator Pitch",
+        description: "Scripts for sales and marketing",
+        link: "https://www.startuptools.ai/resources/post/master-30-second-elevator-pitch-for-business-success",
+      },
+      {
+        label: "Bizee: Create an Elevator Pitch",
+        description: "Hook, problem, solution, proof, CTA",
+        link: "https://bizee.com/articles/create-elevator-pitch",
+      },
+    ],
+    104: [
+      {
+        label: "MeetRep: Discovery Call That Converts",
+        description: "7-step framework for B2B discovery",
+        link: "https://www.meetrep.ai/blog/how-to-run-a-discovery-call-that-actually-converts-7-step-framework",
+      },
+      {
+        label: "RevWiser: Objection Handling Scripts",
+        description: "Close and onboarding playbook",
+        link: "https://www.revwiser.com/en/blog/objection-handling-scripts",
+      },
+    ],
+    105: [
+      {
+        label: "CRV: Term Sheet Guide for Founders",
+        description: "Use of funds and key terms",
+        link: "https://www.crv.com/content/term-sheet",
+      },
+      {
+        label: "Toptal: Term Sheet Mistakes Founders Make",
+        description: "Negotiation and red lines",
+        link: "https://www.toptal.com/finance/fundraising/common-term-sheet-mistakes-founders-make",
       },
     ],
   },
@@ -335,6 +1019,18 @@ export const ASSET_RESOURCES: Record<
         link: "https://a16z.com/startupschool",
       },
     ],
+    2: [
+      {
+        label: "Category Creation: Market Domination",
+        description: "From TAM analysis to category ambition",
+        link: "https://fourweekmba.com/category-creation-the-ultimate-business-strategy-for-market-domination",
+      },
+      {
+        label: "CB Insights: Business Moats",
+        description: "Defensibility beyond market position",
+        link: "https://www.cbinsights.com/research/report/business-moats-competitive-advantage",
+      },
+    ],
     3: [
       {
         label: "YC: Talking to Users (Startup Style)",
@@ -345,6 +1041,18 @@ export const ASSET_RESOURCES: Record<
         label: "First Round Review: Customer Development",
         description: "Fast customer discovery for corporate innovators",
         link: "https://review.firstround.com",
+      },
+    ],
+    4: [
+      {
+        label: "Atlassian: Process Mapping",
+        description: "Workflow and data touchpoints",
+        link: "https://www.atlassian.com/work-management/project-management/process-mapping",
+      },
+      {
+        label: "ProductPlan: Process Mapping",
+        description: "Decisions, data creation, AI intervention",
+        link: "https://productplan.com/learn/process-mapping-document-roadmapping-process",
       },
     ],
     5: [
@@ -359,16 +1067,328 @@ export const ASSET_RESOURCES: Record<
         link: "https://www.ycombinator.com/library",
       },
     ],
+    6: [
+      {
+        label: "MIT Sloan: How to Test Your Assumptions",
+        description: "Test assumptions before scaling",
+        link: "https://sloanreview.mit.edu/article/how-to-test-your-assumptions",
+      },
+      {
+        label: "IdeaPlan: Pivot vs Persevere",
+        description: "Pre-commit criteria, avoid sunk cost bias",
+        link: "https://www.ideaplan.io/blog/when-to-pivot-vs-persevere",
+      },
+    ],
+    7: [
+      {
+        label: "CustomerDevLabs: B2B Interview Script",
+        description: "Discovery without corporate surveys",
+        link: "https://customerdevlabs.com/2014/07/09/b2b-customer-discovery-problem-interview-script",
+      },
+      {
+        label: "Grain: Customer Research Interview Guide",
+        description: "Unbiased script and documentation",
+        link: "https://grain.com/blog/customer-research-interview-guide",
+      },
+    ],
+    8: [
+      {
+        label: "DoWhatMatter: Design Partner Recruitment",
+        description: "B2B pipeline for corporate innovators",
+        link: "https://dowhatmatter.com/guides/design-partner-recruitment",
+      },
+      {
+        label: "Unusual: Qualifying Design Partners",
+        description: "Select accounts for paid pilots",
+        link: "https://www.unusual.vc/articles/qualifying-design-partners",
+      },
+    ],
+    9: [
+      {
+        label: "Evidently AI: LLM Evaluation",
+        description: "Feasibility: rules/ML/LLM/agents, HITL",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "CodeWheel: RAG Architecture",
+        description: "Technical architecture for enterprise AI",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+    ],
+    10: [
+      {
+        label: "Statsig: Golden Datasets",
+        description: "Gold set, scoring, acceptance thresholds",
+        link: "https://www.statsig.com/perspectives/golden-datasets-evaluation-standards",
+      },
+      {
+        label: "Evidently AI: LLM Evaluation Metrics",
+        description: "Failure modes and eval cadence",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+    ],
+    11: [
+      {
+        label: "Cohere: Enterprise Data Commitments",
+        description: "Zero retention, inference vs training",
+        link: "https://cohere.com/enterprise-data-commitments",
+      },
+      {
+        label: "OpenAI: Business Data",
+        description: "Enterprise privacy and compliance",
+        link: "https://openai.com/business-data",
+      },
+    ],
+    12: [
+      {
+        label: "Morgan Lewis: AI Data Rights",
+        description: "Contractual data advantage for enterprise",
+        link: "https://www.morganlewis.com/blogs/sourcingatmorganlewis/2025/12/key-concepts-in-ai-contracting-data-rights-and-restrictions",
+      },
+      {
+        label: "TheDataGuy: AI Data Moat",
+        description: "Exclusivity and training rights",
+        link: "https://thedataguy.pro/blog/2025/05/building-your-ai-data-moat",
+      },
+    ],
     13: [
       {
         label: "a16z: Unit Economics for Enterprise",
-        description: "Translating enterprise metrics to startup unit economics",
+        description: "Translating enterprise metrics to startup",
         link: "https://a16z.com",
       },
       {
         label: "First Round: Financial Models for Startups",
-        description: "Startup financial modeling vs. corporate planning",
+        description: "Startup vs corporate planning",
         link: "https://review.firstround.com",
+      },
+    ],
+    14: [
+      {
+        label: "First Round: Unit Economics",
+        description: "Reality check for corporate innovators",
+        link: "https://review.firstround.com",
+      },
+      {
+        label: "Stripe Atlas: Financial Planning",
+        description: "Margin and sensitivity for startups",
+        link: "https://stripe.com/atlas",
+      },
+    ],
+    15: [
+      {
+        label: "The Startup Project: PRD Template",
+        description: "Focused PRD, not comprehensive",
+        link: "https://startupproject.org/templates/prd",
+      },
+      {
+        label: "Get Product People: PRD Guide",
+        description: "5 pages max – what you build first",
+        link: "https://www.getproductpeople.com/blog/product-requirements-document",
+      },
+    ],
+    16: [
+      {
+        label: "CodeWheel: RAG Architecture",
+        description: "Simple architecture for enterprise AI",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+      {
+        label: "AI App Builder: RAG Reference Architectures",
+        description: "Ship without over-engineering",
+        link: "https://aiappbuilder.com/insights/ai-agents-rag-reference-architectures-that-ship",
+      },
+    ],
+    17: [
+      {
+        label: "DoWhatMatter: Design Partner Agreement",
+        description: "Lightweight MOU for fast execution",
+        link: "https://dowhatmatter.com/guides/design-partner-agreement",
+      },
+      {
+        label: "Common Paper: Design Partners",
+        description: "Co-creation over transaction",
+        link: "https://commonpaper.com/blog/design-partner",
+      },
+    ],
+    18: [
+      {
+        label: "Pilot Plan Template",
+        description: "SOW, KPIs, decision rules",
+        link: "https://federicopresicci.com/resources/pilot-plan-template",
+      },
+      {
+        label: "Userpilot: SaaS KPI Dashboard",
+        description: "Outcome, model, ops KPIs",
+        link: "https://userpilot.com/blog/saas-kpi-dashboard",
+      },
+    ],
+    19: [
+      {
+        label: "Evidently AI: LLM Evaluation",
+        description: "Eval proof and safety controls",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "MeetRep: Enterprise Demos",
+        description: "Demo for stakeholder conversion",
+        link: "https://www.meetrep.ai/blog/enterprise-demos-for-complex-products-why-traditional-approaches-are-failing",
+      },
+    ],
+    20: [
+      {
+        label: "Uncharted: Trust Closes Deals",
+        description: "Narrative and security for enterprise",
+        link: "https://www.thisisuncharted.co/p/startups-closing-big-deals",
+      },
+      {
+        label: "Demostack: Demo Technology",
+        description: "Repeatable selling kit",
+        link: "https://www.demostack.com/demo-technology-for-enterprise",
+      },
+    ],
+    21: [
+      {
+        label: "OnStrategy: Compute-Aware Pricing",
+        description: "Price to outcomes, not seats",
+        link: "https://onstrategy.eu/essay-stop-selling-ai-like-saas-a-compute-aware-pricing-playbook",
+      },
+      {
+        label: "Pilot: AI Pricing Economics",
+        description: "Compute + HITL cost/task",
+        link: "https://pilot.com/blog/ai-pricing-economics-2026",
+      },
+    ],
+    22: [
+      {
+        label: "Pertama Partners: 18-Month Roadmap",
+        description: "Gates and milestones",
+        link: "https://www.pertamapartners.com/insights/ai-roadmap-18-month-implementation-plan",
+      },
+      {
+        label: "RoadmapOne: Product Roadmap",
+        description: "Outcome-focused roadmap",
+        link: "https://blog.roadmap.one/posts/blog16-how-to-build-product-roadmap",
+      },
+    ],
+    23: [
+      {
+        label: "Evidently AI: LLM Monitoring",
+        description: "Model release, eval cadence",
+        link: "https://evidentlyai.com/llm-guide/llm-evaluation-metrics",
+      },
+      {
+        label: "CodeWheel: RAG Governance",
+        description: "Incident response, red-teaming, support",
+        link: "https://codewheel.ai/blog/rag-architecture-guide",
+      },
+    ],
+    24: [
+      {
+        label: "Increased: Investor Data Room",
+        description: "Complete startup checklist",
+        link: "https://increased.com/blog/how-to-setup-an-investor-data-room-the-complete-startup-checklist",
+      },
+      {
+        label: "Fast.io: Startup Data Room",
+        description: "Fundraising and due diligence",
+        link: "https://www.fast.io/resources/startup-data-room",
+      },
+    ],
+    25: [
+      {
+        label: "YC: Startup Financial Models",
+        description: "Compute, ops, hiring tied to gates",
+        link: "https://www.ycombinator.com/library",
+      },
+      {
+        label: "Stripe Atlas: Runway",
+        description: "Capital plan and milestones",
+        link: "https://stripe.com/atlas",
+      },
+    ],
+    26: [
+      {
+        label: "PatentPC: Licensing vs Assignment",
+        description: "IP, DPAs, security for spinout",
+        link: "https://patentpc.com/blog/licensing-vs-assignment-of-ip-in-joint-ventures-and-spinouts",
+      },
+      {
+        label: "Promise Legal: Founder Agreement",
+        description: "IP assignment and legal foundation",
+        link: "https://blog.promise.legal/startup-central/founder-agreement-template-equity-splits-vesting-and-ip-assignment-explained",
+      },
+    ],
+    27: [
+      {
+        label: "MicroVentures: Defensibility",
+        description: "Acquirer logic and proof",
+        link: "https://microventures.com/assessing-a-startups-defensibility",
+      },
+      {
+        label: "Elad Gil: Defensibility",
+        description: "Exit map and options",
+        link: "https://blog.eladgil.com/p/defensibility-and-competition",
+      },
+    ],
+    101: [
+      {
+        label: "Unbounce: Value Proposition",
+        description: "Clear message for visitors",
+        link: "https://unbounce.com/copywriting/value-proposition",
+      },
+      {
+        label: "Soatech: Landing Page Converts",
+        description: "One-page credibility and CTA",
+        link: "https://soatech.co/blog/startup-landing-page-converts",
+      },
+    ],
+    102: [
+      {
+        label: "Sequoia Pitch Deck",
+        description: "Problem, solution, team, ask",
+        link: "https://winningpresentations.com/investor-pitch-deck-template",
+      },
+      {
+        label: "Slidebean: Pitch Deck Template",
+        description: "Concise storytelling",
+        link: "https://slidebean.com/pitch-deck-template-for-startups",
+      },
+    ],
+    103: [
+      {
+        label: "StartupTools: Elevator Pitch",
+        description: "30- and 60-second scripts",
+        link: "https://www.startuptools.ai/resources/post/master-30-second-elevator-pitch-for-business-success",
+      },
+      {
+        label: "Looming Life: Elevator Pitch",
+        description: "Tested with real conversations",
+        link: "https://loominglife.com/30-second-elevator-pitch-guide",
+      },
+    ],
+    104: [
+      {
+        label: "MeetRep: Discovery Call Converts",
+        description: "Qualify, discovery, close",
+        link: "https://www.meetrep.ai/blog/how-to-run-a-discovery-call-that-actually-converts-7-step-framework",
+      },
+      {
+        label: "Highspot: Objection Handling",
+        description: "B2B objection playbook",
+        link: "https://www.highspot.com/blog/objection-handling",
+      },
+    ],
+    105: [
+      {
+        label: "Carta: Term Sheets",
+        description: "Investment story and use of funds",
+        link: "https://carta.com/learn/startups/fundraising/term-sheets",
+      },
+      {
+        label: "SVB: Read a Term Sheet",
+        description: "Key terms and closing",
+        link: "https://www.svb.com/startup-insights/raising-capital/read-startup-term-sheet",
       },
     ],
   },
@@ -413,8 +1433,8 @@ export function getAssetResources(
   experienceProfile: string | null,
   assetNumber: number
 ): ResourceRecommendation[] {
-  if (!experienceProfile) return [];
-  const resources = ASSET_RESOURCES[experienceProfile as ExperienceProfileKey];
+  const profile = experienceProfile ?? "first_time_builder";
+  const resources = ASSET_RESOURCES[profile as ExperienceProfileKey];
   if (!resources) return [];
   return resources[assetNumber] || [];
 }
