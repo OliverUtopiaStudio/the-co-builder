@@ -4,20 +4,16 @@ import type { PathwayStage } from "@/app/actions/diagnosis";
 
 export default function StageJourneyMap({
   pathway,
+  embedded,
 }: {
   pathway: PathwayStage[];
+  /** When true, omit outer card and "Your journey" label (e.g. inside TailoredCoBuild) */
+  embedded?: boolean;
 }) {
   if (!pathway.length) return null;
 
-  return (
-    <div
-      className="bg-surface border border-border p-4 sm:p-5 overflow-hidden"
-      style={{ borderRadius: 2 }}
-    >
-      <div className="label-uppercase text-[10px] mb-4 text-muted">
-        Your journey
-      </div>
-      <div className="space-y-3">
+  const content = (
+    <div className="space-y-3">
         {pathway.map((stage) => (
           <div
             key={stage.stageNumber}
@@ -68,6 +64,19 @@ export default function StageJourneyMap({
           </div>
         ))}
       </div>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <div
+      className="bg-surface border border-border p-4 sm:p-5 overflow-hidden"
+      style={{ borderRadius: 2 }}
+    >
+      <div className="label-uppercase text-[10px] mb-4 text-muted">
+        Your journey
+      </div>
+      {content}
     </div>
   );
 }
