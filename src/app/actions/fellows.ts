@@ -10,6 +10,11 @@ import {
 import { eq, and, asc, desc } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { randomUUID } from "crypto";
+import type { OnboardingStatus } from "@/lib/onboarding";
+import {
+  validateOnboardingUpdate,
+  DEFAULT_ONBOARDING_STATUS,
+} from "@/lib/onboarding";
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -95,6 +100,58 @@ export async function updateFellow(fellowId: string, data: UpdateFellowInput) {
   const [updated] = await db
     .update(fellows)
     .set(updateData)
+    .where(eq(fellows.id, fellowId))
+    .returning();
+
+  return updated;
+}
+
+export type UpdateFellowOnboardingInput = {
+  agreementSigned?: string | null;
+  kycVerified?: string | null;
+};
+
+export async function updateFellowOnboarding(
+  fellowId: string,
+  data: UpdateFellowOnboardingInput
+) {
+  await requireAdmin();
+
+  const [fellow] = await db
+    .select({ onboardingStatus: fellows.onboardingStatus })
+    .from(fellows)
+    .where(eq(fellows.id, fellowId))
+    .limit(1);
+
+  if (!fellow) throw new Error("Fellow not found");
+
+  const current = (fellow.onboardingStatus as OnboardingStatus | null) ?? {
+    ...DEFAULT_ONBOARDING_STATUS,
+  };
+  const next: OnboardingStatus = { ...current };
+
+  if (data.agreementSigned !== undefined) {
+    const v =
+      data.agreementSigned === null || data.agreementSigned === ""
+        ? null
+        : data.agreementSigned.trim();
+    const result = validateOnboardingUpdate("agreementSigned", v ?? null);
+    if (!result.valid) throw new Error(result.error);
+    next.agreementSigned = v || null;
+  }
+  if (data.kycVerified !== undefined) {
+    const v =
+      data.kycVerified === null || data.kycVerified === ""
+        ? null
+        : data.kycVerified.trim();
+    const result = validateOnboardingUpdate("kycVerified", v ?? null);
+    if (!result.valid) throw new Error(result.error);
+    next.kycVerified = v || null;
+  }
+
+  const [updated] = await db
+    .update(fellows)
+    .set({ onboardingStatus: next, updatedAt: new Date() })
     .where(eq(fellows.id, fellowId))
     .returning();
 

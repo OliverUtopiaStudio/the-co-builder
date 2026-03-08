@@ -309,5 +309,23 @@ export const todoItems = pgTable(
   ]
 );
 
+// ─── Marketing Content Plan (studio) ─────────────────────────────
+export const marketingContentPlan = pgTable(
+  "marketing_content_plan",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    weekStartDate: timestamp("week_start_date", { withTimezone: true }).notNull(),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    platform: text("platform"), // e.g. 'linkedin' | 'twitter' | null = any
+    ventureIds: jsonb("venture_ids").$type<string[]>().default([]),
+    position: integer("position").notNull().default(0),
+    bufferPostId: text("buffer_post_id"), // set after pushing to Buffer
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("idx_marketing_content_week").on(table.weekStartDate)]
+);
+
 // Legacy studio/report tables have been physically dropped in migration 017
 // and are intentionally omitted from the v2 schema.

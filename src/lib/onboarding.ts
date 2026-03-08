@@ -220,6 +220,21 @@ export const ADMIN_TRACKED_FIELDS: (keyof OnboardingStatus)[] = [
   "kycVerified",
 ];
 
+/** Checklist steps for display (order + labels). adminOnly steps are set by studio only. */
+export const ONBOARDING_CHECKLIST_STEPS: {
+  key: keyof OnboardingStatus;
+  label: string;
+  adminOnly: boolean;
+}[] = [
+  { key: "agreementSigned", label: "Agreement signed", adminOnly: true },
+  { key: "kycVerified", label: "KYC verified", adminOnly: true },
+  { key: "toolstackComplete", label: "Toolstack setup complete", adminOnly: false },
+  { key: "computeBudgetAcknowledged", label: "Compute budget acknowledged", adminOnly: false },
+  { key: "frameworkIntroComplete", label: "Framework introduction complete", adminOnly: false },
+  { key: "browserSetupComplete", label: "Browser setup complete", adminOnly: false },
+  { key: "ventureCreated", label: "Venture created", adminOnly: false },
+];
+
 export function isAdminTrackedField(field: keyof OnboardingStatus): boolean {
   return ADMIN_TRACKED_FIELDS.includes(field);
 }
@@ -275,6 +290,19 @@ function isAgreementOrKycComplete(value: string | boolean | null | undefined): b
   if (value === true) return true;
   if (typeof value === "string" && value.trim().length > 0) return true;
   return false;
+}
+
+/** Whether a single checklist step is complete (for display). */
+export function isOnboardingStepComplete(
+  status: OnboardingStatus | null,
+  key: keyof OnboardingStatus
+): boolean {
+  if (!status) return false;
+  const v = status[key];
+  if (key === "agreementSigned" || key === "kycVerified") {
+    return isAgreementOrKycComplete(v as string | boolean | null | undefined);
+  }
+  return v === true;
 }
 
 // Count how many onboarding steps are complete

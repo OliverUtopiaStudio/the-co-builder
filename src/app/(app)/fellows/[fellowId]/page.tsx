@@ -9,6 +9,8 @@ import VentureOverview from "@/components/fellows/VentureOverview";
 import MilestonePlan from "@/components/fellows/MilestonePlan";
 import TodoList from "@/components/fellows/TodoList";
 import CategorizedLinks from "@/components/fellows/CategorizedLinks";
+import OnboardingChecklist from "@/components/fellows/OnboardingChecklist";
+import type { OnboardingStatus } from "@/lib/onboarding";
 
 export default async function FellowDetailPage({
   params,
@@ -42,6 +44,19 @@ export default async function FellowDetailPage({
           <p className="text-sm text-muted mt-0.5">{fellow.domain}</p>
         )}
       </div>
+
+      {/* Onboarding checklist: read-only for fellows, studio can mark agreement/KYC */}
+      <section>
+        <h2 className="label-uppercase text-[10px] mb-3 text-muted">
+          Onboarding checklist
+        </h2>
+        <OnboardingChecklist
+          status={(fellow.onboardingStatus as OnboardingStatus | null) ?? null}
+          fellowName={fellow.fullName}
+          readOnly={!isStudio}
+          fellowId={isStudio ? fellow.id : undefined}
+        />
+      </section>
 
       {/* Section 1: Venture Overview */}
       <VentureOverview

@@ -27,6 +27,7 @@ export default async function AppLayout({
           navItems: [
             { href: "/astrolabe", label: "Astrolabe" },
             { href: "/fellows", label: "Fellows" },
+            { href: "/marketing", label: "Marketing" },
             { href: "/library", label: "Content Library" },
             { href: "/ai-eval", label: "AI Eval Tools" },
             { href: "/dashboard", label: "Dashboard" },
