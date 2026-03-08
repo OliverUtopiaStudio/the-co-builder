@@ -51,6 +51,7 @@ const TEAMS: TeamGroup[] = [
       { name: "Roo", role: "CEO, Founding Partner" },
       { name: "Shamona", role: "CFO" },
       { name: "Kon", role: "CSO" },
+      { name: "Beppe", role: "Head of Marketing" },
     ],
   },
   {
@@ -67,6 +68,7 @@ const TEAMS: TeamGroup[] = [
     description: "Deep-conviction capital for radical ideas.",
     accent: "#10B981",
     members: [
+      { name: "JJ", role: "Head of Portfolio" },
       { name: "Steve", role: "Senior Associate" },
       { name: "Alex", role: "Associate" },
       { name: "May", role: "Chief of Staff" },
