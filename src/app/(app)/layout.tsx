@@ -13,10 +13,10 @@ export default async function AppLayout({
     fellowId && !isStudio
       ? {
           navItems: [
+            { href: "/astrolabe", label: "Astrolabe" },
             { href: "/dashboard", label: "Dashboard" },
             { href: "/library", label: "Content Library" },
             { href: "/ai-eval", label: "AI Eval Tools" },
-            { href: "/astrolabe", label: "Astrolabe" },
           ],
           homeHref: "/astrolabe",
           mobileTitle: "CO-BUILDER OS",

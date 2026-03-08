@@ -967,6 +967,21 @@ export const customModules: Asset[] = [
     tags: ["customer-path", "skills"],
     isCustomModule: true,
   },
+  {
+    number: 106,
+    title: "Content Build",
+    purpose:
+      "End-to-end path: setup (Claude, git, design, Vercel, domain), iterate from customer learning, and apply funnel fundamentals so the site drives Demos and sign ups.",
+    coreQuestion:
+      "Does your site get the right visitors to one clear action (demo or sign up) by teaching them what they need to understand first?",
+    checklist: [
+      { id: "106-1", text: "Setup: Claude space, git, design, Vercel deploy, domain" },
+      { id: "106-2", text: "Iterate copy and structure from what customers need to understand" },
+      { id: "106-3", text: "One primary CTA; funnel measured (visits → CTA clicks → completions)" },
+    ],
+    tags: ["customer-path", "skills"],
+    isCustomModule: true,
+  },
 ];
 
 /** Combined flat catalog for the content library */

@@ -1793,6 +1793,46 @@ export const lessons: Record<number, AnimatedLessonData> = {
       },
     ],
   },
+  106: {
+    assetNumber: 106,
+    title: "Content Build",
+    totalDuration: "12–18 min (video)",
+    scenes: [
+      {
+        type: "title",
+        heading: "Content Build",
+        body: "Setup path, customer-led iteration, and funnel fundamentals so your site drives Demos and sign ups.",
+        duration: 4,
+      },
+      {
+        type: "callout",
+        label: "SETUP PATH",
+        heading: "Claude → Git → Design → Vercel → Domain",
+        body: "One repeatable path: brief and copy in a Claude space, code in Git, simple design (one story, one CTA), deploy on Vercel, then point a domain you own.",
+        duration: 8,
+      },
+      {
+        type: "callout",
+        label: "ITERATION",
+        heading: "What does the customer need to understand?",
+        body: "Use interviews and demos to find gaps. Where they ask 'What do you mean?' or 'How does that work?' — add or tighten copy and structure so the site teaches that before the CTA.",
+        duration: 8,
+      },
+      {
+        type: "callout",
+        label: "FUNNEL",
+        heading: "One action: Demos or sign ups",
+        body: "At this stage the site's job is to get visitors to one primary action. Measure: visits → CTA clicks → completions. Hero, proof, and CTA aligned; fix the biggest drop.",
+        duration: 8,
+      },
+      {
+        type: "action",
+        heading: "Watch the full Content Build video",
+        body: "See the full script in docs/content-build-video-script.md. Record as Loom and link via asset media. Use the checklist to ship and iterate.",
+        duration: 4,
+      },
+    ],
+  },
 };
 
 /** Get lesson data for a specific asset, or undefined if none exists */
