@@ -1,9 +1,24 @@
+import { cookies } from "next/headers";
 import { db } from "@/db";
 import { fellows, ventures } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { createClient } from "@/lib/supabase/server";
 
 export async function verifyVentureAccess(ventureId: string): Promise<boolean> {
+  const cookieStore = await cookies();
+  const fellowId = cookieStore.get("co_build_fellow_id")?.value;
+
+  if (fellowId && /^[0-9a-f-]{36}$/i.test(fellowId)) {
+    const [row] = await db
+      .select({ id: ventures.id })
+      .from(ventures)
+      .where(
+        and(eq(ventures.id, ventureId), eq(ventures.fellowId, fellowId))
+      )
+      .limit(1);
+    if (row) return true;
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
