@@ -59,6 +59,8 @@ export const ventures = pgTable(
     // Alignment tracking
     podAlignmentScore: numeric("pod_alignment_score", { precision: 5, scale: 2 }), // 0-100 score
     alignmentNotes: text("alignment_notes"), // Notes on how venture aligns with pod thesis
+    // Categorized resource links: { product: [{title,url}], gtm: [{title,url}], investment: [{title,url}] }
+    categorizedLinks: jsonb("categorized_links").default({ product: [], gtm: [], investment: [] }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -235,6 +237,75 @@ export const tasks = pgTable(
     check("tasks_asset_range", sql`${table.assetNumber} >= 1 AND ${table.assetNumber} <= 27`),
     check("tasks_priority_check", sql`${table.priority} IN ('low','medium','high','urgent')`),
     check("tasks_status_check", sql`${table.status} IN ('open','in_progress','completed','cancelled')`),
+  ]
+);
+
+// ─── Milestones (studio-fellow agreed plan) ─────────────────────
+export const milestones = pgTable(
+  "milestones",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ventureId: uuid("venture_id")
+      .notNull()
+      .references(() => ventures.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description"),
+    targetDate: timestamp("target_date", { withTimezone: true }),
+    status: text("status").default("not_started").notNull(),
+    position: integer("position").notNull().default(0),
+    createdBy: uuid("created_by").references(() => fellows.id),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_milestones_venture").on(table.ventureId),
+    check(
+      "milestones_status_check",
+      sql`${table.status} IN ('not_started','in_progress','completed','blocked')`
+    ),
+  ]
+);
+
+// ─── To-Do Items (shared studio-fellow to-dos) ──────────────────
+export const todoItems = pgTable(
+  "todo_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ventureId: uuid("venture_id")
+      .notNull()
+      .references(() => ventures.id, { onDelete: "cascade" }),
+    milestoneId: uuid("milestone_id").references(() => milestones.id, {
+      onDelete: "set null",
+    }),
+    title: text("title").notNull(),
+    description: text("description"),
+    status: text("status").default("open").notNull(),
+    priority: text("priority").default("medium").notNull(),
+    category: text("category"), // 'product' | 'gtm' | 'investment' | null
+    assetNumber: integer("asset_number"), // links to content library asset 1-27
+    externalUrl: text("external_url"), // Notion/Linear URL
+    externalProvider: text("external_provider"), // 'notion' | 'linear' | null
+    assignedTo: uuid("assigned_to").references(() => fellows.id),
+    dueDate: timestamp("due_date", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdBy: uuid("created_by").references(() => fellows.id),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_todo_venture").on(table.ventureId),
+    index("idx_todo_milestone").on(table.milestoneId),
+    index("idx_todo_status").on(table.ventureId, table.status),
+    check(
+      "todo_status_check",
+      sql`${table.status} IN ('open','in_progress','completed','cancelled')`
+    ),
+    check(
+      "todo_priority_check",
+      sql`${table.priority} IN ('low','medium','high','urgent')`
+    ),
   ]
 );
 

@@ -8,6 +8,13 @@
       "when": 1772730469905,
       "tag": "0000_steady_killraven",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772954179157,
+      "tag": "0001_shocking_toxin",
+      "breakpoints": true
     }
   ]
 }
