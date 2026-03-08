@@ -293,28 +293,27 @@ function estimateTimeToSpinout(
 }
 
 /**
- * Get diagnosis for a venture
+ * Get diagnosis for a venture by ID (cookie-based or server context).
+ * Use when the caller has already verified access (e.g. via fellow cookie).
  */
-export async function getVentureDiagnosis(ventureId: string): Promise<DiagnosisResult | null> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  // Verify access and get venture
-  const [ventureResult] = await db
-    .select({
-      venture: ventures,
-    })
+export async function getVentureDiagnosisByVentureId(
+  ventureId: string
+): Promise<DiagnosisResult | null> {
+  const [venture] = await db
+    .select()
     .from(ventures)
-    .innerJoin(fellows, eq(ventures.fellowId, fellows.id))
-    .where(and(eq(ventures.id, ventureId), eq(fellows.authUserId, user.id)))
+    .where(eq(ventures.id, ventureId))
     .limit(1);
 
-  if (!ventureResult) {
-    return null;
-  }
+  if (!venture) return null;
 
-  const venture = ventureResult.venture;
+  return buildDiagnosisResult(ventureId, venture);
+}
+
+async function buildDiagnosisResult(
+  ventureId: string,
+  venture: { name: string }
+): Promise<DiagnosisResult> {
 
   // Get asset completions
   const completions = await db
@@ -405,6 +404,28 @@ export async function getVentureDiagnosis(ventureId: string): Promise<DiagnosisR
     velocity,
     blockers,
   };
+}
+
+/**
+ * Get diagnosis for a venture (Supabase auth)
+ */
+export async function getVentureDiagnosis(ventureId: string): Promise<DiagnosisResult | null> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const [ventureResult] = await db
+    .select({
+      venture: ventures,
+    })
+    .from(ventures)
+    .innerJoin(fellows, eq(ventures.fellowId, fellows.id))
+    .where(and(eq(ventures.id, ventureId), eq(fellows.authUserId, user.id)))
+    .limit(1);
+
+  if (!ventureResult) return null;
+
+  return buildDiagnosisResult(ventureId, ventureResult.venture);
 }
 
 /**
