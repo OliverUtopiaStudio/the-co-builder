@@ -15,6 +15,7 @@ export default async function AppLayout({
           navItems: [
             { href: "/dashboard", label: "Dashboard" },
             { href: "/library", label: "Content Library" },
+            { href: "/astrolabe", label: "Astrolabe" },
             { href: `/fellows/${fellowId}`, label: "My Venture" },
           ],
           homeHref: "/dashboard",
